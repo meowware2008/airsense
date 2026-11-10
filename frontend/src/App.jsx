@@ -1,3 +1,5 @@
+import Alerts from './components/Alerts'
+import Login from './components/login'
 import { Line } from 'react-chartjs-2'
 import { useEffect, useState } from 'react'
 import AQIGauge from './components/AQIGauge'
@@ -28,6 +30,26 @@ ChartJS.register(
 )
 
 function App() {
+  const [authData, setAuthData] = useState(() => {
+  const token = localStorage.getItem('airsense_token')
+  const user = localStorage.getItem('airsense_user')
+
+  return token
+    ? { token, user: user ? JSON.parse(user) : null }
+    : null
+})
+
+function handleAuthenticated(data) {
+  localStorage.setItem('airsense_token', data.token)
+  localStorage.setItem('airsense_user', JSON.stringify(data.user))
+  setAuthData(data)
+}
+
+function handleLogout() {
+  localStorage.removeItem('airsense_token')
+  localStorage.removeItem('airsense_user')
+  setAuthData(null)
+}
   const [airData, setAirData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -114,6 +136,10 @@ useEffect(() => {
   fetchForecasts()
 }, [selectedLocationId])
 
+if (!authData?.token) {
+  return <Login onAuthenticated={handleAuthenticated} />
+}
+
   return (
     <div className="app">
 
@@ -157,7 +183,11 @@ useEffect(() => {
     ))}
   </select>
 
-  <div className="profile">👤 User</div>
+  <div className="profile">
+  👤 {authData.user?.name || 'User'}
+</div>
+
+<button onClick={handleLogout}>Logout</button>
 </div>
         </header>
 
@@ -358,6 +388,11 @@ useEffect(() => {
     <p>No prediction data is currently available.</p>
   )}
 </section>
+{/* Alerts Section */}
+<Alerts
+  locations={locations}
+  selectedLocationId={selectedLocationId}
+/>
 
 
         <footer>
