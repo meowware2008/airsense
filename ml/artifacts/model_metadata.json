@@ -1,0 +1,40 @@
+{
+  "model_name": "RandomForestRegressor",
+  "model_version": "1.0.0",
+  "target_metric": "pm25",
+  "horizon_hours": 24,
+  "feature_columns": [
+    "pm25_lag1",
+    "pm25_lag2",
+    "pm25_lag3",
+    "pm25_lag6",
+    "pm25_lag12",
+    "pm25_lag24",
+    "pm25_rolling_mean_6h",
+    "pm25_rolling_std_6h",
+    "pm25_rolling_mean_24h",
+    "hour",
+    "day_of_week",
+    "month"
+  ],
+  "sample_counts": {
+    "total": 2184,
+    "train": 1528,
+    "validation": 328,
+    "test": 328
+  },
+  "evaluation": {
+    "random_forest": {
+      "test_mae": 38.14,
+      "test_rmse": 49.17
+    },
+    "persistence_baseline": {
+      "test_mae": 25.49,
+      "test_rmse": 32.91
+    },
+    "mae_improvement_pct": -49.62,
+    "rmse_improvement_pct": -49.42
+  },
+  "trained_at": "2026-11-08T18:11:35.573713",
+  "notes": "Chronological train/val/test split without lookahead leakage. Evaluated against persistence baseline."
+}

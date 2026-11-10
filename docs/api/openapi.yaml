@@ -1,0 +1,200 @@
+openapi: 3.0.3
+info:
+  title: AirSense REST API
+  description: Backend API for real-time air quality monitoring, CPCB NAQI calculation, ML forecasting, and threshold alerts.
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local Development Server
+
+paths:
+  /health/live:
+    get:
+      summary: Liveness probe
+      responses:
+        '200':
+          description: Process is healthy
+          content:
+            application/json:
+              example:
+                status: live
+                timestamp: "2026-11-09T00:00:00"
+                service: airsense-backend
+
+  /health/ready:
+    get:
+      summary: Readiness probe (verifies database)
+      responses:
+        '200':
+          description: Database connected
+        '503':
+          description: Database disconnected
+
+  /auth/register:
+    post:
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string, example: "Jane Doe" }
+                email: { type: string, format: email, example: "jane@example.com" }
+                password: { type: string, minLength: 8, example: "strongpassword123" }
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Validation error
+        '409':
+          description: Email already registered
+
+  /auth/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, example: "jane@example.com" }
+                password: { type: string, example: "strongpassword123" }
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              example:
+                message: Login successful
+                token: "eyJhbGciOi..."
+                user: { id: 1, name: "Jane Doe", email: "jane@example.com" }
+
+  /auth/me:
+    get:
+      summary: Get current authenticated user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profile data
+        '401':
+          description: Unauthorized
+
+  /locations:
+    get:
+      summary: List and search supported locations
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of locations
+    post:
+      summary: Add new location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, region, latitude, longitude]
+              properties:
+                name: { type: string, example: "Jaipur" }
+                region: { type: string, example: "Rajasthan" }
+                country: { type: string, example: "India" }
+                latitude: { type: number, example: 26.9124 }
+                longitude: { type: number, example: 75.7873 }
+      responses:
+        '201':
+          description: Created
+
+  /air-quality/current:
+    get:
+      summary: Get current air quality observation for location
+      parameters:
+        - name: location_id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Current reading with CPCB AQI and freshness status
+
+  /air-quality/history:
+    get:
+      summary: Get historical hourly observations
+      parameters:
+        - name: location_id
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: days
+          in: query
+          required: false
+          schema: { type: integer, default: 7 }
+      responses:
+        '200':
+          description: Ordered time-series data
+
+  /forecasts:
+    get:
+      summary: Get 24-hour ahead hourly PM2.5 forecasts
+      parameters:
+        - name: location_id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: ML forecasts with evaluation metadata
+
+  /alerts:
+    get:
+      summary: List user's active alert preferences
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Alert list
+    post:
+      summary: Create alert threshold
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [location_id, threshold_value]
+              properties:
+                location_id: { type: integer, example: 1 }
+                threshold_value: { type: number, example: 150.0 }
+                enabled: { type: boolean, default: true }
+      responses:
+        '201':
+          description: Alert created
+
+  /notifications:
+    get:
+      summary: List user's notification history
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Notifications list
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

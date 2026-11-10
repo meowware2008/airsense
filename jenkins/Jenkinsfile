@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        APP_NAME = "airsense"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        DOCKER_REGISTRY = "airsense-registry.local"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Test & Quality') {
+            steps {
+                sh '''
+                    python3 -m venv test-env
+                    . test-env/bin/activate
+                    pip install -r backend/requirements.txt -r ml/requirements.txt
+                    pytest tests/ -v
+                '''
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                sh '''
+                    docker build -t airsense-backend:${IMAGE_TAG} -f backend/Dockerfile .
+                    docker build -t airsense-worker:${IMAGE_TAG} -f worker/Dockerfile .
+                '''
+            }
+        }
+
+        stage('Security Scan (Trivy)') {
+            steps {
+                sh '''
+                    trivy image --severity HIGH,CRITICAL --exit-code 0 airsense-backend:${IMAGE_TAG}
+                    trivy image --severity HIGH,CRITICAL --exit-code 0 airsense-worker:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('Deploy via Ansible') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh '''
+                    ansible-playbook -i infrastructure/ansible/inventory.ini infrastructure/ansible/playbook.yml
+                '''
+            }
+        }
+
+        stage('Health Verification') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh '''
+                    curl -f http://localhost:5000/api/v1/health/live
+                    curl -f http://localhost:5000/api/v1/health/ready
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            echo "Pipeline failed. Review build logs and Trivy reports."
+        }
+    }
+}

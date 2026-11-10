@@ -1,0 +1,199 @@
+{
+  "info": {
+    "name": "AirSense REST API",
+    "description": "Postman Collection for AirSense Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Liveness Probe",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health/live"
+          }
+        },
+        {
+          "name": "Readiness Probe",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health/ready"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo User\",\n  \"email\": \"demo@example.com\",\n  \"password\": \"demopassword123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"demopassword123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Current Profile",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "List Locations",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/locations"
+          }
+        },
+        {
+          "name": "Search Locations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/locations?search=Delhi",
+              "host": ["{{baseUrl}}"],
+              "path": ["locations"],
+              "query": [{"key": "search", "value": "Delhi"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Air Quality",
+      "item": [
+        {
+          "name": "Current Conditions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/air-quality/current?location_id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["air-quality", "current"],
+              "query": [{"key": "location_id", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Historical Time Series",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/air-quality/history?location_id=1&days=7",
+              "host": ["{{baseUrl}}"],
+              "path": ["air-quality", "history"],
+              "query": [
+                {"key": "location_id", "value": "1"},
+                {"key": "days", "value": "7"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Forecasts",
+      "item": [
+        {
+          "name": "24h Forecasts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/forecasts?location_id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["forecasts"],
+              "query": [{"key": "location_id", "value": "1"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts & Notifications",
+      "item": [
+        {
+          "name": "List User Alerts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "url": "{{baseUrl}}/alerts"
+          }
+        },
+        {
+          "name": "Create Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{authToken}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"location_id\": 1,\n  \"threshold_value\": 150.0,\n  \"enabled\": true\n}"
+            },
+            "url": "{{baseUrl}}/alerts"
+          }
+        },
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{authToken}}"}],
+            "url": "{{baseUrl}}/notifications"
+          }
+        }
+      ]
+    }
+  ]
+}
