@@ -7,6 +7,37 @@ from backend.app.database import get_engine
 health_bp = Blueprint("health", __name__)
 
 
+@health_bp.route("/", methods=["GET"])
+@health_bp.route("/api/v1", methods=["GET"])
+@health_bp.route("/api/v1/", methods=["GET"])
+def api_index():
+    """API root discovery endpoint."""
+    return jsonify({
+        "name": "AirSense REST API",
+        "version": "1.0.0",
+        "status": "operational",
+        "description": "Real-Time Air Quality Monitoring, CPCB NAQI calculation, and ML Forecasting",
+        "endpoints": {
+            "health_live": "/api/v1/health/live",
+            "health_ready": "/api/v1/health/ready",
+            "locations": "/api/v1/locations",
+            "current_air_quality": "/api/v1/air-quality/current?location_id=1",
+            "historical_air_quality": "/api/v1/air-quality/history?location_id=1&days=7",
+            "forecasts": "/api/v1/forecasts?location_id=1",
+            "auth_register": "/api/v1/auth/register",
+            "auth_login": "/api/v1/auth/login",
+            "auth_me": "/api/v1/auth/me",
+            "alerts": "/api/v1/alerts",
+            "notifications": "/api/v1/notifications",
+            "metrics": "/metrics",
+        },
+        "docs": {
+            "openapi": "/docs/api/openapi.yaml",
+            "postman": "/docs/api/AirSense.postman_collection.json",
+        },
+    }), 200
+
+
 @health_bp.route("/api/v1/health/live", methods=["GET"])
 def liveness():
     """Liveness probe: verifies process is alive."""
