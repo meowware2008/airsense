@@ -12,12 +12,17 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "airsense-insecure-dev-key-change-in-prod")
     JWT_EXPIRY_HOURS = int(os.getenv("JWT_EXPIRY_HOURS", "24"))
 
-    # Database
-    # Support SQLite fallback if MySQL is not available during local testing
-    DATABASE_URL = os.getenv(
+    # Database configuration
+    # Supports PostgreSQL (Render), MySQL, or SQLite fallback
+    raw_db_url = os.getenv(
         "DATABASE_URL",
-        "mysql+pymysql://airsense:airsense_pass@localhost:3306/airsense"
+        "sqlite:///airsense.db" if os.getenv("APP_ENV") not in ("production", "docker") else "mysql+pymysql://airsense:airsense_secure_password@mysql:3306/airsense"
     )
+    # Render PostgreSQL URLs start with postgres:// but SQLAlchemy requires postgresql://
+    if raw_db_url.startswith("postgres://"):
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+
+    DATABASE_URL = raw_db_url
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {

@@ -1,5 +1,13 @@
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+// Resolves API base URL gracefully whether /api/v1 is appended or not
+let rawBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1').trim();
+if (rawBase.endsWith('/')) {
+  rawBase = rawBase.slice(0, -1);
+}
+if (!rawBase.endsWith('/api/v1')) {
+  rawBase = rawBase.endsWith('/api') ? `${rawBase}/v1` : `${rawBase}/api/v1`;
+}
+const API_BASE_URL = rawBase;
 function getAuthHeaders() {
   const token = localStorage.getItem('airsense_token')
 

@@ -1,0 +1,55 @@
+services:
+  # -------------------------------------------------------------------
+  # AirSense Backend API (Render Free Web Service - 512 MB RAM)
+  # -------------------------------------------------------------------
+  - type: web
+    name: airsense-backend
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "gunicorn backend.wsgi:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 --worker-class gthread"
+    healthCheckPath: /api/v1/health/live
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHONPATH
+        value: .
+      - key: AQI_PROVIDER
+        value: open_meteo
+      - key: DATABASE_URL
+        fromDatabase:
+          name: airsense-db
+          property: connectionString
+
+  # -------------------------------------------------------------------
+  # AirSense React Dashboard (Render Free Static Site - Global CDN)
+  # -------------------------------------------------------------------
+  - type: static_site
+    name: airsense-frontend
+    plan: free
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: "./dist"
+    baseDir: "./frontend"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: airsense-backend
+          envVarKey: RENDER_EXTERNAL_URL
+
+databases:
+  # -------------------------------------------------------------------
+  # AirSense PostgreSQL Database (Render Free Tier)
+  # -------------------------------------------------------------------
+  - name: airsense-db
+    plan: free
+    region: oregon
+    databaseName: airsense
+    user: airsense_user
