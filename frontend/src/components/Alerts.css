@@ -81,21 +81,217 @@
   transform: translateY(-1px);
 }
 
+.panel-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.panel-header-row h3 {
+  margin: 0;
+}
+
+.panel-count-badge {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+}
+
 .alert-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 15px;
-  padding: 15px 0;
+  gap: 20px;
+  padding: 16px 0;
   border-bottom: 1px solid #edf0f4;
+  transition: background-color 0.2s ease;
 }
 
-.alert-item p {
-  margin: 6px 0;
+.alert-item:last-child {
+  border-bottom: none;
 }
 
-.alert-item small {
+.alert-item.unread-item {
+  background: #fbfdff;
+}
+
+.alert-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.alert-city-name,
+.notif-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #172b40;
+}
+
+.alert-threshold-info,
+.notif-message {
+  font-size: 14px;
+  color: #475569;
+  margin: 4px 0 6px;
+  line-height: 1.5;
+}
+
+.alert-threshold-info strong {
+  color: #172b40;
+}
+
+.alert-meta {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.alert-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Status Pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.status-pill.enabled {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.status-pill.disabled {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.status-pill.unread {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.status-pill.read {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Delete Alert Button */
+.delete-alert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(225, 29, 72, 0.08);
+  white-space: nowrap;
+}
+
+.delete-alert-btn:hover:not(:disabled) {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #e11d48;
+  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.25);
+  transform: translateY(-1px);
+}
+
+.delete-alert-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.delete-alert-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mark as Read Button */
+.mark-read-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.08);
+  white-space: nowrap;
+}
+
+.mark-read-btn:hover:not(:disabled) {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);
+  transform: translateY(-1px);
+}
+
+.mark-read-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.mark-read-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.read-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-icon {
+  font-size: 13px;
+  display: inline-block;
+}
+
+.alerts-loading,
+.alerts-empty {
   color: #718096;
+  font-size: 14px;
+  padding: 12px 0;
 }
 
 .alerts-note {
@@ -111,10 +307,6 @@
   color: #198754 !important;
 }
 
-.alert-item .delete-alert {
-  background: #dc3545;
-}
-
 @media (max-width: 600px) {
   .alerts-panel form {
     align-items: stretch;
@@ -123,5 +315,16 @@
 
   .alerts-panel input {
     width: 100%;
+  }
+
+  .alert-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .alert-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
