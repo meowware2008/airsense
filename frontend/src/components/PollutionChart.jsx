@@ -11,6 +11,13 @@ import {
   Legend,
   Filler,
 } from 'chart.js'
+import {
+  IconCalendar,
+  IconClock,
+  IconBarChart,
+  IconAlertTriangle,
+  IconLeaf,
+} from './Icons'
 import './PollutionChart.css'
 
 ChartJS.register(
@@ -296,7 +303,8 @@ function PollutionChart({ historyData = [], loading = false }) {
             onClick={() => setViewMode('daily')}
             title="Categorise history into one piece per day"
           >
-            📅 Daily Summary
+            <IconCalendar size={14} />
+            <span>Daily Summary</span>
           </button>
           <button
             type="button"
@@ -304,7 +312,8 @@ function PollutionChart({ historyData = [], loading = false }) {
             onClick={() => setViewMode('hourly')}
             title="View hourly readings"
           >
-            ⏱️ Hourly
+            <IconClock size={14} />
+            <span>Hourly</span>
           </button>
         </div>
       </div>
@@ -312,15 +321,24 @@ function PollutionChart({ historyData = [], loading = false }) {
       {stats && viewMode === 'daily' && (
         <div className="chart-stats-summary">
           <div className="chart-stat-chip">
-            <span>📊 7-Day Average:</span>
+            <span className="chip-label">
+              <IconBarChart size={14} color="#64748b" />
+              <span>7-Day Average:</span>
+            </span>
             <strong>{stats.overallAvg} AQI</strong>
           </div>
           <div className="chart-stat-chip peak">
-            <span>⚠️ Peak Day:</span>
+            <span className="chip-label">
+              <IconAlertTriangle size={14} color="#d97706" />
+              <span>Peak Day:</span>
+            </span>
             <strong>{stats.peakDay.label} ({stats.peakDay.maxAqi} AQI)</strong>
           </div>
           <div className="chart-stat-chip clean">
-            <span>🌿 Cleanest Day:</span>
+            <span className="chip-label">
+              <IconLeaf size={14} color="#059669" />
+              <span>Cleanest Day:</span>
+            </span>
             <strong>{stats.cleanestDay.label} ({stats.cleanestDay.avgAqi} AQI)</strong>
           </div>
         </div>

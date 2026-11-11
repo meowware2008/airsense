@@ -4,6 +4,22 @@ import PollutionChart from './components/PollutionChart'
 import { useEffect, useState } from 'react'
 import AQIGauge from './components/AQIGauge'
 import { getLocations, getCurrentAirQuality, getAirQualityHistory,  getForecasts } from './api'
+import {
+  IconWind,
+  IconLayoutDashboard,
+  IconBarChart,
+  IconTrendingUp,
+  IconBell,
+  IconLightbulb,
+  IconMapPin,
+  IconLocate,
+  IconLoader,
+  IconUser,
+  IconLogOut,
+  IconShieldCheck,
+  IconActivity,
+  IconSparkles,
+} from './components/Icons'
 import './App.css'
 
 function App() {
@@ -168,16 +184,34 @@ if (!authData?.token) {
 
       {/* Sidebar */}
       <aside className="sidebar">
-        <h2 className="logo">🌿 AirSense</h2>
+        <h2 className="logo">
+          <IconWind size={26} color="#62d6a4" />
+          <span>AirSense</span>
+        </h2>
 
         <p className="menu-title">MENU</p>
 
         <nav>
-          <a className="active" href="#dashboard">▦ Dashboard</a>
-          <a href="#analytics">📊 Analytics</a>
-          <a href="#predictions">🔮 Predictions</a>
-          <a href="#alerts">🔔 Alerts</a>
-          <a href="#recommendations">💡 Recommendations</a>
+          <a className="active" href="#dashboard">
+            <IconLayoutDashboard size={17} />
+            <span>Dashboard</span>
+          </a>
+          <a href="#analytics">
+            <IconBarChart size={17} />
+            <span>Analytics</span>
+          </a>
+          <a href="#predictions">
+            <IconTrendingUp size={17} />
+            <span>Predictions</span>
+          </a>
+          <a href="#alerts">
+            <IconBell size={17} />
+            <span>Alerts</span>
+          </a>
+          <a href="#recommendations">
+            <IconLightbulb size={17} />
+            <span>Recommendations</span>
+          </a>
         </nav>
 
         <div className="sidebar-bottom">
@@ -197,7 +231,9 @@ if (!authData?.token) {
           <div className="topbar-right">
             <div className="location-picker-group">
               <div className="location-select-wrapper">
-                <span className="location-icon" aria-hidden="true">📍</span>
+                <span className="location-icon" aria-hidden="true">
+                  <IconMapPin size={16} color="#258b70" />
+                </span>
                 <select
                   id="location-select"
                   className="location-select"
@@ -220,12 +256,24 @@ if (!authData?.token) {
                 title="Detect nearest city based on your GPS location"
                 disabled={isLocating}
               >
-                {isLocating ? '⌛ Locating...' : '🎯 Auto-Detect'}
+                {isLocating ? (
+                  <>
+                    <IconLoader size={14} />
+                    <span>Locating...</span>
+                  </>
+                ) : (
+                  <>
+                    <IconLocate size={14} />
+                    <span>Auto-Detect</span>
+                  </>
+                )}
               </button>
             </div>
 
             <div className="profile" title="Logged in user">
-              <span className="profile-icon">👤</span>
+              <span className="profile-icon">
+                <IconUser size={16} color="#64748b" />
+              </span>
               <span className="profile-name">{authData.user?.name || 'User'}</span>
             </div>
 
@@ -235,14 +283,16 @@ if (!authData?.token) {
               onClick={handleLogout}
               title="Sign out of your account"
             >
-              <span className="logout-icon">🚪</span>
+              <span className="logout-icon">
+                <IconLogOut size={15} />
+              </span>
               <span>Logout</span>
             </button>
           </div>
         </header>
 
         <section className="welcome">
-          <h2>Welcome to AirSense 🌿</h2>
+          <h2>Welcome to AirSense</h2>
           <p>Stay informed. Breathe better. Live healthier.</p>
         </section>
 
@@ -354,14 +404,18 @@ if (!authData?.token) {
           <div className="panel" id="recommendations">
             <h2>Health Recommendations</h2>
             <div className="recommendation">
-              <span>🌱</span>
+              <span className="rec-icon-wrapper">
+                <IconShieldCheck size={26} color="#258b70" />
+              </span>
               <div>
                 <h3>Air quality guidance</h3>
                 <p>Recommendations will appear based on actual AQI readings.</p>
               </div>
             </div>
             <div className="recommendation">
-              <span>😷</span>
+              <span className="rec-icon-wrapper">
+                <IconActivity size={26} color="#258b70" />
+              </span>
               <div>
                 <h3>Stay informed</h3>
                 <p>Check pollution levels before outdoor activities.</p>
@@ -389,8 +443,10 @@ if (!authData?.token) {
   ) : forecastData.length > 0 ? (
     <div className="forecast-list">
       {forecastData.map((forecast, index) => (
-        <div className="recommendation" key={forecast.forecast_for || index}>
-          <span>🔮</span>
+        <div className="recommendation forecast-item" key={forecast.forecast_for || index}>
+          <span className="rec-icon-wrapper forecast-icon">
+            <IconSparkles size={22} color="#258b70" />
+          </span>
           <div>
             <h3>
               {new Date(forecast.forecast_for).toLocaleString()}

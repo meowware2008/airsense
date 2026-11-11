@@ -29,6 +29,9 @@
 }
 
 .view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: #f1f5f9;
   border: 1px solid #dce4ec;
   color: #475569;
@@ -66,9 +69,15 @@
   padding: 8px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 13px;
   color: #64748b;
+}
+
+.chip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .chart-stat-chip strong {

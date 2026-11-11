@@ -31,6 +31,9 @@ body {
   font-size: 25px;
   margin-bottom: 50px;
   color: #62d6a4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .menu-title {
@@ -48,9 +51,14 @@ body {
 .sidebar nav a {
   text-decoration: none;
   color: #c2d0db;
-  padding: 13px;
+  padding: 12px 14px;
   border-radius: 9px;
   transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .sidebar nav a:hover,
@@ -113,7 +121,9 @@ body {
 .location-icon {
   position: absolute;
   left: 12px;
-  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
   z-index: 1;
 }
@@ -303,13 +313,39 @@ body {
 .recommendation {
   display: flex;
   gap: 15px;
-  align-items: flex-start;
+  align-items: center;
   padding: 15px 0;
-  border-bottom: 1px solid #edf0f3;
+  border-bottom: 1px solid #edf0f4;
 }
 
-.recommendation span {
-  font-size: 25px;
+.recommendation:last-child {
+  border-bottom: none;
+}
+
+.rec-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: #f0fbf7;
+  border: 1px solid #c2e2d8;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.rec-icon-wrapper.forecast-icon {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+@keyframes icon-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.icon-spin {
+  animation: icon-spin 1s linear infinite;
 }
 
 .recommendation h3 {

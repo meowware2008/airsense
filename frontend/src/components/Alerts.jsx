@@ -7,6 +7,14 @@ import {
   getNotifications,
   markNotificationRead,
 } from '../api'
+import {
+  IconBell,
+  IconMapPin,
+  IconTrash,
+  IconAlertTriangle,
+  IconCheck,
+  IconLoader,
+} from './Icons'
 import './Alerts.css'
 
 function Alerts({ locations = [], selectedLocationId }) {
@@ -94,7 +102,10 @@ function Alerts({ locations = [], selectedLocationId }) {
 
   return (
     <div className="alerts-container" id="alerts">
-      <h2>🔔 Air Quality Alerts</h2>
+      <h2 className="section-title">
+        <IconBell size={22} color="#258b70" />
+        <span>Air Quality Alerts</span>
+      </h2>
       <p>Get notified when air quality crosses your chosen AQI threshold.</p>
 
       <div className="alerts-panel">
@@ -158,7 +169,8 @@ function Alerts({ locations = [], selectedLocationId }) {
               <div className="alert-info">
                 <div className="alert-title-row">
                   <strong className="alert-city-name">
-                    📍 {alert.location?.name || 'Location'}
+                    <IconMapPin size={16} color="#258b70" />
+                    <span>{alert.location?.name || 'Location'}</span>
                   </strong>
                   <span className={`status-pill ${alert.enabled ? 'enabled' : 'disabled'}`}>
                     {alert.enabled ? 'Active' : 'Disabled'}
@@ -180,8 +192,17 @@ function Alerts({ locations = [], selectedLocationId }) {
                   disabled={deletingId === alert.id}
                   title="Delete this alert rule"
                 >
-                  <span className="btn-icon">🗑️</span>
-                  <span>{deletingId === alert.id ? 'Deleting...' : 'Delete'}</span>
+                  {deletingId === alert.id ? (
+                    <>
+                      <IconLoader size={14} />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <IconTrash size={14} />
+                      <span>Delete</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -210,10 +231,11 @@ function Alerts({ locations = [], selectedLocationId }) {
               <div className="alert-info">
                 <div className="alert-title-row">
                   <strong className="notif-title">
-                    ⚠️ {notification.title || 'Air Quality Notification'}
+                    <IconAlertTriangle size={16} color="#d97706" />
+                    <span>{notification.title || 'Air Quality Notification'}</span>
                   </strong>
                   <span className={`status-pill ${notification.status === 'unread' ? 'unread' : 'read'}`}>
-                    {notification.status === 'unread' ? '● Unread' : '✓ Read'}
+                    {notification.status === 'unread' ? 'Unread' : 'Read'}
                   </span>
                 </div>
                 <p className="notif-message">
@@ -233,12 +255,22 @@ function Alerts({ locations = [], selectedLocationId }) {
                     disabled={markingId === notification.id}
                     title="Mark this notification as read"
                   >
-                    <span className="btn-icon">✓</span>
-                    <span>{markingId === notification.id ? 'Marking...' : 'Mark as Read'}</span>
+                    {markingId === notification.id ? (
+                      <>
+                        <IconLoader size={14} />
+                        <span>Marking...</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconCheck size={14} />
+                        <span>Mark as Read</span>
+                      </>
+                    )}
                   </button>
                 ) : (
                   <span className="read-indicator" title="Notification already read">
-                    ✓ Read
+                    <IconCheck size={13} color="#64748b" />
+                    <span>Read</span>
                   </span>
                 )}
               </div>

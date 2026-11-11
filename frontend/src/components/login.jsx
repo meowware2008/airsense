@@ -1,6 +1,7 @@
 
 import { useState } from 'react'
 import { loginUser, registerUser } from '../api'
+import { IconWind } from './Icons'
 import './login.css'
 
 function Login({ onAuthenticated }) {
@@ -32,7 +33,7 @@ function Login({ onAuthenticated }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>🌿 AirSense</h1>
+        <h1 className="auth-logo"><IconWind size={28} color="#258b70" /> AirSense</h1>
         <p className="auth-subtitle">
           Smart Air Quality Monitoring System
         </p>
