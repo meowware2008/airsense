@@ -1,33 +1,10 @@
 import Alerts from './components/Alerts'
 import Login from './components/login'
-import { Line } from 'react-chartjs-2'
+import PollutionChart from './components/PollutionChart'
 import { useEffect, useState } from 'react'
 import AQIGauge from './components/AQIGauge'
 import { getLocations, getCurrentAirQuality, getAirQualityHistory,  getForecasts } from './api'
 import './App.css'
-
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js'
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-)
 
 function App() {
   const [authData, setAuthData] = useState(() => {
@@ -56,10 +33,53 @@ function handleLogout() {
 
   const [locations, setLocations] = useState([])
   const [selectedLocationId, setSelectedLocationId] = useState('3')
+  const [isLocating, setIsLocating] = useState(false)
   const [historyData, setHistoryData] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(true)
   const [forecastData, setForecastData] = useState([])
   const [forecastLoading, setForecastLoading] = useState(true)
   const [forecastError, setForecastError] = useState('')
+
+  function handleDetectLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.')
+      return
+    }
+
+    setIsLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setIsLocating(false)
+        const { latitude, longitude } = pos.coords
+        if (!locations || locations.length === 0) return
+
+        let closest = locations[0]
+        let minDistance = Infinity
+
+        locations.forEach(loc => {
+          if (typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+            const dLat = loc.latitude - latitude
+            const dLon = loc.longitude - longitude
+            const dist = Math.sqrt(dLat * dLat + dLon * dLon)
+            if (dist < minDistance) {
+              minDistance = dist
+              closest = loc
+            }
+          }
+        })
+
+        if (closest) {
+          setSelectedLocationId(String(closest.id))
+        }
+      },
+      err => {
+        setIsLocating(false)
+        console.warn('Geolocation error:', err)
+        alert('Unable to retrieve location or permission was denied.')
+      },
+      { timeout: 8000 }
+    )
+  }
   // Fetch available cities
   useEffect(() => {
     async function fetchLocations() {
@@ -97,12 +117,15 @@ function handleLogout() {
   // Fetch 7-day air quality history
   useEffect(() => {
     async function fetchHistory() {
+      setHistoryLoading(true)
       try {
         const data = await getAirQualityHistory(selectedLocationId, 7)
         setHistoryData(data.series || [])
       } catch (err) {
         console.error('Error fetching history:', err)
         setHistoryData([])
+      } finally {
+        setHistoryLoading(false)
       }
     }
 
@@ -167,28 +190,55 @@ if (!authData?.token) {
       <main className="main-content">
 
         <header className="topbar">
-          <div>
+          <div className="topbar-left">
             <h1>Air Quality Dashboard</h1>
             <p>Monitor your environment in real time</p>
           </div>
           <div className="topbar-right">
-  <select
-    value={selectedLocationId}
-    onChange={e => setSelectedLocationId(e.target.value)}
-  >
-    {locations.map(location => (
-      <option key={location.id} value={location.id}>
-        {location.name}
-      </option>
-    ))}
-  </select>
+            <div className="location-picker-group">
+              <div className="location-select-wrapper">
+                <span className="location-icon" aria-hidden="true">📍</span>
+                <select
+                  id="location-select"
+                  className="location-select"
+                  value={selectedLocationId}
+                  onChange={e => setSelectedLocationId(e.target.value)}
+                  aria-label="Select City"
+                >
+                  {locations.map(location => (
+                    <option key={location.id} value={location.id}>
+                      {location.name}{location.region ? ` (${location.region})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-  <div className="profile">
-  👤 {authData.user?.name || 'User'}
-</div>
+              <button
+                type="button"
+                className="detect-location-btn"
+                onClick={handleDetectLocation}
+                title="Detect nearest city based on your GPS location"
+                disabled={isLocating}
+              >
+                {isLocating ? '⌛ Locating...' : '🎯 Auto-Detect'}
+              </button>
+            </div>
 
-<button onClick={handleLogout}>Logout</button>
-</div>
+            <div className="profile" title="Logged in user">
+              <span className="profile-icon">👤</span>
+              <span className="profile-name">{authData.user?.name || 'User'}</span>
+            </div>
+
+            <button
+              type="button"
+              className="logout-btn"
+              onClick={handleLogout}
+              title="Sign out of your account"
+            >
+              <span className="logout-icon">🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
         </header>
 
         <section className="welcome">
@@ -323,38 +373,7 @@ if (!authData?.token) {
         
 {/* 7-day Air Quality History */}
 <section className="panel" id="history">
-  <h2>7-Day Air Quality History</h2>
-
-  {historyData.length > 0 ? (
-    <Line
-      data={{
-        labels: historyData.map(item =>
-          new Date(item.timestamp).toLocaleString()
-        ),
-        datasets: [
-          {
-            label: 'AQI',
-            data: historyData.map(item => item.aqi),
-            borderColor: '#36A2EB',
-            backgroundColor: 'rgba(54, 162, 235, 0.15)',
-            fill: true,
-            tension: 0.3,
-          },
-        ],
-      }}
-      options={{
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: {
-            display: true,
-          },
-        },
-      }}
-    />
-  ) : (
-    <p>Loading historical data...</p>
-  )}
+  <PollutionChart historyData={historyData} loading={historyLoading} />
 </section>
 
         {/* Prediction section */}

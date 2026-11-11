@@ -9,13 +9,20 @@ import {
 } from '../api'
 import './Alerts.css'
 
-function Alerts({ locations, selectedLocationId }) {
+function Alerts({ locations = [], selectedLocationId }) {
   const [alerts, setAlerts] = useState([])
   const [notifications, setNotifications] = useState([])
   const [threshold, setThreshold] = useState('100')
+  const [alertLocationId, setAlertLocationId] = useState(selectedLocationId || '1')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    if (selectedLocationId) {
+      setAlertLocationId(selectedLocationId)
+    }
+  }, [selectedLocationId])
 
   async function loadAlerts() {
     setLoading(true)
@@ -46,7 +53,7 @@ function Alerts({ locations, selectedLocationId }) {
     setMessage('')
 
     try {
-      await createAlert(selectedLocationId, threshold)
+      await createAlert(alertLocationId, threshold)
       setMessage('Alert created successfully!')
       await loadAlerts()
     } catch (err) {
@@ -81,18 +88,38 @@ function Alerts({ locations, selectedLocationId }) {
       <div className="alerts-panel">
         <h3>Create a New Alert</h3>
 
-        <form onSubmit={handleCreateAlert}>
-          <label>AQI Threshold</label>
-          <input
-            type="number"
-            min="1"
-            max="500"
-            value={threshold}
-            onChange={e => setThreshold(e.target.value)}
-            required
-          />
+        <form onSubmit={handleCreateAlert} className="create-alert-form">
+          <div className="alert-field-group">
+            <label htmlFor="alert-city">Target City</label>
+            <select
+              id="alert-city"
+              value={alertLocationId}
+              onChange={e => setAlertLocationId(e.target.value)}
+              className="alert-select"
+            >
+              {locations.map(loc => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name}{loc.region ? ` (${loc.region})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <button type="submit">Create Alert</button>
+          <div className="alert-field-group">
+            <label htmlFor="alert-threshold">AQI Threshold</label>
+            <input
+              id="alert-threshold"
+              type="number"
+              min="1"
+              max="500"
+              value={threshold}
+              onChange={e => setThreshold(e.target.value)}
+              className="alert-input"
+              required
+            />
+          </div>
+
+          <button type="submit" className="create-alert-btn">Create Alert</button>
         </form>
 
         <p className="alerts-note">

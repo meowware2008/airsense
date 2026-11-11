@@ -1,0 +1,99 @@
+.pollution-chart-card {
+  width: 100%;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chart-title-area h2 {
+  font-size: 19px;
+  color: #172b40;
+  margin-bottom: 4px;
+}
+
+.chart-subtitle {
+  font-size: 13px;
+  color: #718293;
+}
+
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-toggle-btn {
+  background: #f1f5f9;
+  border: 1px solid #dce4ec;
+  color: #475569;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-toggle-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.view-toggle-btn.active {
+  background: #258b70;
+  border-color: #258b70;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(37, 139, 112, 0.25);
+}
+
+.chart-stats-summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.chart-stat-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.chart-stat-chip strong {
+  color: #172b40;
+  font-size: 14px;
+}
+
+.chart-stat-chip.peak strong {
+  color: #d97706;
+}
+
+.chart-stat-chip.clean strong {
+  color: #059669;
+}
+
+.chart-container-wrapper {
+  position: relative;
+  height: 340px;
+  width: 100%;
+}
+
+.chart-loading,
+.chart-empty {
+  padding: 40px;
+  text-align: center;
+  color: #718293;
+  font-size: 14px;
+}
