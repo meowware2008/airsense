@@ -64,6 +64,21 @@ services:
     networks:
       - airsense-net
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+    container_name: airsense-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - airsense-net
+
   prometheus:
     build:
       context: .

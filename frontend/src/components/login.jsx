@@ -1,7 +1,7 @@
 
 import { useState } from 'react'
 import { loginUser, registerUser } from '../api'
-import './Login.css'
+import './login.css'
 
 function Login({ onAuthenticated }) {
   const [isRegister, setIsRegister] = useState(false)
