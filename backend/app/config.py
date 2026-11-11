@@ -18,9 +18,12 @@ class Config:
         "DATABASE_URL",
         "sqlite:///airsense.db" if os.getenv("APP_ENV") not in ("production", "docker") else "mysql+pymysql://airsense:airsense_secure_password@mysql:3306/airsense"
     )
-    # Render PostgreSQL URLs start with postgres:// but SQLAlchemy requires postgresql://
+    # Render PostgreSQL URLs start with postgres:// or postgresql://
+    # Map explicitly to postgresql+psycopg2:// so SQLAlchemy uses psycopg2 driver directly
     if raw_db_url.startswith("postgres://"):
-        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif raw_db_url.startswith("postgresql://") and not raw_db_url.startswith("postgresql+"):
+        raw_db_url = raw_db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
     DATABASE_URL = raw_db_url
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
