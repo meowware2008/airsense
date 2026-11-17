@@ -1,10 +1,19 @@
 import { useState } from 'react'
+import EcoCityIllustration from './EcoCityIllustration'
 import { loginUser, registerUser } from '../api'
-import { IconEye, IconEyeOff, IconX, IconShieldCheck, IconLoader } from './Icons'
+import {
+  IconLeafOutline,
+  IconMail,
+  IconLock,
+  IconEye,
+  IconEyeOff,
+  IconUser,
+  IconLoader,
+  IconShieldCheck,
+} from './Icons'
 import './login.css'
 
 export default function Login({ onAuthenticated }) {
-  const [showAuthModal, setShowAuthModal] = useState(false)
   const [isRegister, setIsRegister] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -12,18 +21,6 @@ export default function Login({ onAuthenticated }) {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  function handleOpenLogin() {
-    setIsRegister(false)
-    setError('')
-    setShowAuthModal(true)
-  }
-
-  function handleOpenRegister() {
-    setIsRegister(true)
-    setError('')
-    setShowAuthModal(true)
-  }
 
   function handleDemoFill() {
     setEmail('demo@airsense.org')
@@ -51,199 +48,142 @@ export default function Login({ onAuthenticated }) {
   }
 
   return (
-    <div className="airsense-viewport">
-      {/* 1. Top Header Navigation */}
-      <header className="airsense-header">
-        <div className="airsense-brand">
-          <span className="brand-logo-text">AirSense</span>
-          <span className="brand-category-tag">ATMOSPHERIC INTELLIGENCE</span>
+    <div className="airsense-auth-page">
+      {/* Top Header Bar */}
+      <header className="auth-header-bar">
+        <div className="auth-brand-lockup">
+          <IconLeafOutline size={22} color="#1E3A2F" />
+          <span className="auth-brand-name">AirSense</span>
         </div>
-
-        <nav className="airsense-header-right" aria-label="Main Navigation">
-          <button
-            type="button"
-            className="btn-nav-signup"
-            onClick={handleOpenRegister}
-          >
-            Sign up
-          </button>
-
-          <button
-            type="button"
-            className="btn-nav-login"
-            onClick={handleOpenLogin}
-          >
-            Sign in
-          </button>
-        </nav>
       </header>
+      <div className="auth-header-divider" />
 
-      {/* 3. Hero Bottom Typography & Callouts */}
-      <main className="airsense-hero-content">
-        {/* Bottom Left Oversized Typography */}
-        <div className="airsense-hero-left">
-          <span className="hero-eyebrow-label">AIR QUALITY INTELLIGENCE</span>
-          <h1 className="airsense-hero-headline">
-            Breathe easier.<br />
-            Know your air.
-          </h1>
-        </div>
+      {/* Main Two-Column Split Experience */}
+      <main className="auth-split-layout">
+        {/* Left Column: Welcome & Illustration */}
+        <div className="auth-left-column">
+          <div className="auth-left-header">
+            <span className="auth-eyebrow-tag">AIR QUALITY INTELLIGENCE</span>
+            <h1 className="auth-welcome-title">
+              {isRegister ? (
+                <>Join the<br />AirSense network.</>
+              ) : (
+                <>Welcome back<br />to AirSense.</>
+              )}
+            </h1>
+            <p className="auth-welcome-desc">
+              {isRegister
+                ? 'Create an account to monitor real-time air quality, explore trends and access predictive forecasts.'
+                : 'Sign in to monitor air quality, explore trends and get predictive insights.'}
+            </p>
+          </div>
 
-        {/* Bottom Right Supporting Copy & Refined CTAs */}
-        <div className="airsense-hero-right">
-          <p className="airsense-hero-subtext">
-            Understand air quality, explore pollution trends and see what tomorrow&apos;s air might bring.
-          </p>
-
-          <div className="airsense-cta-row">
-            <button
-              type="button"
-              className="btn-primary-cta"
-              onClick={handleOpenLogin}
-            >
-              Discover AirSense
-            </button>
-
-            <button
-              type="button"
-              className="btn-secondary-cta"
-              onClick={handleOpenLogin}
-            >
-              Sign in
-            </button>
+          <div className="auth-illustration-container">
+            <EcoCityIllustration className="auth-eco-city-art" />
           </div>
         </div>
-      </main>
 
-      {/* 4. Bottom Footer Strip */}
-      <footer className="airsense-bottom-strip">
-        <div className="airsense-scroll-indicator">
-          <span className="scroll-accent-line" />
-          <span>SCROLL TO EXPLORE</span>
-        </div>
+        {/* Center Vertical Divider Line */}
+        <div className="auth-vertical-rule" />
 
-        <div className="airsense-footer-phrase">
-          <span>MONITOR · UNDERSTAND · FORECAST</span>
-        </div>
-      </footer>
-
-      {/* 5. Minimalist Clean Authentication Modal */}
-      {showAuthModal && (
-        <div className="auth-modal-backdrop" onClick={() => setShowAuthModal(false)}>
-          <div className="auth-modal-panel" onClick={e => e.stopPropagation()}>
-            <button
-              type="button"
-              className="auth-modal-close-btn"
-              onClick={() => setShowAuthModal(false)}
-              aria-label="Close"
-            >
-              <IconX size={18} />
-            </button>
-
-            <div className="auth-modal-badge">
-              <span className="modal-badge-name">AirSense</span>
-              <span className="modal-badge-sub">ENVIRONMENTAL INTELLIGENCE</span>
-            </div>
-
-            <h2 className="auth-modal-title">
-              {isRegister ? 'Begin Monitoring' : 'Welcome Back'}
+        {/* Right Column: Clean Form */}
+        <div className="auth-right-column">
+          <div className="auth-form-card">
+            <h2 className="auth-form-heading">
+              {isRegister ? 'Sign up' : 'Sign in'}
             </h2>
-            <p className="auth-modal-desc">
-              {isRegister
-                ? 'Create your account to access real-time telemetry, 7-day trends, and machine-learning forecasts.'
-                : 'Sign in to access your continuous atmospheric monitoring observatory.'}
+            <p className="auth-form-subheading">
+              {isRegister ? 'Create your AirSense account.' : 'Access your AirSense account.'}
             </p>
 
-            {error && <div className="auth-modal-error-pill">{error}</div>}
+            {error && <div className="auth-form-error-banner">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="auth-modal-form">
+            <form onSubmit={handleSubmit} className="auth-credential-form">
               {isRegister && (
-                <div className="auth-input-group">
-                  <label className="auth-input-label">FULL NAME</label>
+                <div className="auth-input-wrapper">
+                  <IconUser size={18} color="#7A8E82" className="auth-leading-icon" />
                   <input
                     type="text"
-                    placeholder="e.g. Dr. Jane Doe"
+                    placeholder="Full name"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    className="auth-text-input"
+                    className="auth-text-field"
                     required
                   />
                 </div>
               )}
 
-              <div className="auth-input-group">
-                <label className="auth-input-label">EMAIL ADDRESS</label>
+              <div className="auth-input-wrapper">
+                <IconMail size={18} color="#7A8E82" className="auth-leading-icon" />
                 <input
                   type="email"
-                  placeholder="demo@airsense.org"
+                  placeholder="Email address"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="auth-text-input"
+                  className="auth-text-field"
                   required
                 />
               </div>
 
-              <div className="auth-input-group">
-                <label className="auth-input-label">PASSWORD</label>
-                <div className="auth-password-container">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Minimum 8 characters"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    minLength={8}
-                    className="auth-text-input auth-password-input"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="auth-eye-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
-                  </button>
-                </div>
+              <div className="auth-input-wrapper">
+                <IconLock size={18} color="#7A8E82" className="auth-leading-icon" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  minLength={8}
+                  className="auth-text-field auth-password-field"
+                  required
+                />
+                <button
+                  type="button"
+                  className="auth-trailing-eye-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                </button>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-modal-submit"
+                className="auth-submit-action-btn"
               >
                 {loading ? (
                   <>
                     <IconLoader size={16} />
-                    <span>Authenticating...</span>
+                    <span>Signing in...</span>
                   </>
                 ) : (
-                  <span>{isRegister ? 'Create Account' : 'Sign In'}</span>
+                  <span>{isRegister ? 'Sign up →' : 'Sign in →'}</span>
                 )}
               </button>
             </form>
 
-            <div className="auth-modal-bottom-row">
-              <p className="auth-switch-prompt">
-                {isRegister ? 'Already registered?' : 'Need an account?'}{' '}
+            <div className="auth-account-switch-row">
+              <p className="auth-switch-caption">
+                {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
                   type="button"
-                  className="btn-switch-mode"
+                  className="auth-switch-link"
                   onClick={() => {
                     setIsRegister(!isRegister)
                     setError('')
                   }}
                 >
-                  {isRegister ? 'Sign in' : 'Create account'}
+                  {isRegister ? 'Sign in' : 'Sign up'}
                 </button>
               </p>
 
               <button
                 type="button"
-                className="btn-demo-autofill"
+                className="auth-demo-autofill-btn"
                 onClick={handleDemoFill}
                 title="1-Click Fill Demo Credentials"
               >
-                <IconShieldCheck size={14} color="#176B70" />
+                <IconShieldCheck size={14} color="#1E3A2F" />
                 <span>
                   1-Click Demo: <strong>demo@airsense.org</strong> • <strong>demo12345</strong>
                 </span>
@@ -251,7 +191,7 @@ export default function Login({ onAuthenticated }) {
             </div>
           </div>
         </div>
-      )}
+      </main>
     </div>
   )
 }
