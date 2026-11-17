@@ -1,32 +1,50 @@
+/* =====================================================================
+   Alerts & Notifications — Minimalist Environmental System (Air.inc Style)
+   ===================================================================== */
 
 .alerts-container {
-  margin-top: 25px;
-  color: #172b40;
-}
-
-.alerts-container > h2,
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.alerts-container > p {
-  color: #718096;
+  width: 100%;
 }
 
 .alerts-panel {
-  background: #ffffff;
-  padding: 24px;
-  margin-top: 20px;
-  border-radius: 12px;
-  box-shadow: 0 3px 15px rgba(23, 43, 64, 0.06);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 20px;
+  padding: 26px 28px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  margin-bottom: 24px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.alerts-panel h3 {
-  margin-top: 0;
-  margin-bottom: 18px;
+.alerts-panel:hover {
+  box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.08);
+}
+
+.panel-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.panel-header-row h3 {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.panel-count-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 4px 12px;
+  border-radius: 9999px;
 }
 
 .alerts-panel form {
@@ -34,7 +52,7 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .alert-field-group {
@@ -44,75 +62,96 @@
 }
 
 .alert-field-group label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #4a5568;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
 .alert-select,
 .alert-input {
   padding: 10px 14px;
-  border: 1px solid #dce3eb;
-  border-radius: 8px;
-  background: white;
-  color: #172b40;
-  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13.5px;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
 }
 
 .alert-select {
-  min-width: 180px;
+  min-width: 190px;
 }
 
 .alert-input {
-  width: 130px;
+  width: 120px;
+}
+
+.alert-select:focus,
+.alert-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 .create-alert-btn {
-  padding: 10px 18px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 8px;
-  background: #258b70;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  height: 40px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  height: 42px;
 }
 
 .create-alert-btn:hover {
-  background: #1c6d57;
+  background: #1e293b;
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
 }
 
-.panel-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
+.alerts-note {
+  font-size: 12.5px;
+  color: #94a3b8;
+  margin-top: 10px;
+  line-height: 1.5;
 }
 
-.panel-header-row h3 {
-  margin: 0;
+.alerts-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin-bottom: 16px;
 }
 
-.panel-count-badge {
-  background: #f1f5f9;
-  color: #475569;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 1px solid #e2e8f0;
+.alerts-success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #059669;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin-bottom: 16px;
 }
 
+/* Alert Items */
 .alert-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
   padding: 16px 0;
-  border-bottom: 1px solid #edf0f4;
+  border-bottom: 1px solid #f1f5f9;
   transition: background-color 0.2s ease;
 }
 
@@ -121,7 +160,10 @@
 }
 
 .alert-item.unread-item {
-  background: #fbfdff;
+  background: rgba(240, 249, 255, 0.5);
+  border-radius: 12px;
+  padding: 16px 14px;
+  margin-bottom: 6px;
 }
 
 .alert-info {
@@ -139,25 +181,28 @@
 
 .alert-city-name,
 .notif-title {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 700;
-  color: #172b40;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .alert-threshold-info,
 .notif-message {
-  font-size: 14px;
+  font-size: 13.5px;
   color: #475569;
   margin: 4px 0 6px;
   line-height: 1.5;
 }
 
 .alert-threshold-info strong {
-  color: #172b40;
+  color: #0f172a;
 }
 
 .alert-meta {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #94a3b8;
 }
 
@@ -171,10 +216,10 @@
 .status-pill {
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
   padding: 3px 8px;
   border-radius: 6px;
 }
@@ -199,7 +244,7 @@
 
 .status-pill.read {
   background: #f8fafc;
-  color: #64748b;
+  color: #94a3b8;
   border: 1px solid #e2e8f0;
 }
 
@@ -211,13 +256,13 @@
   background: #fff1f2;
   color: #e11d48;
   border: 1px solid #fecdd3;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(225, 29, 72, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(225, 29, 72, 0.06);
   white-space: nowrap;
 }
 
@@ -225,12 +270,7 @@
   background: #e11d48;
   color: #ffffff;
   border-color: #e11d48;
-  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.25);
   transform: translateY(-1px);
-}
-
-.delete-alert-btn:active:not(:disabled) {
-  transform: translateY(0);
 }
 
 .delete-alert-btn:disabled {
@@ -243,34 +283,24 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.06);
   white-space: nowrap;
 }
 
 .mark-read-btn:hover:not(:disabled) {
-  background: #16a34a;
+  background: #059669;
   color: #ffffff;
-  border-color: #16a34a;
-  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);
+  border-color: #059669;
   transform: translateY(-1px);
-}
-
-.mark-read-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.mark-read-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .read-indicator {
@@ -282,53 +312,14 @@
   color: #94a3b8;
   padding: 6px 12px;
   background: #f8fafc;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
-}
-
-.btn-icon {
-  font-size: 13px;
-  display: inline-block;
 }
 
 .alerts-loading,
 .alerts-empty {
-  color: #718096;
-  font-size: 14px;
-  padding: 12px 0;
-}
-
-.alerts-note {
-  font-size: 13px;
-  color: #718096;
-}
-
-.alerts-error {
-  color: #dc3545 !important;
-}
-
-.alerts-success {
-  color: #198754 !important;
-}
-
-@media (max-width: 600px) {
-  .alerts-panel form {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .alerts-panel input {
-    width: 100%;
-  }
-
-  .alert-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .alert-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
+  color: #94a3b8;
+  font-size: 13.5px;
+  padding: 24px 0;
+  text-align: center;
 }
