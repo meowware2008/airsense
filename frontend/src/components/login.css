@@ -13,7 +13,6 @@
   min-height: 100vh;
   width: 100%;
   background-color: #102d38;
-  background-image: radial-gradient(circle at 62% 38%, #176b70 0%, #102d38 60%, #0a1f27 100%);
   color: #f3f5f2;
   display: flex;
   flex-direction: column;
@@ -22,17 +21,6 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   user-select: none;
   box-sizing: border-box;
-}
-
-/* 3D Flow Sculpture Canvas */
-.airflow-canvas-element {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
 }
 
 /* Header */

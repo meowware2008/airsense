@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import AirflowSculptureCanvas from './AirflowSculptureCanvas'
 import { loginUser, registerUser } from '../api'
 import { IconEye, IconEyeOff, IconX, IconShieldCheck, IconLoader } from './Icons'
 import './login.css'
@@ -53,10 +52,7 @@ export default function Login({ onAuthenticated }) {
 
   return (
     <div className="airsense-viewport">
-      {/* 1. Central 3D Animated Airflow Sculpture & Flow Lines */}
-      <AirflowSculptureCanvas />
-
-      {/* 2. Top Header Navigation */}
+      {/* 1. Top Header Navigation */}
       <header className="airsense-header">
         <div className="airsense-brand">
           <span className="brand-logo-text">AirSense</span>
