@@ -1,6 +1,6 @@
 /* =====================================================================
    AirSense — Animated City Diorama Styles
-   Natural Cartoon-Style Airflow & Foliage Motion
+   Original Artwork with Layered SVG Airflow & Drifting Leaves
    ===================================================================== */
 
 .city-diorama-wrapper {
@@ -12,7 +12,7 @@
   overflow: visible;
 }
 
-/* Base Diorama Image — Seamlessly blended into #F3F5F0 with no box, border or shadow */
+/* Base Diorama Image — Original Artwork Seamlessly Blended into #F3F5F0 */
 .city-diorama-base {
   display: block;
   width: 100%;
@@ -38,7 +38,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   1. Wind Streamlines (Preserved exactly as requested)
+   1. Wind Streamlines (Flowing left to right)
    --------------------------------------------------------------------- */
 
 .city-wind-path {
@@ -99,156 +99,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   2. Tree Crown Motion (Gentle lean in wind direction, trunks stationary)
-   --------------------------------------------------------------------- */
-
-.city-tree-crown {
-  will-change: transform;
-  transform-box: view-box;
-}
-
-/* Tree 1: Left foreground tree (anchor at trunk base 193px 615px) */
-.crown-sway-1 {
-  transform-origin: 193px 615px;
-  animation: crownSwayA 4.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-}
-
-/* Tree 2: Tall mid-left tree (anchor at trunk base 382px 545px) */
-.crown-sway-2 {
-  transform-origin: 382px 545px;
-  animation: crownSwayB 5.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -1.4s;
-}
-
-/* Tree 3: Left cluster companion tree (anchor at 470px 525px) */
-.crown-sway-3 {
-  transform-origin: 470px 525px;
-  animation: crownSwayA 4.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -2.1s;
-}
-
-/* Tree 4: Right foreground prominent tree (anchor at 1290px 615px) */
-.crown-sway-4 {
-  transform-origin: 1290px 615px;
-  animation: crownSwayB 5.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -0.8s;
-}
-
-/* Tree 5: Right mid tree (anchor at 1393px 595px) */
-.crown-sway-5 {
-  transform-origin: 1393px 595px;
-  animation: crownSwayA 4.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -2.8s;
-}
-
-/* Tree 6: Right backdrop glade tree (anchor at 1112px 448px) */
-.crown-sway-6 {
-  transform-origin: 1112px 448px;
-  animation: crownSwayB 6.0s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -3.5s;
-}
-
-@keyframes crownSwayA {
-  0% {
-    transform: rotate(0deg);
-  }
-  38% {
-    transform: rotate(2.8deg);
-  }
-  75% {
-    transform: rotate(-1.5deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
-@keyframes crownSwayB {
-  0% {
-    transform: rotate(0deg);
-  }
-  42% {
-    transform: rotate(2.5deg);
-  }
-  80% {
-    transform: rotate(-1.8deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
-/* ---------------------------------------------------------------------
-   3. Individual Leaves Sway (Cartoon-style gentle flutter left & right)
-   --------------------------------------------------------------------- */
-
-.tree-leaf-cluster {
-  will-change: transform;
-  transform-box: view-box;
-}
-
-.leaf-flutter-1 {
-  animation: leafFlutterA 2.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-}
-
-.leaf-flutter-2 {
-  animation: leafFlutterB 2.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -0.7s;
-}
-
-.leaf-flutter-3 {
-  animation: leafFlutterC 1.9s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -1.2s;
-}
-
-.leaf-flutter-4 {
-  animation: leafFlutterA 2.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -1.6s;
-}
-
-.leaf-flutter-5 {
-  animation: leafFlutterB 2.1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -0.4s;
-}
-
-@keyframes leafFlutterA {
-  0% {
-    transform: rotate(0deg);
-  }
-  40% {
-    transform: rotate(14deg);
-  }
-  80% {
-    transform: rotate(-10deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
-@keyframes leafFlutterB {
-  0% {
-    transform: rotate(0deg);
-  }
-  35% {
-    transform: rotate(-13deg);
-  }
-  75% {
-    transform: rotate(15deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
-@keyframes leafFlutterC {
-  0% {
-    transform: rotate(0deg);
-  }
-  45% {
-    transform: rotate(16deg);
-  }
-  85% {
-    transform: rotate(-12deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
-/* ---------------------------------------------------------------------
-   4. Detached Leaves Drifting Horizontally with Gentle Rotation
+   2. Detached Leaves Drifting Horizontally with Gentle Tumbling
    --------------------------------------------------------------------- */
 
 .city-detached-leaf {
@@ -374,13 +225,11 @@
 }
 
 /* ---------------------------------------------------------------------
-   5. Reduced Motion Preferences
+   3. Reduced Motion Preferences
    --------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .city-wind-path,
-  .city-tree-crown,
-  .tree-leaf-cluster,
   .city-detached-leaf {
     animation: none !important;
     transform: none !important;
