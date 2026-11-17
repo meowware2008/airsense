@@ -3,16 +3,16 @@ import { useCountUp } from '../utils/useCountUp'
 import './AQIGauge.css'
 
 function getAQIColor(aqi) {
-  if (aqi == null) return { primary: '#94a3b8', gradient: ['#64748b', '#475569'], label: 'Unavailable', bg: 'rgba(148, 163, 184, 0.1)' }
-  if (aqi <= 50) return { primary: '#10b981', gradient: ['#34d399', '#059669'], label: 'Good', bg: 'rgba(16, 185, 129, 0.15)' }
-  if (aqi <= 100) return { primary: '#14b8a6', gradient: ['#2dd4bf', '#0d9488'], label: 'Satisfactory', bg: 'rgba(20, 184, 166, 0.15)' }
-  if (aqi <= 200) return { primary: '#f59e0b', gradient: ['#fbbf24', '#d97706'], label: 'Moderate', bg: 'rgba(245, 158, 11, 0.15)' }
-  if (aqi <= 300) return { primary: '#f97316', gradient: ['#fb923c', '#ea580c'], label: 'Poor', bg: 'rgba(249, 115, 22, 0.15)' }
-  if (aqi <= 400) return { primary: '#ef4444', gradient: ['#f87171', '#dc2626'], label: 'Very Poor', bg: 'rgba(239, 68, 68, 0.18)' }
-  return { primary: '#a855f7', gradient: ['#c084fc', '#9333ea'], label: 'Severe', bg: 'rgba(168, 85, 247, 0.18)' }
+  if (aqi == null) return { primary: '#94a3b8', gradient: ['#cbd5e1', '#94a3b8'], label: 'Unavailable', bg: 'rgba(148, 163, 184, 0.1)' }
+  if (aqi <= 50) return { primary: '#10b981', gradient: ['#34d399', '#059669'], label: 'Good', bg: 'rgba(16, 185, 129, 0.12)' }
+  if (aqi <= 100) return { primary: '#14b8a6', gradient: ['#2dd4bf', '#0d9488'], label: 'Satisfactory', bg: 'rgba(20, 184, 166, 0.12)' }
+  if (aqi <= 200) return { primary: '#f59e0b', gradient: ['#fbbf24', '#d97706'], label: 'Moderate', bg: 'rgba(245, 158, 11, 0.12)' }
+  if (aqi <= 300) return { primary: '#f97316', gradient: ['#fb923c', '#ea580c'], label: 'Poor', bg: 'rgba(249, 115, 22, 0.12)' }
+  if (aqi <= 400) return { primary: '#ef4444', gradient: ['#f87171', '#dc2626'], label: 'Very Poor', bg: 'rgba(239, 68, 68, 0.14)' }
+  return { primary: '#8b5cf6', gradient: ['#a78bfa', '#7c3aed'], label: 'Severe', bg: 'rgba(139, 92, 246, 0.16)' }
 }
 
-function AQIGauge({ value = null, standard = 'CPCB NAQI' }) {
+function AQIGauge({ value = null, standard = 'IN_CPCB' }) {
   const hasValue = Number.isFinite(value) && value >= 0
   const clampedValue = hasValue ? Math.min(Math.max(value, 0), 500) : 0
   const animatedValue = useCountUp(hasValue ? clampedValue : null, 1200)
@@ -20,8 +20,10 @@ function AQIGauge({ value = null, standard = 'CPCB NAQI' }) {
 
   // Semi-circle arc geometry
   const radius = 80
-  const strokeWidth = 12
+  const strokeWidth = 14
+  // Circumference of semi-circle = pi * radius
   const arcLength = Math.PI * radius
+  // Ratio from 0 to 500
   const fillRatio = clampedValue / 500
   const strokeDashoffset = arcLength - (arcLength * fillRatio)
 
@@ -37,7 +39,7 @@ function AQIGauge({ value = null, standard = 'CPCB NAQI' }) {
               <stop offset="100%" stopColor={colorMeta.gradient[1]} />
             </linearGradient>
             <filter id="gaugeGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="5" floodColor={colorMeta.primary} floodOpacity="0.45" />
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor={colorMeta.primary} floodOpacity="0.35" />
             </filter>
           </defs>
 
@@ -45,7 +47,7 @@ function AQIGauge({ value = null, standard = 'CPCB NAQI' }) {
           <path
             d="M 20 110 A 80 80 0 0 1 180 110"
             fill="none"
-            stroke="rgba(255, 255, 255, 0.08)"
+            stroke="rgba(226, 232, 240, 0.6)"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
           />

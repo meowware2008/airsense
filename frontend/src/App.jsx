@@ -1,10 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
-import LandingPage from './components/LandingPage'
-import Login from './components/login'
 import Alerts from './components/Alerts'
+import Login from './components/login'
 import PollutionChart from './components/PollutionChart'
 import AQIGauge from './components/AQIGauge'
-import AtmosphericCanvas from './components/AtmosphericCanvas'
 import {
   getLocations,
   getCurrentAirQuality,
@@ -27,39 +25,37 @@ import {
   IconSparkles,
   IconThermometer,
   IconDroplets,
-  IconGlobe,
-  IconArrowRight,
 } from './components/Icons'
 import './App.css'
 
 function getPollutantStatus(key, value) {
-  if (value == null) return { label: '--', status: 'normal', ratio: 0, whoLimit: '--' }
+  if (value == null) return { label: '--', status: 'normal', ratio: 0 }
   const num = Number(value)
 
   switch (key) {
     case 'pm25':
-      if (num <= 30) return { label: 'Optimal', status: 'good', ratio: Math.min(num / 60, 1), whoLimit: '15 µg/m³ (WHO)' }
-      if (num <= 60) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 120, 1), whoLimit: '15 µg/m³ (WHO)' }
-      if (num <= 90) return { label: 'Elevated', status: 'poor', ratio: Math.min(num / 180, 1), whoLimit: '15 µg/m³ (WHO)' }
-      return { label: 'Hazardous', status: 'severe', ratio: Math.min(num / 250, 1), whoLimit: '15 µg/m³ (WHO)' }
+      if (num <= 30) return { label: 'Good', status: 'good', ratio: Math.min(num / 60, 1) }
+      if (num <= 60) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 120, 1) }
+      if (num <= 90) return { label: 'Poor', status: 'poor', ratio: Math.min(num / 180, 1) }
+      return { label: 'Severe', status: 'severe', ratio: Math.min(num / 250, 1) }
     case 'pm10':
-      if (num <= 50) return { label: 'Optimal', status: 'good', ratio: Math.min(num / 100, 1), whoLimit: '45 µg/m³ (WHO)' }
-      if (num <= 100) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 250, 1), whoLimit: '45 µg/m³ (WHO)' }
-      return { label: 'Elevated', status: 'poor', ratio: Math.min(num / 350, 1), whoLimit: '45 µg/m³ (WHO)' }
+      if (num <= 50) return { label: 'Good', status: 'good', ratio: Math.min(num / 100, 1) }
+      if (num <= 100) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 250, 1) }
+      return { label: 'Elevated', status: 'poor', ratio: Math.min(num / 350, 1) }
     case 'no2':
     case 'so2':
-      if (num <= 40) return { label: 'Safe', status: 'good', ratio: Math.min(num / 80, 1), whoLimit: '25 µg/m³ (WHO)' }
-      if (num <= 80) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 150, 1), whoLimit: '25 µg/m³ (WHO)' }
-      return { label: 'High', status: 'poor', ratio: Math.min(num / 200, 1), whoLimit: '25 µg/m³ (WHO)' }
+      if (num <= 40) return { label: 'Safe', status: 'good', ratio: Math.min(num / 80, 1) }
+      if (num <= 80) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 150, 1) }
+      return { label: 'High', status: 'poor', ratio: Math.min(num / 200, 1) }
     case 'co':
-      if (num <= 1.0) return { label: 'Safe', status: 'good', ratio: Math.min(num / 2.0, 1), whoLimit: '4.0 mg/m³ (WHO)' }
-      if (num <= 2.0) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 4.0, 1), whoLimit: '4.0 mg/m³ (WHO)' }
-      return { label: 'High', status: 'poor', ratio: Math.min(num / 5.0, 1), whoLimit: '4.0 mg/m³ (WHO)' }
+      if (num <= 1.0) return { label: 'Safe', status: 'good', ratio: Math.min(num / 2.0, 1) }
+      if (num <= 2.0) return { label: 'Moderate', status: 'moderate', ratio: Math.min(num / 4.0, 1) }
+      return { label: 'High', status: 'poor', ratio: Math.min(num / 5.0, 1) }
     case 'o3':
-      if (num <= 50) return { label: 'Normal', status: 'good', ratio: Math.min(num / 100, 1), whoLimit: '100 µg/m³ (WHO)' }
-      return { label: 'Elevated', status: 'moderate', ratio: Math.min(num / 180, 1), whoLimit: '100 µg/m³ (WHO)' }
+      if (num <= 50) return { label: 'Normal', status: 'good', ratio: Math.min(num / 100, 1) }
+      return { label: 'Elevated', status: 'moderate', ratio: Math.min(num / 180, 1) }
     default:
-      return { label: 'Normal', status: 'normal', ratio: 0.5, whoLimit: '--' }
+      return { label: 'Normal', status: 'normal', ratio: 0.5 }
   }
 }
 
@@ -77,7 +73,7 @@ function getAdvisory(aqi) {
   if (aqi <= 50) {
     return {
       title: 'Optimal Atmospheric Purity',
-      summary: 'Air quality is pristine and poses no health risk. Ideal for outdoor recreation.',
+      summary: 'Air quality is considered pristine and poses little or no health risk.',
       mask: 'Not Required',
       outdoors: 'Ideal for running & exercise',
       ventilation: 'Open windows encouraged',
@@ -87,7 +83,7 @@ function getAdvisory(aqi) {
   if (aqi <= 100) {
     return {
       title: 'Satisfactory Air Quality',
-      summary: 'Acceptable air quality. Minor breathing discomfort possible for sensitive individuals.',
+      summary: 'Air quality is acceptable. Minor breathing discomfort possible for sensitive individuals.',
       mask: 'Optional for sensitive groups',
       outdoors: 'Safe for general public',
       ventilation: 'Natural airflow recommended',
@@ -98,9 +94,9 @@ function getAdvisory(aqi) {
     return {
       title: 'Moderate Pollution Alert',
       summary: 'Breathing discomfort to people with lung disease, asthma, and heart conditions.',
-      mask: 'Recommended in heavy traffic',
+      mask: 'Recommended in traffic',
       outdoors: 'Reduce prolonged intense exertion',
-      ventilation: 'Use indoor air filters if available',
+      ventilation: 'Use air filters if available',
       color: '#f59e0b',
     }
   }
@@ -120,7 +116,7 @@ function getAdvisory(aqi) {
     mask: 'Strict N95 respirator required',
     outdoors: 'Suspended outdoor activity',
     ventilation: 'Indoor air filtration mandatory',
-    color: '#a855f7',
+    color: '#8b5cf6',
   }
 }
 
@@ -131,14 +127,10 @@ function App() {
     return token ? { token, user: user ? JSON.parse(user) : null } : null
   })
 
-  const [currentView, setCurrentView] = useState('landing')
-  const [showAuthModal, setShowAuthModal] = useState(false)
-
   function handleAuthenticated(data) {
     localStorage.setItem('airsense_token', data.token)
     localStorage.setItem('airsense_user', JSON.stringify(data.user))
     setAuthData(data)
-    setShowAuthModal(false)
   }
 
   function handleLogout() {
@@ -290,146 +282,151 @@ function App() {
 
   const aqiValue = airData?.aqi_summary?.value ?? null
   const advisory = useMemo(() => getAdvisory(aqiValue), [aqiValue])
+
+  // SEPARATE LOGIN SCREEN: Dashboard is ONLY accessible AFTER login!
+  if (!authData?.token) {
+    return <Login onAuthenticated={handleAuthenticated} />
+  }
+
   const reading = airData?.reading || {}
 
-  const particulatePollutants = [
-    { key: 'pm25', name: 'Fine Particulate Matter', formula: 'PM₂.₅', value: reading.pm25, unit: 'µg/m³', max: 120, standard: 'WHO limit: 15 µg/m³' },
-    { key: 'pm10', name: 'Coarse Particulate Matter', formula: 'PM₁₀', value: reading.pm10, unit: 'µg/m³', max: 200, standard: 'WHO limit: 45 µg/m³' },
-  ]
-
-  const gaseousPollutants = [
+  const pollutants = [
+    { key: 'pm25', name: 'Fine Particulate', formula: 'PM₂.₅', value: reading.pm25, unit: 'µg/m³', max: 120 },
+    { key: 'pm10', name: 'Coarse Particulate', formula: 'PM₁₀', value: reading.pm10, unit: 'µg/m³', max: 200 },
     { key: 'no2', name: 'Nitrogen Dioxide', formula: 'NO₂', value: reading.no2, unit: 'µg/m³', max: 100 },
     { key: 'so2', name: 'Sulphur Dioxide', formula: 'SO₂', value: reading.so2, unit: 'µg/m³', max: 100 },
     { key: 'co', name: 'Carbon Monoxide', formula: 'CO', value: reading.co, unit: 'mg/m³', max: 4 },
-    { key: 'o3', name: 'Surface Ozone', formula: 'O₃', value: reading.o3, unit: 'µg/m³', max: 120 },
+    { key: 'o3', name: 'Ground Ozone', formula: 'O₃', value: reading.o3, unit: 'µg/m³', max: 120 },
   ]
-
-  function handleNavigateTo(tab) {
-    setCurrentView('dashboard')
-    setActiveTab(tab)
-    const targetElement = document.getElementById(tab)
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
-
-  // Render Landing Page
-  if (currentView === 'landing') {
-    return (
-      <>
-        <LandingPage
-          onExplore={handleNavigateTo}
-          onOpenAuth={() => setShowAuthModal(true)}
-          authData={authData}
-          locations={locations}
-          selectedLocationId={selectedLocationId}
-          onSelectLocation={setSelectedLocationId}
-          airData={airData}
-          loading={loading}
-        />
-
-        {showAuthModal && (
-          <Login
-            onAuthenticated={handleAuthenticated}
-            onClose={() => setShowAuthModal(false)}
-            isModal={true}
-          />
-        )}
-      </>
-    )
-  }
 
   return (
     <div className="air-app">
-      {/* Background Animated Atmospheric Canvas */}
-      <AtmosphericCanvas intensity={0.8} showParticles={true} />
+      {/* Background Ambient Glows */}
+      <div className="ambient-sphere ambient-top-left" />
+      <div className="ambient-sphere ambient-bottom-right" />
 
-      {/* Floating Modern Header */}
-      <header className="air-topbar">
-        <div className="topbar-brand-section" onClick={() => setCurrentView('landing')} role="button" tabIndex={0} title="Back to Overview">
-          <div className="topbar-brand-icon">
-            <IconWind size={20} color="#00f2fe" />
+      {/* Modern Sleek Sidebar */}
+      <aside className="air-sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-icon-wrapper">
+            <IconWind size={22} color="#10b981" />
           </div>
           <div>
-            <h1 className="topbar-brand-title">AirSense</h1>
-            <span className="topbar-brand-sub">ENVIRONMENTAL OS</span>
+            <h2 className="brand-title">AirSense</h2>
+            <span className="brand-tagline">ENVIRONMENTAL OS</span>
           </div>
         </div>
 
-        <div className="topbar-actions">
-          {/* Station Selector Dropdown */}
-          <div className="station-selector-group">
-            <div className="station-dropdown-wrapper">
-              <IconMapPin size={15} color="#00f2fe" className="station-pin-icon" />
-              <select
-                value={selectedLocationId}
-                onChange={e => setSelectedLocationId(e.target.value)}
-                className="station-select"
-                aria-label="Select Monitoring Station"
-              >
-                {locations.map(loc => (
-                  <option key={loc.id} value={loc.id}>
-                    {loc.name} {loc.region ? `(${loc.region})` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="button"
-              className="btn-auto-locate"
-              onClick={handleDetectLocation}
-              disabled={isLocating}
-              title="Detect nearest city using device GPS"
-            >
-              {isLocating ? <IconLoader size={14} /> : <IconLocate size={14} />}
-              <span>Auto-Detect</span>
-            </button>
-          </div>
-
-          {/* User Auth or Sign In Button */}
-          {authData?.token ? (
-            <div className="topbar-user-group">
-              <div className="user-profile-badge">
-                <IconUser size={15} color="#00f2fe" />
-                <span className="user-name">{authData.user?.name || 'Observer'}</span>
-              </div>
-              <button
-                type="button"
-                className="btn-logout"
-                onClick={handleLogout}
-                title="Log out of AirSense"
-              >
-                <IconLogOut size={14} />
-                <span>Exit</span>
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="btn-signin-pill"
-              onClick={() => setShowAuthModal(true)}
-            >
-              <IconUser size={14} />
-              <span>Sign in</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            className="btn-view-toggle"
-            onClick={() => setCurrentView('landing')}
-            title="View atmospheric presentation hero"
+        <nav className="sidebar-nav">
+          <a
+            href="#dashboard"
+            className={activeTab === 'dashboard' ? 'nav-item active' : 'nav-item'}
+            onClick={() => setActiveTab('dashboard')}
           >
-            <IconGlobe size={15} />
-            <span>Presentation</span>
-          </button>
+            <IconLayoutDashboard size={18} />
+            <span>Overview</span>
+          </a>
+          <a
+            href="#pollutants"
+            className={activeTab === 'pollutants' ? 'nav-item active' : 'nav-item'}
+            onClick={() => setActiveTab('pollutants')}
+          >
+            <IconBarChart size={18} />
+            <span>Pollutants</span>
+          </a>
+          <a
+            href="#history"
+            className={activeTab === 'history' ? 'nav-item active' : 'nav-item'}
+            onClick={() => setActiveTab('history')}
+          >
+            <IconActivity size={18} />
+            <span>7-Day Trends</span>
+          </a>
+          <a
+            href="#predictions"
+            className={activeTab === 'predictions' ? 'nav-item active' : 'nav-item'}
+            onClick={() => setActiveTab('predictions')}
+          >
+            <IconTrendingUp size={18} />
+            <span>24h Forecast</span>
+          </a>
+          <a
+            href="#alerts"
+            className={activeTab === 'alerts' ? 'nav-item active' : 'nav-item'}
+            onClick={() => setActiveTab('alerts')}
+          >
+            <IconBell size={18} />
+            <span>Smart Alerts</span>
+          </a>
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="system-status-chip">
+            <span className="status-live-dot" />
+            <div className="status-info">
+              <span className="status-title">Open-Meteo & CAMS</span>
+              <span className="status-sub">Live Telemetry Active</span>
+            </div>
+          </div>
         </div>
-      </header>
+      </aside>
 
       {/* Main Experience */}
       <main className="air-main">
-        {/* HERO: Centerpiece AQI & Environmental Intelligence */}
+        {/* Top Navigation Bar */}
+        <header className="air-topbar">
+          <div className="topbar-title-block">
+            <div className="breadcrumbs">
+              <span>ENVIRONMENT</span>
+              <span className="separator">/</span>
+              <span className="current-station">{currentLocation.name}</span>
+            </div>
+            <h1 className="page-heading">Atmospheric Dashboard</h1>
+          </div>
+
+          <div className="topbar-actions">
+            <div className="station-selector-group">
+              <div className="station-dropdown-wrapper">
+                <IconMapPin size={15} color="#10b981" className="station-pin-icon" />
+                <select
+                  value={selectedLocationId}
+                  onChange={e => setSelectedLocationId(e.target.value)}
+                  className="station-select"
+                  aria-label="Select Monitoring Station"
+                >
+                  {locations.map(loc => (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.name} {loc.region ? `(${loc.region})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                type="button"
+                className="btn-auto-locate"
+                onClick={handleDetectLocation}
+                disabled={isLocating}
+                title="Detect nearest city using your device GPS"
+              >
+                {isLocating ? <IconLoader size={14} /> : <IconLocate size={14} />}
+                <span>Auto-Detect</span>
+              </button>
+            </div>
+
+            <div className="user-profile-badge">
+              <IconUser size={15} color="#64748b" />
+              <span className="user-name">{authData.user?.name || 'Observer'}</span>
+            </div>
+
+            <button type="button" className="btn-logout" onClick={handleLogout} title="Log out">
+              <IconLogOut size={14} />
+              <span>Exit</span>
+            </button>
+          </div>
+        </header>
+
+        {/* HERO: Environmental State & Gauge */}
         <section className="air-hero-section" id="dashboard">
           {/* Main Air Quality Status Card */}
           <div className="hero-status-card">
@@ -446,7 +443,7 @@ function App() {
             <div className="hero-gauge-wrapper">
               <AQIGauge
                 value={loading ? null : aqiValue}
-                standard={airData?.reading?.aqi_standard || 'CPCB NAQI'}
+                standard={airData?.reading?.aqi_standard || 'IN_CPCB'}
               />
             </div>
 
@@ -463,27 +460,27 @@ function App() {
               <span className="meta-item">
                 Status:{' '}
                 <strong style={{ color: '#10b981' }}>
-                  {airData?.freshness?.is_stale === false ? 'Live Synchronized' : 'Telemetry Active'}
+                  {airData?.freshness?.is_stale === false ? 'Fresh' : 'Synchronized'}
                 </strong>
               </span>
               <span className="meta-divider">•</span>
               <span className="meta-item">
-                Sensor: <strong>Copernicus CAMS & Open-Meteo</strong>
+                Standard: <strong>{airData?.reading?.aqi_standard || 'CPCB NAQI'}</strong>
               </span>
             </div>
           </div>
 
-          {/* Environmental Intelligence & Micro-Climate Column */}
+          {/* Environmental Intelligence & Micro-Climate */}
           <div className="hero-intelligence-column">
             {/* Health Advisory Card */}
             <div className="intel-card health-card">
               <div className="intel-header">
-                <div className="intel-icon-box" style={{ background: advisory.color + '22', color: advisory.color }}>
+                <div className="intel-icon-box" style={{ background: advisory.color + '1a', color: advisory.color }}>
                   <IconShieldCheck size={20} />
                 </div>
                 <div>
                   <h3 className="intel-title">{advisory.title}</h3>
-                  <span className="intel-subtitle">Atmospheric Health Guidance</span>
+                  <span className="intel-subtitle">Public Health Recommendation</span>
                 </div>
               </div>
               <p className="intel-description">{advisory.summary}</p>
@@ -509,7 +506,7 @@ function App() {
               <div className="micro-climate-grid">
                 <div className="climate-metric">
                   <div className="climate-icon-row">
-                    <IconThermometer size={16} color="#f87171" />
+                    <IconThermometer size={16} color="#ef4444" />
                     <span className="climate-label">Ambient Temp</span>
                   </div>
                   <h4 className="climate-value">
@@ -519,7 +516,7 @@ function App() {
 
                 <div className="climate-metric">
                   <div className="climate-icon-row">
-                    <IconDroplets size={16} color="#38bdf8" />
+                    <IconDroplets size={16} color="#3b82f6" />
                     <span className="climate-label">Relative Humidity</span>
                   </div>
                   <h4 className="climate-value">
@@ -541,62 +538,20 @@ function App() {
           </div>
         </section>
 
-        {/* CRITERIA POLLUTANTS TELEMETRY */}
+        {/* CRITERIA POLLUTANTS GRID */}
         <section className="pollutants-section" id="pollutants">
           <div className="section-title-row">
             <div>
               <h2 className="section-heading">Criteria Pollutants Telemetry</h2>
               <p className="section-subheading">
-                Real-time mass concentrations evaluated against WHO air quality guidelines & CPCB standard
+                Atmospheric mass concentrations vs. standard exposure ceilings
               </p>
             </div>
             <span className="standard-badge">WHO & CPCB Standard Breakdown</span>
           </div>
 
-          {/* Particulate Matter Focus (PM2.5 & PM10) */}
-          <div className="particulate-matrix-grid">
-            {particulatePollutants.map(item => {
-              const statusInfo = getPollutantStatus(item.key, item.value)
-              const percent = Math.round(statusInfo.ratio * 100)
-
-              return (
-                <div className="particulate-hero-card" key={item.key}>
-                  <div className="particulate-top">
-                    <div>
-                      <span className="chemical-formula-lg">{item.formula}</span>
-                      <h3 className="particulate-title">{item.name}</h3>
-                    </div>
-                    <span className={`pollutant-status-pill ${statusInfo.status}`}>
-                      {statusInfo.label}
-                    </span>
-                  </div>
-
-                  <div className="particulate-value-row">
-                    <span className="particulate-number">
-                      {loading ? '...' : (item.value != null ? item.value : '--')}
-                    </span>
-                    <span className="particulate-unit">{item.unit}</span>
-                  </div>
-
-                  <div className="particulate-progress-track">
-                    <div
-                      className={`particulate-progress-fill ${statusInfo.status}`}
-                      style={{ width: `${Math.max(percent, 6)}%` }}
-                    />
-                  </div>
-
-                  <div className="particulate-footer">
-                    <span className="who-guideline-badge">{item.standard}</span>
-                    <span className="exposure-ratio">{percent}% of benchmark</span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Gaseous Pollutants Grid (NO2, SO2, CO, O3) */}
-          <div className="gaseous-spectrum-grid">
-            {gaseousPollutants.map(pollutant => {
+          <div className="pollutants-grid">
+            {pollutants.map(pollutant => {
               const statusInfo = getPollutantStatus(pollutant.key, pollutant.value)
               const percent = Math.round(statusInfo.ratio * 100)
 
@@ -626,7 +581,7 @@ function App() {
                   </div>
                   <div className="spectrum-labels">
                     <span>0</span>
-                    <span>Safe Limit</span>
+                    <span>Safe Ceiling</span>
                     <span>{pollutant.max}+</span>
                   </div>
                 </div>
@@ -645,7 +600,7 @@ function App() {
           <div className="section-title-row">
             <div>
               <div className="ai-badge-row">
-                <IconSparkles size={16} color="#00f2fe" />
+                <IconSparkles size={16} color="#8b5cf6" />
                 <span className="ai-badge-text">AUTOREGRESSIVE RANDOM FOREST REGRESSOR</span>
               </div>
               <h2 className="section-heading">24-Hour Predictive Horizon</h2>
@@ -700,105 +655,19 @@ function App() {
 
         {/* ALERT PREFERENCES & NOTIFICATIONS */}
         <section className="alerts-section" id="alerts">
-          {authData?.token ? (
-            <Alerts locations={locations} selectedLocationId={selectedLocationId} />
-          ) : (
-            <div className="alerts-guest-banner">
-              <div className="alerts-guest-content">
-                <div className="guest-icon-box">
-                  <IconBell size={24} color="#00f2fe" />
-                </div>
-                <div>
-                  <h3 className="guest-title">Configure Automated Threshold Alerts</h3>
-                  <p className="guest-desc">
-                    Sign in to your account to define custom pollutant thresholds (AQI, PM₂.₅, NO₂) and receive real-time Web Push alerts when thresholds are exceeded.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="btn-guest-signin"
-                onClick={() => setShowAuthModal(true)}
-              >
-                <span>Sign In to Enable Alerts</span>
-                <IconArrowRight size={16} />
-              </button>
-            </div>
-          )}
+          <Alerts locations={locations} selectedLocationId={selectedLocationId} />
         </section>
 
-        {/* FOOTER */}
+        {/* MINIMALIST FOOTER */}
         <footer className="air-footer">
           <div className="footer-content">
             <p>© 2026 AirSense • Smart Air Quality Monitoring & Machine Learning Analytics</p>
             <p className="footer-sub">
-              Telemetry powered by European Union Copernicus CAMS & Open-Meteo • Standard: Indian CPCB NAQI
+              Telemetry powered by Open-Meteo & European Union Copernicus CAMS • Standard: Indian CPCB NAQI
             </p>
           </div>
         </footer>
       </main>
-
-      {/* Floating Bottom Navigation Pill Dock (Jeton Style) */}
-      <nav className="dashboard-floating-dock" aria-label="Dashboard Navigation">
-        <button
-          type="button"
-          className={activeTab === 'dashboard' ? 'dock-pill-btn active' : 'dock-pill-btn'}
-          onClick={() => handleNavigateTo('dashboard')}
-          title="Overview"
-        >
-          <IconLayoutDashboard size={16} />
-          <span>Overview</span>
-        </button>
-
-        <button
-          type="button"
-          className={activeTab === 'pollutants' ? 'dock-pill-btn active' : 'dock-pill-btn'}
-          onClick={() => handleNavigateTo('pollutants')}
-          title="Pollutants"
-        >
-          <IconBarChart size={16} />
-          <span>Pollutants</span>
-        </button>
-
-        <button
-          type="button"
-          className={activeTab === 'history' ? 'dock-pill-btn active' : 'dock-pill-btn'}
-          onClick={() => handleNavigateTo('history')}
-          title="7-Day Trends"
-        >
-          <IconActivity size={16} />
-          <span>Trends</span>
-        </button>
-
-        <button
-          type="button"
-          className={activeTab === 'predictions' ? 'dock-pill-btn active' : 'dock-pill-btn'}
-          onClick={() => handleNavigateTo('predictions')}
-          title="24h Forecast"
-        >
-          <IconTrendingUp size={16} />
-          <span>24h Forecast</span>
-        </button>
-
-        <button
-          type="button"
-          className={activeTab === 'alerts' ? 'dock-pill-btn active' : 'dock-pill-btn'}
-          onClick={() => handleNavigateTo('alerts')}
-          title="Smart Alerts"
-        >
-          <IconBell size={16} />
-          <span>Alerts</span>
-        </button>
-      </nav>
-
-      {/* Auth Modal */}
-      {showAuthModal && (
-        <Login
-          onAuthenticated={handleAuthenticated}
-          onClose={() => setShowAuthModal(false)}
-          isModal={true}
-        />
-      )}
     </div>
   )
 }

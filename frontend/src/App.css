@@ -1,77 +1,283 @@
 /* =====================================================================
-   AirSense — Dark Atmospheric Environmental Intelligence CSS
-   Palette: #080D0F (Deep Charcoal), #0E1417 & #12181C (Graphite),
-            #00F2FE & #10B981 (Teal & Emerald)
+   AirSense — Minimalist Environmental Dashboard & Design System
+   Inspired by Air.inc & Modern Apple Weather / Environmental UI
    ===================================================================== */
 
-.air-app {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  background-color: #080d0f;
-  color: #f8fafc;
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  overflow-x: hidden;
+:root {
+  --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --bg-canvas: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.88);
+  --bg-card-hover: rgba(255, 255, 255, 0.98);
+  --border-card: rgba(226, 232, 240, 0.85);
+  --border-focus: rgba(16, 185, 129, 0.4);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --teal-500: #14b8a6;
+  --amber-500: #f59e0b;
+  --orange-500: #f97316;
+  --rose-500: #ef4444;
+  --purple-500: #8b5cf6;
+
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  --shadow-hover: 0 14px 34px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+  --radius-full: 9999px;
+
+  --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
-/* Floating Topbar */
-.air-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 36px;
-  background: rgba(8, 13, 15, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+body {
+  font-family: var(--font-main);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-.topbar-brand-section {
+/* -----------------------------------------------------------------
+   App Container & Ambient Environmental Canvas
+   ----------------------------------------------------------------- */
+.air-app {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  background: 
+    radial-gradient(circle at 8% 8%, rgba(16, 185, 129, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 92% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(241, 245, 249, 0.4) 0%, transparent 70%),
+    var(--bg-canvas);
+}
+
+.ambient-sphere {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  z-index: 0;
+}
+
+.ambient-top-left {
+  top: -100px;
+  left: 100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.09) 0%, transparent 70%);
+}
+
+.ambient-bottom-right {
+  bottom: -150px;
+  right: -50px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+}
+
+/* -----------------------------------------------------------------
+   Sidebar Navigation (Minimalist Obsidian Surface)
+   ----------------------------------------------------------------- */
+.air-sidebar {
+  width: 250px;
+  background: #09121d;
+  color: #e2e8f0;
+  padding: 28px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
-  user-select: none;
+  margin-bottom: 40px;
+  padding: 0 8px;
 }
 
-.topbar-brand-icon {
-  width: 36px;
-  height: 36px;
+.brand-icon-wrapper {
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
-  background: rgba(0, 242, 254, 0.1);
-  border: 1px solid rgba(0, 242, 254, 0.25);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
 }
 
-.topbar-brand-title {
-  font-size: 18px;
+.brand-title {
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: #ffffff;
   line-height: 1.1;
-  margin: 0;
 }
 
-.topbar-brand-sub {
+.brand-tagline {
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: #00f2fe;
+  color: #10b981;
+  display: block;
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: var(--transition-smooth);
+}
+
+.nav-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(2px);
+}
+
+.nav-item.active {
+  color: #ffffff;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.nav-item.active svg {
+  color: #10b981;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.system-status-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+}
+
+.status-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: auraPulse 2s infinite;
+  flex-shrink: 0;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.status-sub {
+  font-size: 10px;
+  color: #64748b;
+}
+
+/* -----------------------------------------------------------------
+   Main Content Area
+   ----------------------------------------------------------------- */
+.air-main {
+  flex: 1;
+  padding: 32px 42px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* -----------------------------------------------------------------
+   Topbar
+   ----------------------------------------------------------------- */
+.air-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.separator {
+  color: #cbd5e1;
+}
+
+.current-station {
+  color: var(--emerald-600);
+}
+
+.page-heading {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
 }
 
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-/* Station Dropdown Group */
 .station-selector-group {
   display: flex;
   align-items: center;
@@ -79,255 +285,230 @@
 }
 
 .station-dropdown-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px 6px 12px;
-  background: rgba(18, 24, 28, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  transition: border-color 0.2s ease;
 }
 
-.station-dropdown-wrapper:hover {
-  border-color: rgba(0, 242, 254, 0.4);
+.station-pin-icon {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
 }
 
 .station-select {
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  font-size: 13px;
+  appearance: none;
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+  border: 1px solid var(--border-card);
+  padding: 9px 34px 9px 34px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
   font-weight: 600;
-  outline: none;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
+  transition: var(--transition-smooth);
+  min-width: 170px;
 }
 
-.station-select option {
-  background: #0e1417;
-  color: #ffffff;
+.station-select:hover {
+  border-color: var(--emerald-500);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
+}
+
+.station-select:focus {
+  outline: none;
+  border-color: var(--emerald-500);
+  box-shadow: 0 0 0 3px var(--border-focus);
 }
 
 .btn-auto-locate {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  color: #94a3b8;
-  font-size: 12px;
+  background: white;
+  border: 1px solid #a7f3d0;
+  color: var(--emerald-600);
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
+  white-space: nowrap;
 }
 
 .btn-auto-locate:hover:not(:disabled) {
-  color: #00f2fe;
-  background: rgba(0, 242, 254, 0.1);
-  border-color: rgba(0, 242, 254, 0.3);
-}
-
-.btn-auto-locate:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* User & Auth Buttons */
-.topbar-user-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  background: #ecfdf5;
+  border-color: var(--emerald-500);
+  transform: translateY(-1px);
 }
 
 .user-profile-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px;
-  background: rgba(18, 24, 28, 0.85);
-  border: 1px solid rgba(0, 242, 254, 0.25);
-  border-radius: 9999px;
+  background: white;
+  border: 1px solid var(--border-card);
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-logout {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  color: #94a3b8;
-  font-size: 12px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #e11d48;
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
 }
 
 .btn-logout:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.3);
-}
-
-.btn-signin-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 18px;
-  background: linear-gradient(135deg, #00f2fe 0%, #10b981 100%);
-  color: #080d0f;
-  font-size: 13px;
-  font-weight: 700;
-  border: none;
-  border-radius: 9999px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.25);
-  transition: all 0.2s ease;
-}
-
-.btn-signin-pill:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0, 242, 254, 0.35);
-}
-
-.btn-view-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  color: #cbd5e1;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-view-toggle:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #e11d48;
   color: #ffffff;
+  border-color: #e11d48;
+  transform: translateY(-1px);
 }
 
-/* Main Container */
-.air-main {
-  position: relative;
-  z-index: 10;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px 36px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-  box-sizing: border-box;
-}
-
-/* =====================================================================
-   HERO SECTION: Status Card & Intelligence
-   ===================================================================== */
-
+/* -----------------------------------------------------------------
+   Hero Section (Atmospheric Status & Intelligence)
+   ----------------------------------------------------------------- */
 .air-hero-section {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
-  gap: 28px;
-  align-items: stretch;
+  gap: 24px;
+  margin-bottom: 30px;
+  animation: airFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero-status-card {
-  position: relative;
-  background: rgba(14, 20, 23, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 28px;
-  padding: 32px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 28px 30px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-status-card:hover {
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
 }
 
 .card-header-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .badge-live-pulse {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #10b981;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
 }
 
 .pulse-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #10b981;
-  box-shadow: 0 0 8px #10b981;
+  animation: auraPulse 1.8s infinite;
 }
 
 .station-name-pill {
   font-size: 13px;
   font-weight: 700;
-  color: #cbd5e1;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  background: #f1f5f9;
   padding: 4px 12px;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
+}
+
+.telemetry-error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 12.5px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  margin: 10px 0;
+  text-align: center;
 }
 
 .hero-gauge-wrapper {
-  margin: 10px 0 20px;
+  margin: 10px 0 16px;
 }
 
 .hero-meta-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 10px;
   font-size: 12px;
-  color: #64748b;
-  flex-wrap: wrap;
-}
-
-.hero-meta-row strong {
-  color: #cbd5e1;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(226, 232, 240, 0.7);
+  padding-top: 14px;
 }
 
 .meta-divider {
-  color: #334155;
+  color: #cbd5e1;
+}
+
+.meta-item strong {
+  color: var(--text-secondary);
 }
 
 /* Intelligence Column */
 .hero-intelligence-column {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .intel-card {
-  background: rgba(14, 20, 23, 0.85);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 26px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-smooth);
+}
+
+.intel-card:hover {
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
 }
 
 .health-card {
@@ -340,671 +521,539 @@
 .intel-header {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
 .intel-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.intel-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 2px;
-  letter-spacing: -0.02em;
-}
-
-.intel-subtitle {
-  font-size: 12px;
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.intel-description {
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: #94a3b8;
-  margin: 0 0 18px;
-}
-
-.advisory-chips-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.advisory-chip {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.chip-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-.chip-value {
-  font-size: 12px;
-  font-weight: 600;
-  color: #e2e8f0;
-}
-
-/* Micro-Climate Weather Strip */
-.micro-climate-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.climate-metric {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.climate-icon-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.climate-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #94a3b8;
-}
-
-.climate-value {
-  font-size: 20px;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-/* =====================================================================
-   POLLUTANTS SECTION
-   ===================================================================== */
-
-.section-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 22px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.section-heading {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #ffffff;
-  margin: 0 0 4px;
-}
-
-.section-subheading {
-  font-size: 13.5px;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.standard-badge {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #00f2fe;
-  background: rgba(0, 242, 254, 0.08);
-  border: 1px solid rgba(0, 242, 254, 0.2);
-  padding: 5px 14px;
-  border-radius: 9999px;
-}
-
-/* Particulate Matrix (PM2.5 & PM10) */
-.particulate-matrix-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.particulate-hero-card {
-  background: rgba(14, 20, 23, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.particulate-hero-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.particulate-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.chemical-formula-lg {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #00f2fe;
-  display: block;
-}
-
-.particulate-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #94a3b8;
-  margin: 2px 0 0;
-}
-
-.particulate-value-row {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.particulate-number {
-  font-size: 44px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: #ffffff;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.particulate-unit {
-  font-size: 14px;
-  font-weight: 600;
-  color: #64748b;
-}
-
-.particulate-progress-track {
-  width: 100%;
-  height: 6px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-}
-
-.particulate-progress-fill {
-  height: 100%;
-  border-radius: 9999px;
-  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.particulate-progress-fill.good {
-  background: linear-gradient(90deg, #10b981, #34d399);
-}
-
-.particulate-progress-fill.moderate {
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
-}
-
-.particulate-progress-fill.poor {
-  background: linear-gradient(90deg, #f97316, #fb923c);
-}
-
-.particulate-progress-fill.severe {
-  background: linear-gradient(90deg, #ef4444, #a855f7);
-}
-
-.particulate-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11.5px;
-}
-
-.who-guideline-badge {
-  color: #94a3b8;
-  font-weight: 600;
-}
-
-.exposure-ratio {
-  color: #64748b;
-  font-weight: 500;
-}
-
-/* Gaseous Spectrum Grid */
-.gaseous-spectrum-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.pollutant-card {
-  background: rgba(14, 20, 23, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  transition: transform 0.2s ease;
-}
-
-.pollutant-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.pollutant-top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.chemical-formula {
-  font-size: 17px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-}
-
-.pollutant-status-pill {
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 9999px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.pollutant-status-pill.good {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-}
-
-.pollutant-status-pill.moderate {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-}
-
-.pollutant-status-pill.poor {
-  background: rgba(249, 115, 22, 0.15);
-  color: #f97316;
-}
-
-.pollutant-status-pill.severe {
-  background: rgba(239, 68, 68, 0.18);
-  color: #ef4444;
-}
-
-.pollutant-full-name {
-  font-size: 12px;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.pollutant-value-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.pollutant-numeric {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #ffffff;
-  font-variant-numeric: tabular-nums;
-}
-
-.pollutant-unit {
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 600;
-}
-
-.spectrum-track {
-  width: 100%;
-  height: 5px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-}
-
-.spectrum-fill {
-  height: 100%;
-  border-radius: 9999px;
-}
-
-.spectrum-fill.good { background: #10b981; }
-.spectrum-fill.moderate { background: #f59e0b; }
-.spectrum-fill.poor { background: #f97316; }
-.spectrum-fill.severe { background: #ef4444; }
-
-.spectrum-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9.5px;
-  color: #64748b;
-  font-weight: 600;
-}
-
-/* =====================================================================
-   24-HOUR FORECAST SECTION
-   ===================================================================== */
-
-.ai-badge-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.ai-badge-text {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #00f2fe;
-}
-
-.model-chip {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 5px 14px;
-  border-radius: 9999px;
-}
-
-.forecast-timeline-container {
-  overflow-x: auto;
-  padding: 6px 0 16px;
-}
-
-.forecast-timeline-track {
-  display: flex;
-  gap: 14px;
-  min-width: max-content;
-}
-
-.forecast-timeline-card {
-  background: rgba(14, 20, 23, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  padding: 16px;
-  min-width: 120px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-  transition: all 0.2s ease;
-}
-
-.forecast-timeline-card:hover {
-  border-color: rgba(0, 242, 254, 0.3);
-  transform: translateY(-2px);
-}
-
-.forecast-time-pill {
-  font-size: 12px;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.forecast-day-sub {
-  font-size: 10.5px;
-  color: #64748b;
-}
-
-.forecast-metric-box {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin: 4px 0;
-}
-
-.forecast-val {
-  font-size: 22px;
-  font-weight: 800;
-  color: #00f2fe;
-}
-
-.forecast-unit {
-  font-size: 10.5px;
-  color: #64748b;
-}
-
-.forecast-status-dot {
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 9999px;
-}
-
-.forecast-status-dot.clean {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-}
-
-.forecast-status-dot.elevated {
-  background: rgba(249, 115, 22, 0.15);
-  color: #f97316;
-}
-
-.forecast-loading-state,
-.forecast-empty-state {
-  background: rgba(14, 20, 23, 0.6);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 36px 20px;
-  text-align: center;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-/* =====================================================================
-   GUEST ALERTS BANNER
-   ===================================================================== */
-
-.alerts-guest-banner {
-  background: rgba(14, 20, 23, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 242, 254, 0.25);
-  border-radius: 24px;
-  padding: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.alerts-guest-content {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  max-width: 720px;
-}
-
-.guest-icon-box {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  background: rgba(0, 242, 254, 0.1);
-  border: 1px solid rgba(0, 242, 254, 0.25);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.guest-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 4px;
-}
-
-.guest-desc {
-  font-size: 13.5px;
-  color: #94a3b8;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.btn-guest-signin {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #00f2fe 0%, #10b981 100%);
-  color: #080d0f;
-  font-size: 14px;
+.intel-title {
+  font-size: 16px;
   font-weight: 700;
-  border: none;
-  cursor: pointer;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.intel-subtitle {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.intel-description {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.advisory-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.advisory-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.chip-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chip-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
   white-space: nowrap;
-  box-shadow: 0 6px 18px rgba(0, 242, 254, 0.25);
-  transition: all 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.btn-guest-signin:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(0, 242, 254, 0.35);
+/* Micro-climate card */
+.micro-climate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-/* =====================================================================
-   DASHBOARD FLOATING PILL DOCK (Jeton Style)
-   ===================================================================== */
+.climate-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-.dashboard-floating-dock {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
+.climate-icon-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
-  background: rgba(14, 20, 23, 0.88);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  box-shadow: 
-    0 16px 36px rgba(0, 0, 0, 0.6),
-    0 0 24px rgba(0, 242, 254, 0.12);
 }
 
-.dock-pill-btn {
+.climate-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.climate-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* -----------------------------------------------------------------
+   Criteria Pollutants Section
+   ----------------------------------------------------------------- */
+.pollutants-section {
+  margin-bottom: 34px;
+  animation: airFadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.section-heading {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.section-subheading {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.standard-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+}
+
+.pollutants-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.pollutant-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 18px 16px;
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+}
+
+.pollutant-card:hover {
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.pollutant-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.chemical-formula {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.pollutant-status-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pollutant-status-pill.good {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.pollutant-status-pill.moderate {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.pollutant-status-pill.poor {
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+}
+
+.pollutant-status-pill.severe {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.pollutant-status-pill.normal {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.pollutant-full-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pollutant-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.pollutant-numeric {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.pollutant-unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Micro spectrum bar */
+.spectrum-track {
+  height: 5px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.spectrum-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spectrum-fill.good {
+  background: linear-gradient(90deg, #34d399, #10b981);
+}
+
+.spectrum-fill.moderate {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+.spectrum-fill.poor {
+  background: linear-gradient(90deg, #fb923c, #ea580c);
+}
+
+.spectrum-fill.severe {
+  background: linear-gradient(90deg, #f87171, #dc2626);
+}
+
+.spectrum-fill.normal {
+  background: #94a3b8;
+}
+
+.spectrum-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+/* -----------------------------------------------------------------
+   Analytics & Prediction Sections
+   ----------------------------------------------------------------- */
+.analytics-section,
+.prediction-section,
+.alerts-section {
+  margin-bottom: 34px;
+  animation: airFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ai-badge-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.ai-badge-text {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7c3aed;
+  text-transform: uppercase;
+}
+
+.model-chip {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6d28d9;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+}
+
+/* 24-Hour Timeline Track */
+.forecast-timeline-container {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+  overflow-x: auto;
+}
+
+.forecast-timeline-track {
+  display: flex;
+  gap: 12px;
+  min-width: max-content;
+}
+
+.forecast-timeline-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 105px;
+  transition: var(--transition-smooth);
+}
+
+.forecast-timeline-card:hover {
+  border-color: #c4b5fd;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.12);
+  transform: translateY(-2px);
+}
+
+.forecast-time-pill {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.forecast-day-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.forecast-metric-box {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+
+.forecast-val {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.forecast-unit {
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+.forecast-status-dot {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.forecast-status-dot.clean {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.forecast-status-dot.elevated {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.forecast-loading-state,
+.forecast-empty-state {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13.5px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  justify-content: center;
+  gap: 10px;
 }
 
-.dock-pill-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.dock-pill-btn.active {
-  color: #080d0f;
-  background: #00f2fe;
-  font-weight: 700;
-  box-shadow: 0 2px 10px rgba(0, 242, 254, 0.35);
-}
-
-/* Footer */
+/* -----------------------------------------------------------------
+   Footer
+   ----------------------------------------------------------------- */
 .air-footer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-card);
   text-align: center;
-  padding: 32px 0 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .footer-content p {
-  margin: 4px 0;
   font-size: 12.5px;
-  color: #64748b;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .footer-sub {
-  font-size: 11.5px;
-  color: #475569;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
+/* -----------------------------------------------------------------
+   Animations & Keyframes
+   ----------------------------------------------------------------- */
+@keyframes airFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auraPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.5;
+  }
+}
+
+/* -----------------------------------------------------------------
+   Responsive Media Queries
+   ----------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  .pollutants-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .air-hero-section {
     grid-template-columns: 1fr;
   }
-  .gaseous-spectrum-grid {
+}
+
+@media (max-width: 820px) {
+  .air-app {
+    flex-direction: column;
+  }
+
+  .air-sidebar {
+    width: 100%;
+    min-height: auto;
+    position: static;
+    padding: 16px 20px;
+  }
+
+  .sidebar-brand {
+    margin-bottom: 16px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+
+  .air-main {
+    padding: 20px;
+  }
+
+  .pollutants-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 768px) {
-  .air-topbar {
-    padding: 14px 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .particulate-matrix-grid {
+@media (max-width: 540px) {
+  .pollutants-grid {
     grid-template-columns: 1fr;
   }
-  .gaseous-spectrum-grid {
+
+  .advisory-chips-grid {
     grid-template-columns: 1fr;
   }
-  .air-main {
-    padding: 20px 20px 100px;
-  }
-  .dashboard-floating-dock {
-    width: calc(100% - 32px);
-    justify-content: space-around;
-  }
-  .dock-pill-btn span {
-    display: none;
+
+  .micro-climate-grid {
+    grid-template-columns: 1fr;
   }
 }
