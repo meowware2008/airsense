@@ -1,10 +1,16 @@
 import cityDioramaImg from '../assets/city-diorama.png'
+import crown1 from '../assets/tree-crown-1.png'
+import crown2 from '../assets/tree-crown-2.png'
+import crown3 from '../assets/tree-crown-3.png'
+import crown4 from '../assets/tree-crown-4.png'
+import crown5 from '../assets/tree-crown-5.png'
+import crown6 from '../assets/tree-crown-6.png'
 import './AnimatedCityDiorama.css'
 
 export default function AnimatedCityDiorama({ className = '' }) {
   return (
     <div className={`city-diorama-wrapper ${className}`}>
-      {/* 1. Original Illustrated Base Artwork (Pristine original tree crowns, textures, and details) */}
+      {/* 1. Base Illustrated Artwork (With stationary trunks, roads, buildings & landscape) */}
       <img
         src={cityDioramaImg}
         alt="AirSense Eco-City Environmental Illustration"
@@ -12,7 +18,7 @@ export default function AnimatedCityDiorama({ className = '' }) {
         draggable="false"
       />
 
-      {/* 2. Layered SVG Wind Airflow & Drifting Leaf Overlay */}
+      {/* 2. Layered SVG Overlay for Animated Isolated Canopies & Wind Streamlines */}
       <svg
         className="city-diorama-svg-overlay"
         viewBox="0 0 1735 906"
@@ -57,7 +63,7 @@ export default function AnimatedCityDiorama({ className = '' }) {
         </defs>
 
         {/* =================================================================
-            1. Upper Skyline Wind Lines (Passing over hills & spire crests)
+            LAYER A: Upper Skyline Wind Lines (Passing above distant hills)
             ================================================================= */}
         {/* Wind 1: High skyline sweep */}
         <path
@@ -75,6 +81,104 @@ export default function AnimatedCityDiorama({ className = '' }) {
           className="city-wind-path city-wind-path-5"
         />
 
+        {/* =================================================================
+            LAYER B: Isolated Illustrated Tree Canopies Swaying in the Wind
+            (Preserves original leaf shapes, textures, colours & proportions)
+            ================================================================= */}
+
+        {/* Tree 6: Right backdrop glade tree (anchor 1112px 448px) */}
+        <g
+          className="city-tree-canopy-layer tree-canopy-sway-6"
+          style={{ transformOrigin: '1112px 448px' }}
+        >
+          <image
+            href={crown6}
+            x="1065"
+            y="365"
+            width="95"
+            height="90"
+            preserveAspectRatio="none"
+          />
+        </g>
+
+        {/* Tree 2: Tall mid-left tree (anchor 382px 545px) */}
+        <g
+          className="city-tree-canopy-layer tree-canopy-sway-2"
+          style={{ transformOrigin: '382px 545px' }}
+        >
+          <image
+            href={crown2}
+            x="295"
+            y="385"
+            width="150"
+            height="165"
+            preserveAspectRatio="none"
+          />
+        </g>
+
+        {/* Tree 3: Left cluster companion tree (anchor 470px 525px) */}
+        <g
+          className="city-tree-canopy-layer tree-canopy-sway-3"
+          style={{ transformOrigin: '470px 525px' }}
+        >
+          <image
+            href={crown3}
+            x="425"
+            y="415"
+            width="105"
+            height="115"
+            preserveAspectRatio="none"
+          />
+        </g>
+
+        {/* Tree 1: Left foreground prominent tree (anchor 193px 615px) */}
+        <g
+          className="city-tree-canopy-layer tree-canopy-sway-1"
+          style={{ transformOrigin: '193px 615px' }}
+        >
+          <image
+            href={crown1}
+            x="115"
+            y="475"
+            width="160"
+            height="145"
+            preserveAspectRatio="none"
+          />
+        </g>
+
+        {/* Tree 5: Right mid tree (anchor 1393px 595px) */}
+        <g
+          className="city-tree-canopy-layer tree-canopy-sway-5"
+          style={{ transformOrigin: '1393px 595px' }}
+        >
+          <image
+            href={crown5}
+            x="1335"
+            y="465"
+            width="135"
+            height="135"
+            preserveAspectRatio="none"
+          />
+        </g>
+
+        {/* Tree 4: Right foreground prominent tree (anchor 1290px 615px) */}
+        <g
+          className="city-tree-canopy-layer tree-canopy-sway-4"
+          style={{ transformOrigin: '1290px 615px' }}
+        >
+          <image
+            href={crown4}
+            x="1195"
+            y="480"
+            width="170"
+            height="140"
+            preserveAspectRatio="none"
+          />
+        </g>
+
+        {/* =================================================================
+            LAYER C: Mid & Foreground Wind Lines (Sweeping across park & road)
+            ================================================================= */}
         {/* Wind 2: Mid-level airflow through glade */}
         <path
           d="M 60 410 C 340 370, 580 440, 880 395 S 1320 430, 1660 390"
@@ -83,9 +187,6 @@ export default function AnimatedCityDiorama({ className = '' }) {
           className="city-wind-path city-wind-path-2"
         />
 
-        {/* =================================================================
-            2. Lower Wind Lines (Sweeping across lower roadway & meadow)
-            ================================================================= */}
         {/* Wind 3: Lower roadway breeze */}
         <path
           d="M 140 540 C 380 495, 660 550, 990 505 S 1380 525, 1680 480"
@@ -103,7 +204,7 @@ export default function AnimatedCityDiorama({ className = '' }) {
         />
 
         {/* =================================================================
-            3. Detached Drifting Leaves (Floating gently along the breeze)
+            LAYER D: Detached Drifting Leaves
             ================================================================= */}
         <g className="city-detached-leaf city-detached-leaf-1">
           <use href="#detachedLeafShape" transform="scale(1.1)" />
