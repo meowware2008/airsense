@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import EcoCityIllustration from './EcoCityIllustration'
+import AnimatedCityDiorama from './AnimatedCityDiorama'
 import { loginUser, registerUser } from '../api'
 import {
   IconLeafOutline,
@@ -52,7 +52,7 @@ export default function Login({ onAuthenticated }) {
       {/* Top Header Bar */}
       <header className="auth-header-bar">
         <div className="auth-brand-lockup">
-          <IconLeafOutline size={22} color="#1E3A2F" />
+          <IconLeafOutline size={26} color="#1E3A2F" />
           <span className="auth-brand-name">AirSense</span>
         </div>
       </header>
@@ -79,7 +79,7 @@ export default function Login({ onAuthenticated }) {
           </div>
 
           <div className="auth-illustration-container">
-            <EcoCityIllustration className="auth-eco-city-art" />
+            <AnimatedCityDiorama className="auth-eco-city-art" />
           </div>
         </div>
 
@@ -101,7 +101,7 @@ export default function Login({ onAuthenticated }) {
             <form onSubmit={handleSubmit} className="auth-credential-form">
               {isRegister && (
                 <div className="auth-input-wrapper">
-                  <IconUser size={18} color="#7A8E82" className="auth-leading-icon" />
+                  <IconUser size={20} color="#7A8E82" className="auth-leading-icon" />
                   <input
                     type="text"
                     placeholder="Full name"
@@ -114,7 +114,7 @@ export default function Login({ onAuthenticated }) {
               )}
 
               <div className="auth-input-wrapper">
-                <IconMail size={18} color="#7A8E82" className="auth-leading-icon" />
+                <IconMail size={20} color="#7A8E82" className="auth-leading-icon" />
                 <input
                   type="email"
                   placeholder="Email address"
@@ -126,7 +126,7 @@ export default function Login({ onAuthenticated }) {
               </div>
 
               <div className="auth-input-wrapper">
-                <IconLock size={18} color="#7A8E82" className="auth-leading-icon" />
+                <IconLock size={20} color="#7A8E82" className="auth-leading-icon" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
@@ -142,7 +142,7 @@ export default function Login({ onAuthenticated }) {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
+                  {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
                 </button>
               </div>
 

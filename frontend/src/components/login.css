@@ -1,17 +1,17 @@
 /* =====================================================================
    AirSense — Editorial Split-Screen Authentication Experience
-   Exact Design Match to user reference screenshot
+   Scaled-up generous layout matching reference design exactly
    ===================================================================== */
 
 .airsense-auth-page {
   position: relative;
   min-height: 100vh;
   width: 100%;
-  background-color: #f3f5f0;
+  background-color: #f1f3eb;
   color: #1e3a2f;
   display: flex;
   flex-direction: column;
-  padding: 28px 64px 48px;
+  padding: 36px clamp(24px, 4.5vw, 84px) 64px;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -23,84 +23,89 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-bottom: 20px;
+  padding-bottom: 24px;
   width: 100%;
-  max-width: 1140px;
+  max-width: 1480px;
   margin: 0 auto;
 }
 
 .auth-brand-lockup {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .auth-brand-name {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: #1e3a2f;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
 }
 
 .auth-header-divider {
   width: 100%;
-  max-width: 1140px;
+  max-width: 1480px;
   height: 1px;
   background-color: #dce2d6;
-  margin: 0 auto 52px;
+  margin: 0 auto clamp(36px, 4.5vh, 64px);
 }
 
 /* Main Split Container */
 .auth-split-layout {
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  grid-template-columns: minmax(0, 1.25fr) 1px minmax(0, 1fr);
   align-items: center;
-  gap: 64px;
+  gap: clamp(48px, 5.5vw, 96px);
   width: 100%;
-  max-width: 1140px;
+  max-width: 1480px;
   margin: auto auto;
   box-sizing: border-box;
+  flex: 1;
 }
 
 /* Left Column */
 .auth-left-column {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding-right: 20px;
+  justify-content: center;
+  padding-right: 12px;
+}
+
+.auth-left-header {
+  margin-bottom: clamp(16px, 2vh, 28px);
 }
 
 .auth-eyebrow-tag {
   display: block;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: #587063;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .auth-welcome-title {
-  font-size: 46px;
+  font-size: clamp(42px, 3.8vw, 62px);
   font-weight: 700;
   color: #1e3a2f;
-  line-height: 1.15;
+  line-height: 1.12;
   letter-spacing: -0.035em;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
 }
 
 .auth-welcome-desc {
-  font-size: 15px;
+  font-size: clamp(15.5px, 1.1vw, 17.5px);
   color: #587063;
-  line-height: 1.55;
-  max-width: 380px;
-  margin: 0 0 36px;
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0;
 }
 
 .auth-illustration-container {
   width: 100%;
-  max-width: 440px;
-  margin: 0 auto;
+  max-width: 720px;
+  margin-top: clamp(24px, 3vh, 40px);
 }
 
 .auth-eco-city-art {
@@ -113,7 +118,7 @@
 .auth-vertical-rule {
   width: 1px;
   height: 100%;
-  min-height: 440px;
+  min-height: clamp(520px, 58vh, 700px);
   background-color: #dce2d6;
 }
 
@@ -122,44 +127,44 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  padding-left: 20px;
+  padding-left: 12px;
 }
 
 .auth-form-card {
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
 }
 
 .auth-form-heading {
-  font-size: 34px;
+  font-size: clamp(34px, 2.7vw, 44px);
   font-weight: 700;
   color: #1e3a2f;
   letter-spacing: -0.03em;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
 }
 
 .auth-form-subheading {
-  font-size: 14.5px;
+  font-size: 16px;
   color: #587063;
-  margin: 0 0 28px;
-  line-height: 1.4;
+  margin: 0 0 36px;
+  line-height: 1.45;
 }
 
 .auth-form-error-banner {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #dc2626;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  padding: 10px 14px;
-  border-radius: 8px;
-  margin-bottom: 18px;
+  padding: 12px 16px;
+  border-radius: 9px;
+  margin-bottom: 20px;
 }
 
 .auth-credential-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .auth-input-wrapper {
@@ -171,19 +176,20 @@
 
 .auth-leading-icon {
   position: absolute;
-  left: 14px;
+  left: 18px;
   pointer-events: none;
   color: #7a8e82;
 }
 
 .auth-text-field {
   width: 100%;
-  padding: 13px 14px 13px 44px;
-  border-radius: 8px;
+  min-height: 54px;
+  padding: 16px 18px 16px 52px;
+  border-radius: 9px;
   border: 1px solid #ccd5c8;
   background-color: #fafbf8;
   color: #1e3a2f;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 500;
   outline: none;
   transition: all 0.2s ease;
@@ -202,17 +208,17 @@
 }
 
 .auth-password-field {
-  padding-right: 44px;
+  padding-right: 52px;
 }
 
 .auth-trailing-eye-btn {
   position: absolute;
-  right: 12px;
+  right: 16px;
   background: none;
   border: none;
   color: #7a8e82;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,11 +231,12 @@
 
 .auth-submit-action-btn {
   width: 100%;
-  padding: 13px 20px;
-  border-radius: 8px;
+  min-height: 54px;
+  padding: 16px 24px;
+  border-radius: 9px;
   background-color: #1e3a2f;
   color: #ffffff;
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 600;
   border: none;
   cursor: pointer;
@@ -237,14 +244,15 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color 0.2s ease, transform 0.15s ease;
-  margin-top: 6px;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  margin-top: 8px;
   box-sizing: border-box;
 }
 
 .auth-submit-action-btn:hover:not(:disabled) {
   background-color: #274c3d;
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(30, 58, 47, 0.16);
 }
 
 .auth-submit-action-btn:disabled {
@@ -253,16 +261,16 @@
 }
 
 .auth-account-switch-row {
-  margin-top: 24px;
+  margin-top: 28px;
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
 }
 
 .auth-switch-caption {
-  font-size: 13.5px;
+  font-size: 15px;
   color: #587063;
   margin: 0;
 }
@@ -274,7 +282,7 @@
   font-weight: 700;
   cursor: pointer;
   padding: 0 4px;
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 .auth-switch-link:hover {
@@ -284,14 +292,14 @@
 .auth-demo-autofill-btn {
   background: rgba(30, 58, 47, 0.05);
   border: 1px dashed rgba(30, 58, 47, 0.25);
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 12px;
+  border-radius: 9px;
+  padding: 10px 18px;
+  font-size: 13.5px;
   color: #1e3a2f;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   transition: all 0.2s ease;
 }
 
@@ -301,13 +309,13 @@
 }
 
 /* Responsive Breakpoints */
-@media (max-width: 960px) {
+@media (max-width: 1080px) {
   .airsense-auth-page {
-    padding: 24px;
+    padding: 28px 24px 48px;
   }
   .auth-split-layout {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 48px;
   }
   .auth-vertical-rule {
     display: none;
@@ -320,11 +328,16 @@
   .auth-welcome-desc {
     max-width: 100%;
   }
+  .auth-illustration-container {
+    max-width: 580px;
+    margin: 24px auto 0;
+  }
   .auth-right-column {
     padding-left: 0;
     justify-content: center;
   }
   .auth-form-card {
-    max-width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
   }
 }

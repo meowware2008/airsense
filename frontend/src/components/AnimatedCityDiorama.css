@@ -1,0 +1,300 @@
+/* =====================================================================
+   AirSense — Animated City Diorama
+   Layered SVG + CSS airflow animations over high-res isometric diorama
+   ===================================================================== */
+
+.city-diorama-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1735 / 906;
+  user-select: none;
+  overflow: visible;
+}
+
+/* Base Diorama Image */
+.city-diorama-base {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0 16px 32px rgba(30, 58, 47, 0.08));
+}
+
+/* SVG Overlay */
+.city-diorama-svg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* ---------------------------------------------------------------------
+   1. Wind Streamlines
+   --------------------------------------------------------------------- */
+
+.city-wind-path {
+  fill: none;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  animation-name: cityWindFlow;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: stroke-dashoffset, opacity;
+}
+
+.city-wind-path-1 {
+  stroke-dasharray: 280 920;
+  animation-duration: 7.2s;
+  animation-delay: -1.8s;
+}
+
+.city-wind-path-2 {
+  stroke-dasharray: 320 980;
+  animation-duration: 8.4s;
+  animation-delay: -4.6s;
+}
+
+.city-wind-path-3 {
+  stroke-dasharray: 360 1020;
+  animation-duration: 7.8s;
+  animation-delay: -0.2s;
+}
+
+.city-wind-path-4 {
+  stroke-dasharray: 260 880;
+  animation-duration: 9.2s;
+  animation-delay: -3.4s;
+}
+
+.city-wind-path-5 {
+  stroke-dasharray: 240 840;
+  animation-duration: 6.6s;
+  animation-delay: -5.1s;
+}
+
+@keyframes cityWindFlow {
+  0% {
+    stroke-dashoffset: 1300;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    stroke-dashoffset: -400;
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   2. Tree Canopies Sway
+   --------------------------------------------------------------------- */
+
+.city-canopy-group {
+  will-change: transform;
+  transform-box: view-box;
+}
+
+/* Canopy sway variants */
+.canopy-sway-1 {
+  transform-origin: 232px 612px;
+  animation: canopyOscillateA 4.8s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+.canopy-sway-2 {
+  transform-origin: 376px 532px;
+  animation: canopyOscillateB 5.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -1.4s;
+}
+
+.canopy-sway-3 {
+  transform-origin: 478px 528px;
+  animation: canopyOscillateA 4.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -2.1s;
+}
+
+.canopy-sway-4 {
+  transform-origin: 1285px 616px;
+  animation: canopyOscillateB 5.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -0.9s;
+}
+
+.canopy-sway-5 {
+  transform-origin: 1395px 594px;
+  animation: canopyOscillateA 4.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -2.8s;
+}
+
+.canopy-sway-6 {
+  transform-origin: 1114px 466px;
+  animation: canopyOscillateB 6.0s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite -3.5s;
+}
+
+@keyframes canopyOscillateA {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  35% {
+    transform: rotate(2.4deg);
+  }
+  75% {
+    transform: rotate(-1.8deg);
+  }
+}
+
+@keyframes canopyOscillateB {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(-2.2deg);
+  }
+  80% {
+    transform: rotate(2.6deg);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   3. Drifting Leaves
+   --------------------------------------------------------------------- */
+
+.city-drifting-leaf {
+  will-change: transform, opacity;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.35, 0, 0.25, 1);
+  transform-box: view-box;
+}
+
+.city-drifting-leaf-1 {
+  animation-name: driftLeafMotion1;
+  animation-duration: 9.5s;
+  animation-delay: -1.2s;
+}
+
+.city-drifting-leaf-2 {
+  animation-name: driftLeafMotion2;
+  animation-duration: 11.2s;
+  animation-delay: -5.4s;
+}
+
+.city-drifting-leaf-3 {
+  animation-name: driftLeafMotion3;
+  animation-duration: 10.4s;
+  animation-delay: -3.8s;
+}
+
+.city-drifting-leaf-4 {
+  animation-name: driftLeafMotion4;
+  animation-duration: 12.8s;
+  animation-delay: -7.6s;
+}
+
+@keyframes driftLeafMotion1 {
+  0% {
+    transform: translate(160px, 510px) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  40% {
+    transform: translate(640px, 470px) rotate(55deg);
+    opacity: 0.95;
+  }
+  75% {
+    transform: translate(1050px, 530px) rotate(115deg);
+    opacity: 0.85;
+  }
+  95% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(1380px, 560px) rotate(170deg);
+    opacity: 0;
+  }
+}
+
+@keyframes driftLeafMotion2 {
+  0% {
+    transform: translate(280px, 420px) rotate(20deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  45% {
+    transform: translate(780px, 390px) rotate(75deg);
+    opacity: 0.95;
+  }
+  80% {
+    transform: translate(1240px, 440px) rotate(135deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(1540px, 470px) rotate(190deg);
+    opacity: 0;
+  }
+}
+
+@keyframes driftLeafMotion3 {
+  0% {
+    transform: translate(210px, 600px) rotate(-15deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(680px, 570px) rotate(40deg);
+    opacity: 0.9;
+  }
+  85% {
+    transform: translate(1140px, 610px) rotate(90deg);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(1420px, 640px) rotate(130deg);
+    opacity: 0;
+  }
+}
+
+@keyframes driftLeafMotion4 {
+  0% {
+    transform: translate(360px, 340px) rotate(10deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  45% {
+    transform: translate(890px, 310px) rotate(60deg);
+    opacity: 0.85;
+  }
+  80% {
+    transform: translate(1380px, 360px) rotate(120deg);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(1680px, 385px) rotate(175deg);
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   4. Accessibility: Prefers-Reduced-Motion
+   --------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .city-wind-path,
+  .city-canopy-group,
+  .city-drifting-leaf {
+    animation: none !important;
+    opacity: 0.7;
+    transform: none !important;
+  }
+}
