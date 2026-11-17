@@ -25,7 +25,7 @@
   justify-content: flex-start;
   padding-bottom: 24px;
   width: 100%;
-  max-width: 1480px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -44,7 +44,7 @@
 
 .auth-header-divider {
   width: 100%;
-  max-width: 1480px;
+  max-width: 1600px;
   height: 1px;
   background-color: #dce2d6;
   margin: 0 auto clamp(36px, 4.5vh, 64px);
@@ -53,11 +53,11 @@
 /* Main Split Container */
 .auth-split-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) 1px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.45fr) 1px minmax(0, 1fr);
   align-items: center;
-  gap: clamp(48px, 5.5vw, 96px);
+  gap: clamp(40px, 4.5vw, 84px);
   width: 100%;
-  max-width: 1480px;
+  max-width: 1600px;
   margin: auto auto;
   box-sizing: border-box;
   flex: 1;
@@ -104,7 +104,7 @@
 
 .auth-illustration-container {
   width: 100%;
-  max-width: 935px;
+  max-width: 1080px;
   margin-top: clamp(16px, 2.2vh, 32px);
 }
 
@@ -329,7 +329,7 @@
     max-width: 100%;
   }
   .auth-illustration-container {
-    max-width: 580px;
+    max-width: min(760px, 100%);
     margin: 24px auto 0;
   }
   .auth-right-column {
