@@ -86,92 +86,86 @@ export default function AnimatedCityDiorama({ className = '' }) {
             (Preserves original leaf shapes, textures, colours & proportions)
             ================================================================= */}
 
-        {/* Tree 6: Right backdrop glade tree (anchor 1112px 448px) */}
-        <g
-          className="city-tree-canopy-layer tree-canopy-sway-6"
-          style={{ transformOrigin: '1112px 448px' }}
-        >
+        {/* Tree 6: Right backdrop glade tree (anchor at trunk base 65% 98%) */}
+        <g id="tree-cluster-6">
           <image
             href={crown6}
             x="1065"
             y="365"
             width="95"
             height="90"
+            className="city-tree-canopy-layer tree-canopy-sway-6"
+            style={{ transformOrigin: '65% 98%' }}
             preserveAspectRatio="none"
           />
         </g>
 
-        {/* Tree 2: Tall mid-left tree (anchor 382px 545px) */}
-        <g
-          className="city-tree-canopy-layer tree-canopy-sway-2"
-          style={{ transformOrigin: '382px 545px' }}
-        >
+        {/* Tree 2: Tall mid-left tree (anchor at trunk base 50% 98%) */}
+        <g id="tree-cluster-2">
           <image
             href={crown2}
             x="295"
             y="385"
             width="150"
             height="165"
+            className="city-tree-canopy-layer tree-canopy-sway-2"
+            style={{ transformOrigin: '50% 98%' }}
             preserveAspectRatio="none"
           />
         </g>
 
-        {/* Tree 3: Left cluster companion tree (anchor 470px 525px) */}
-        <g
-          className="city-tree-canopy-layer tree-canopy-sway-3"
-          style={{ transformOrigin: '470px 525px' }}
-        >
+        {/* Tree 3: Left cluster companion tree (anchor at trunk base 38% 98%) */}
+        <g id="tree-cluster-3">
           <image
             href={crown3}
             x="425"
             y="415"
             width="105"
             height="115"
+            className="city-tree-canopy-layer tree-canopy-sway-3"
+            style={{ transformOrigin: '38% 98%' }}
             preserveAspectRatio="none"
           />
         </g>
 
-        {/* Tree 1: Left foreground prominent tree (anchor 193px 615px) */}
-        <g
-          className="city-tree-canopy-layer tree-canopy-sway-1"
-          style={{ transformOrigin: '193px 615px' }}
-        >
+        {/* Tree 1: Left foreground prominent tree (anchor at trunk base 25% 98%) */}
+        <g id="tree-cluster-1">
           <image
             href={crown1}
             x="115"
             y="475"
             width="160"
             height="145"
+            className="city-tree-canopy-layer tree-canopy-sway-1"
+            style={{ transformOrigin: '25% 98%' }}
             preserveAspectRatio="none"
           />
         </g>
 
-        {/* Tree 5: Right mid tree (anchor 1393px 595px) */}
-        <g
-          className="city-tree-canopy-layer tree-canopy-sway-5"
-          style={{ transformOrigin: '1393px 595px' }}
-        >
+        {/* Tree 5: Right mid tree (anchor at trunk base 40% 98%) */}
+        <g id="tree-cluster-5">
           <image
             href={crown5}
             x="1335"
             y="465"
             width="135"
             height="135"
+            className="city-tree-canopy-layer tree-canopy-sway-5"
+            style={{ transformOrigin: '40% 98%' }}
             preserveAspectRatio="none"
           />
         </g>
 
-        {/* Tree 4: Right foreground prominent tree (anchor 1290px 615px) */}
-        <g
-          className="city-tree-canopy-layer tree-canopy-sway-4"
-          style={{ transformOrigin: '1290px 615px' }}
-        >
+        {/* Tree 4: Right foreground prominent tree (anchor at trunk base 80% 98%) */}
+        <g id="tree-cluster-4">
           <image
             href={crown4}
             x="1195"
             y="480"
             width="170"
             height="140"
+            className="city-tree-canopy-layer tree-canopy-sway-4"
+            style={{ transformOrigin: '80% 98%' }}
             preserveAspectRatio="none"
           />
         </g>
