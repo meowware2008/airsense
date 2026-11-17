@@ -7,7 +7,7 @@
   position: relative;
   min-height: 100vh;
   width: 100%;
-  background-color: #f1f3eb;
+  background-color: #f3f5f0;
   color: #1e3a2f;
   display: flex;
   flex-direction: column;
@@ -104,8 +104,8 @@
 
 .auth-illustration-container {
   width: 100%;
-  max-width: 720px;
-  margin-top: clamp(24px, 3vh, 40px);
+  max-width: 935px;
+  margin-top: clamp(16px, 2.2vh, 32px);
 }
 
 .auth-eco-city-art {
