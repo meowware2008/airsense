@@ -2,11 +2,13 @@ import time
 import logging
 from datetime import datetime
 from typing import Optional, List
+from flask import current_app
 from backend.app.database import db_session
 from backend.app.models import Location, AirQualityReading, IngestionRun
 from backend.app.providers import get_provider
 from backend.app.providers.base import BaseAirQualityProvider, NormalizedReading
 from backend.app.services.alert_service import AlertService
+from backend.app.config import Config
 from backend.app.monitoring.metrics import (
     INGESTION_RUNS_TOTAL,
     INGESTION_RECORDS_SAVED_TOTAL,
@@ -17,9 +19,15 @@ logger = logging.getLogger(__name__)
 
 
 class IngestionService:
-    def __init__(self, provider: Optional[BaseAirQualityProvider] = None, provider_name: str = "open_meteo"):
-        self.provider = provider or get_provider(provider_name)
-        self.provider_name = provider_name
+    def __init__(self, provider: Optional[BaseAirQualityProvider] = None, provider_name: Optional[str] = None):
+        active_provider = None
+        try:
+            active_provider = current_app.config.get("AQI_PROVIDER")
+        except Exception:
+            pass
+        name = provider_name or active_provider or Config.AQI_PROVIDER or "open_meteo"
+        self.provider = provider or get_provider(name)
+        self.provider_name = name
 
     def ingest_location(self, location: Location) -> int:
         """Ingest current reading for a single location idempotently. Returns number of saved records."""

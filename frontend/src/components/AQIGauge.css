@@ -1,0 +1,125 @@
+.aqi-minimal-gauge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 4px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.gauge-ambient-glow {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 90px;
+  border-radius: 50%;
+  filter: blur(40px);
+  z-index: 0;
+  pointer-events: none;
+  transition: all 0.6s ease;
+  opacity: 0.7;
+}
+
+.gauge-svg-container {
+  position: relative;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  z-index: 1;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gauge-active-arc {
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.5s ease;
+}
+
+.gauge-center-content {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  pointer-events: none;
+}
+
+.gauge-value-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: -2px;
+}
+
+.gauge-numeric-value {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition: color 0.4s ease;
+}
+
+.gauge-unit-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  margin: 4px 0 6px;
+}
+
+.gauge-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.4s ease;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  animation: auraPulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.gauge-scale-legend {
+  display: flex;
+  justify-content: space-between;
+  width: 86%;
+  max-width: 240px;
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@keyframes auraPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.5;
+  }
+}

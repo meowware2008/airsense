@@ -61,3 +61,7 @@ ml/data/*.csv
 ml/artifacts/*.joblib
 !ml/data/sample_delhi_pm25.csv
 !ml/artifacts/.gitkeep
+
+# Reference design files
+Air _ Your agent for creative tasks*
+
