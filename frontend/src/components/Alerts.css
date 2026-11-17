@@ -1,5 +1,5 @@
 /* =====================================================================
-   Alerts & Notifications — Minimalist Environmental System (Air.inc Style)
+   Alerts & Notifications — Dark Graphite Environmental System
    ===================================================================== */
 
 .alerts-container {
@@ -7,32 +7,33 @@
 }
 
 .alerts-panel {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(14, 20, 23, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  border-radius: 20px;
-  padding: 26px 28px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
   margin-bottom: 24px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
 .alerts-panel:hover {
-  box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .panel-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .panel-header-row h3 {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
-  color: #0f172a;
+  color: #ffffff;
   letter-spacing: -0.025em;
   margin: 0;
 }
@@ -40,9 +41,9 @@
 .panel-count-badge {
   font-size: 11.5px;
   font-weight: 700;
-  color: #475569;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 4px 12px;
   border-radius: 9999px;
 }
@@ -64,27 +65,31 @@
 .alert-field-group label {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #64748b;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
   text-transform: uppercase;
 }
 
 .alert-select,
 .alert-input {
   padding: 10px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  background: #ffffff;
-  color: #0f172a;
+  background: rgba(22, 30, 36, 0.9);
+  color: #ffffff;
   font-size: 13.5px;
   font-weight: 600;
   outline: none;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
 }
 
 .alert-select {
   min-width: 190px;
+}
+
+.alert-select option {
+  background: #0e1417;
+  color: #ffffff;
 }
 
 .alert-input {
@@ -93,41 +98,40 @@
 
 .alert-select:focus,
 .alert-input:focus {
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  border-color: #00f2fe;
+  box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.15);
 }
 
 .create-alert-btn {
-  padding: 10px 20px;
+  padding: 10px 22px;
   border: none;
   border-radius: 12px;
-  background: #0f172a;
-  color: #ffffff;
+  background: linear-gradient(135deg, #00f2fe 0%, #10b981 100%);
+  color: #080d0f;
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.25);
   height: 42px;
 }
 
 .create-alert-btn:hover {
-  background: #1e293b;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 6px 18px rgba(0, 242, 254, 0.35);
 }
 
 .alerts-note {
   font-size: 12.5px;
-  color: #94a3b8;
+  color: #64748b;
   margin-top: 10px;
   line-height: 1.5;
 }
 
 .alerts-error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
   padding: 10px 14px;
   border-radius: 12px;
   font-size: 13px;
@@ -135,9 +139,9 @@
 }
 
 .alerts-success {
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #059669;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
   padding: 10px 14px;
   border-radius: 12px;
   font-size: 13px;
@@ -151,7 +155,7 @@
   align-items: center;
   gap: 20px;
   padding: 16px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transition: background-color 0.2s ease;
 }
 
@@ -160,7 +164,7 @@
 }
 
 .alert-item.unread-item {
-  background: rgba(240, 249, 255, 0.5);
+  background: rgba(0, 242, 254, 0.05);
   border-radius: 12px;
   padding: 16px 14px;
   margin-bottom: 6px;
@@ -183,7 +187,7 @@
 .notif-title {
   font-size: 14.5px;
   font-weight: 700;
-  color: #0f172a;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -192,18 +196,18 @@
 .alert-threshold-info,
 .notif-message {
   font-size: 13.5px;
-  color: #475569;
+  color: #94a3b8;
   margin: 4px 0 6px;
   line-height: 1.5;
 }
 
 .alert-threshold-info strong {
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .alert-meta {
   font-size: 11.5px;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .alert-actions {
@@ -225,27 +229,27 @@
 }
 
 .status-pill.enabled {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .status-pill.disabled {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
   color: #64748b;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .status-pill.unread {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  background: rgba(0, 242, 254, 0.15);
+  color: #00f2fe;
+  border: 1px solid rgba(0, 242, 254, 0.3);
 }
 
 .status-pill.read {
-  background: #f8fafc;
-  color: #94a3b8;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.03);
+  color: #64748b;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* Delete Alert Button */
@@ -253,23 +257,22 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #fff1f2;
-  color: #e11d48;
-  border: 1px solid #fecdd3;
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
   padding: 7px 14px;
   border-radius: 10px;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(225, 29, 72, 0.06);
   white-space: nowrap;
 }
 
 .delete-alert-btn:hover:not(:disabled) {
-  background: #e11d48;
+  background: #ef4444;
   color: #ffffff;
-  border-color: #e11d48;
+  border-color: #ef4444;
   transform: translateY(-1px);
 }
 
@@ -283,23 +286,22 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
   padding: 7px 14px;
   border-radius: 10px;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.06);
   white-space: nowrap;
 }
 
 .mark-read-btn:hover:not(:disabled) {
-  background: #059669;
-  color: #ffffff;
-  border-color: #059669;
+  background: #10b981;
+  color: #080d0f;
+  border-color: #10b981;
   transform: translateY(-1px);
 }
 
@@ -309,11 +311,11 @@
   gap: 4px;
   font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: #64748b;
   padding: 6px 12px;
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .alerts-loading,

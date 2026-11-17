@@ -22,7 +22,7 @@
   z-index: 0;
   pointer-events: none;
   transition: all 0.6s ease;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .gauge-svg-container {
@@ -64,7 +64,7 @@
 }
 
 .gauge-numeric-value {
-  font-size: 52px;
+  font-size: 56px;
   font-weight: 800;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
@@ -77,7 +77,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #64748b;
+  color: #94a3b8;
   margin: 4px 0 6px;
 }
 
@@ -90,6 +90,7 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   transition: all 0.4s ease;
 }
 
@@ -100,26 +101,28 @@
   animation: auraPulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+@keyframes auraPulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 10px currentColor; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
 .gauge-scale-legend {
   display: flex;
   justify-content: space-between;
-  width: 86%;
-  max-width: 240px;
-  margin-top: 10px;
+  width: 100%;
+  max-width: 250px;
+  margin-top: 6px;
   font-size: 10px;
   font-weight: 600;
-  color: #94a3b8;
   letter-spacing: 0.04em;
+  color: #64748b;
   text-transform: uppercase;
+  z-index: 1;
 }
 
-@keyframes auraPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.4);
-    opacity: 0.5;
+@media (max-width: 640px) {
+  .gauge-numeric-value {
+    font-size: 44px;
   }
 }
