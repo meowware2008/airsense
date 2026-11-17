@@ -28,11 +28,11 @@ function Alerts({ locations = [], selectedLocationId }) {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
-  useEffect(() => {
-    if (selectedLocationId) {
-      setAlertLocationId(selectedLocationId)
-    }
-  }, [selectedLocationId])
+  const [prevSelectedId, setPrevSelectedId] = useState(selectedLocationId)
+  if (selectedLocationId !== prevSelectedId) {
+    setPrevSelectedId(selectedLocationId)
+    setAlertLocationId(selectedLocationId)
+  }
 
   async function loadAlerts() {
     setLoading(true)
@@ -54,7 +54,31 @@ function Alerts({ locations = [], selectedLocationId }) {
   }
 
   useEffect(() => {
-    loadAlerts()
+    let ignore = false
+    async function fetchInitialAlerts() {
+      try {
+        const [alertData, notificationData] = await Promise.all([
+          getAlerts(),
+          getNotifications(),
+        ])
+        if (!ignore) {
+          setAlerts(alertData.alerts || [])
+          setNotifications(notificationData.notifications || [])
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false)
+        }
+      }
+    }
+    fetchInitialAlerts()
+    return () => {
+      ignore = true
+    }
   }, [])
 
   async function handleCreateAlert(e) {

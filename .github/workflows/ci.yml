@@ -1,14 +1,18 @@
-name: AirSense CI Pipeline
+name: AirSense CI/CD Pipeline
 
 on:
   push:
     branches: [main, master, "feature/**"]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
 jobs:
-  backend-and-ml-tests:
-    name: Backend, Provider & ML Test Suite
+  # -----------------------------------------------------------------
+  # 1. Backend & ML Quality, Linting & Automated Test Suite
+  # -----------------------------------------------------------------
+  backend-ci:
+    name: Backend & ML Tests (Pytest + Lint)
     runs-on: ubuntu-latest
 
     steps:
@@ -21,27 +25,98 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install Dependencies
+      - name: Install Backend & ML Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt -r ml/requirements.txt
-          pip install flake8
 
-      - name: Code Linting
+      - name: Python Code Linting
         run: |
-          flake8 backend/ worker/ ml/src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Stop build if there are Python syntax errors or undefined names
+          flake8 backend/ ml/src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
-      - name: Run Pytest Test Suite
+      - name: Run Pytest Test Suite with Coverage
         env:
           APP_ENV: testing
           PROMETHEUS_ENABLED: "false"
         run: |
-          pytest tests/ -v --junitxml=test-results.xml
+          pytest tests/ -v --junitxml=test-results.xml --cov=backend/app --cov-report=term-missing
 
-      - name: Trivy Filesystem Vulnerability Scan
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: test-results.xml
+
+  # -----------------------------------------------------------------
+  # 2. Frontend Quality, ESLint & Production Vite Build
+  # -----------------------------------------------------------------
+  frontend-ci:
+    name: Frontend Quality & Build (ESLint + Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run ESLint Code Check
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Build Vite Production Assets
+        working-directory: ./frontend
+        env:
+          VITE_API_BASE_URL: "https://airsense-cjr4.onrender.com"
+        run: npm run build
+
+  # -----------------------------------------------------------------
+  # 3. Security Vulnerability Scan (Trivy)
+  # -----------------------------------------------------------------
+  security-audit:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Trivy Filesystem Scan
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: "fs"
           scan-ref: "."
           severity: "CRITICAL,HIGH"
-          exit-code: "0"  # Informative reporting in PR check
+          exit-code: "0"
+
+  # -----------------------------------------------------------------
+  # 4. Continuous Deployment Health Verification (Master Branch)
+  # -----------------------------------------------------------------
+  production-verify:
+    name: Production Deployment Verification
+    runs-on: ubuntu-latest
+    needs: [backend-ci, frontend-ci, security-audit]
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Verify Live Backend API Health
+        run: |
+          echo "Pinging Live Backend API at Render..."
+          curl -f -s -S --retry 5 --retry-delay 15 --retry-connrefused https://airsense-cjr4.onrender.com/api/v1/health/live | grep -q "live" && echo "✅ Backend Health: Live & Operational"
+
+      - name: Verify Live Frontend CDN Availability
+        run: |
+          echo "Pinging Live Frontend CDN at Render..."
+          curl -f -s -S --retry 5 --retry-delay 15 --retry-connrefused https://airsense-frontend-sxen.onrender.com > /dev/null && echo "✅ Frontend CDN: Reachable & Serving"
