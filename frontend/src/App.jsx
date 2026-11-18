@@ -3,6 +3,7 @@ import Alerts from './components/Alerts'
 import Login from './components/login'
 import PollutionChart from './components/PollutionChart'
 import AnimatedCityDiorama from './components/AnimatedCityDiorama'
+import cityDioramaBg from './assets/city-diorama.png'
 import cornerTreesImg from './assets/corner-trees.png'
 import { useCountUp } from './utils/useCountUp'
 import {
@@ -397,43 +398,19 @@ function App() {
 
   return (
     <div className="air-app">
-      {/* Decorative rolling hills background pattern matching screenshot */}
-      <div className="atmospheric-bg-hills" aria-hidden="true">
-        <svg viewBox="0 0 1200 200" preserveAspectRatio="none" className="bg-hills-svg">
-          {/* Soft cloud floating at top */}
-          <path
-            d="M720 45 a18 18 0 0 1 24 -6 a24 24 0 0 1 44 8 a16 16 0 0 1 18 16 a16 16 0 0 1 -16 16 h-70 a16 16 0 0 1 0 -34 z"
-            fill="#ffffff"
-            opacity="0.75"
-          />
-          {/* Far background hill */}
-          <path
-            d="M100 120 Q 300 40 550 90 T 1000 60 Q 1120 70 1200 100 L 1200 200 L 100 200 Z"
-            fill="#dfe8dc"
-            opacity="0.6"
-          />
-          {/* Midground rolling hill curve */}
-          <path
-            d="M200 140 Q 420 70 700 115 T 1200 85 L 1200 200 L 200 200 Z"
-            fill="#e5ede1"
-            opacity="0.8"
-          />
-        </svg>
-      </div>
-
-      {/* Decorative Corner Trees Illustration */}
-      <img
-        src={cornerTreesImg}
-        alt=""
-        className="corner-trees-illustration"
+      {/* Layered Environmental Background from original landscape artwork */}
+      <div
+        className="atmospheric-bg-layer"
+        style={{ backgroundImage: `url(${cityDioramaBg})` }}
         aria-hidden="true"
       />
+      <div className="atmospheric-bg-overlay" aria-hidden="true" />
 
-      {/* Clean Minimalist Sage Sidebar */}
+      {/* Light Sage Translucent Sidebar (~212px at 1728px viewport) */}
       <aside className="air-sidebar">
         <div className="sidebar-brand">
           <div className="brand-logo-leaf">
-            <IconLeafOutline size={22} color="#255a36" />
+            <IconLeafOutline size={24} color="#255a36" />
           </div>
           <div className="brand-text-group">
             <h2 className="brand-title">AirSense</h2>
@@ -491,6 +468,11 @@ function App() {
             <span>Settings</span>
           </button>
         </nav>
+
+        {/* Seamlessly blended landscape illustration at bottom of sidebar */}
+        <div className="sidebar-landscape-illustration" aria-hidden="true">
+          <img src={cornerTreesImg} alt="" />
+        </div>
       </aside>
 
       {/* Main Experience */}
@@ -601,11 +583,11 @@ function App() {
                 </div>
               </div>
 
-              {/* Right Hero Card: Advisory & Micro-Climate Telemetry */}
+              {/* Right Hero Card: Air Quality Status Card with vertical separators */}
               <div className="hero-card-right">
                 <div className="advisory-top-row">
                   <div className="advisory-circle-icon">
-                    <IconLeafOutline size={22} color="#255a36" />
+                    <IconLeafOutline size={26} color="#255a36" />
                   </div>
                   <div className="advisory-text-group">
                     <h3 className="advisory-heading">{advisory.title}</h3>
@@ -618,24 +600,28 @@ function App() {
 
                 <div className="micro-weather-row">
                   <div className="weather-metric-item">
-                    <IconThermometer size={18} color="#255a36" />
+                    <IconThermometer size={19} color="#255a36" />
                     <span className="weather-metric-val">{tempVal}°C</span>
                   </div>
 
+                  <div className="weather-metric-separator" />
+
                   <div className="weather-metric-item">
-                    <IconDroplets size={18} color="#255a36" />
+                    <IconDroplets size={19} color="#255a36" />
                     <span className="weather-metric-val">{humidityVal}%</span>
                   </div>
 
+                  <div className="weather-metric-separator" />
+
                   <div className="weather-metric-item">
-                    <IconWind size={18} color="#255a36" />
+                    <IconWind size={19} color="#255a36" />
                     <span className="weather-metric-val">{windVal} km/h</span>
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* 7-DAY AIR QUALITY TREND SECTION */}
+            {/* 7-DAY AIR QUALITY TREND SECTION (Taller & Spacious) */}
             <section className="dashboard-chart-card">
               <PollutionChart
                 historyData={historyData}
@@ -656,7 +642,7 @@ function App() {
               >
                 <div className="feature-card-header">
                   <div className="feature-card-icon">
-                    <IconWind size={22} color="#255a36" />
+                    <IconWind size={24} color="#255a36" />
                   </div>
                   <IconChevronRight size={16} color="#8a9e90" />
                 </div>
@@ -673,7 +659,7 @@ function App() {
               >
                 <div className="feature-card-header">
                   <div className="feature-card-icon">
-                    <IconCalendar size={22} color="#255a36" />
+                    <IconCalendar size={24} color="#255a36" />
                   </div>
                   <IconChevronRight size={16} color="#8a9e90" />
                 </div>
@@ -690,7 +676,7 @@ function App() {
               >
                 <div className="feature-card-header">
                   <div className="feature-card-icon">
-                    <IconSunCloud size={22} color="#255a36" />
+                    <IconSunCloud size={24} color="#255a36" />
                   </div>
                   <IconChevronRight size={16} color="#8a9e90" />
                 </div>
@@ -707,7 +693,7 @@ function App() {
               >
                 <div className="feature-card-header">
                   <div className="feature-card-icon">
-                    <IconBell size={22} color="#255a36" />
+                    <IconBell size={24} color="#255a36" />
                   </div>
                   <IconChevronRight size={16} color="#8a9e90" />
                 </div>

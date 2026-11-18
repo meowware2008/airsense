@@ -54,54 +54,69 @@ body {
   display: flex;
   min-height: 100vh;
   position: relative;
-  background-color: var(--bg-page);
+  background-color: #f2f5ed;
 }
 
-/* Atmospheric rolling hill curves across top-center */
-.atmospheric-bg-hills {
+/* Layered Environmental Background from original landscape artwork */
+.atmospheric-bg-layer {
   position: fixed;
-  top: 0;
-  left: 210px;
-  right: 0;
-  height: 200px;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
   z-index: 0;
-  overflow: hidden;
+  background-size: cover;
+  background-position: center bottom;
+  opacity: 0.38;
 }
 
-.bg-hills-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* Bottom-left corner trees illustration */
-.corner-trees-illustration {
+.atmospheric-bg-overlay {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 230px;
-  height: auto;
+  inset: 0;
   pointer-events: none;
-  z-index: 1;
-  user-select: none;
-  mix-blend-mode: multiply;
-  opacity: 0.95;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(242, 245, 237, 0.45) 0%, rgba(242, 245, 237, 0.15) 100%);
 }
 
 /* -----------------------------------------------------------------
-   Sidebar Navigation (Light Sage Background)
+   Sidebar Navigation (Light Sage Translucent Background ~212px)
    ----------------------------------------------------------------- */
 .air-sidebar {
-  width: 220px;
-  background: transparent;
-  padding: 32px 18px 28px 24px;
+  width: 212px;
+  background: rgba(242, 245, 238, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(215, 225, 210, 0.6);
+  padding: 30px 16px 24px 20px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   position: sticky;
   top: 0;
   z-index: 20;
+  overflow: hidden;
+}
+
+/* Seamlessly blended landscape illustration at bottom of sidebar */
+.sidebar-landscape-illustration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 212px;
+  height: 180px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.sidebar-landscape-illustration img {
+  width: 260px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  mix-blend-mode: multiply;
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%), linear-gradient(to right, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%), linear-gradient(to right, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
 }
 
 .sidebar-brand {
@@ -453,6 +468,8 @@ body {
   background-color: transparent !important;
   border-radius: 18px;
   overflow: hidden;
+  -webkit-mask-image: radial-gradient(ellipse 85% 78% at 50% 50%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
+  mask-image: radial-gradient(ellipse 85% 78% at 50% 50%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 95%);
 }
 
 .hero-city-video .city-diorama-video {
@@ -463,7 +480,7 @@ body {
 }
 
 .hero-city-video::after {
-  box-shadow: inset 0 0 20px 8px #f8f8f2 !important;
+  display: none !important;
 }
 
 /* Hero Card Right: Advisory & Micro-Climate Weather Telemetry */
@@ -492,8 +509,8 @@ body {
 }
 
 .advisory-circle-icon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--green-badge-bg);
   border: 1px solid var(--green-badge-border);
@@ -550,6 +567,12 @@ body {
   letter-spacing: -0.02em;
 }
 
+.weather-metric-separator {
+  width: 1px;
+  height: 28px;
+  background: rgba(46, 70, 56, 0.16);
+}
+
 /* -----------------------------------------------------------------
    7-Day Trend Chart Card
    ----------------------------------------------------------------- */
@@ -557,7 +580,7 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  padding: 20px 28px 18px;
+  padding: 24px 30px 22px;
   box-shadow: var(--shadow-subtle);
   transition: var(--transition);
 }
@@ -579,9 +602,9 @@ body {
 .feature-card {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 20px;
-  padding: 18px 22px;
-  height: 126px;
+  border-radius: 22px;
+  padding: 22px 24px;
+  height: 138px;
   box-shadow: var(--shadow-subtle);
   cursor: pointer;
   transition: var(--transition);

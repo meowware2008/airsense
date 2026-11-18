@@ -1,6 +1,5 @@
 /* =====================================================================
    AirSense — Animated City Diorama (High-Definition Video Loop)
-   Seamless background color blending matching the exact #e4eadd tone
    ===================================================================== */
 
 .city-diorama-wrapper {
@@ -13,7 +12,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #e4eadd;
+  background-color: transparent;
 }
 
 .city-diorama-video {
@@ -22,14 +21,22 @@
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-  background-color: #e4eadd;
+  background-color: transparent;
   border: none;
   outline: none;
   box-shadow: none;
 }
 
-/* Feathered inset overlay: flawlessly covers perimeter with identical #e4eadd */
-.city-diorama-wrapper::after {
+/* Feathered inset overlay for login screen only */
+.auth-eco-city-art {
+  background-color: #e4eadd;
+}
+
+.auth-eco-city-art .city-diorama-video {
+  background-color: #e4eadd;
+}
+
+.auth-eco-city-art::after {
   content: '';
   position: absolute;
   inset: 0;
