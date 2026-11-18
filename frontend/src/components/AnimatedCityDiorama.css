@@ -1,7 +1,6 @@
 /* =====================================================================
    AirSense — Animated City Diorama (High-Definition Video Loop)
-   Smooth looping video replacing the manual SVG layers
-   Seamless background blending with feathered edge masking
+   Seamless background color blending matching the exact #e4eadd tone
    ===================================================================== */
 
 .city-diorama-wrapper {
@@ -10,10 +9,11 @@
   max-width: 100%;
   aspect-ratio: 16 / 9;
   user-select: none;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #e4eadd;
 }
 
 .city-diorama-video {
@@ -22,13 +22,19 @@
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-  background: transparent;
+  background-color: #e4eadd;
   border: none;
   outline: none;
   box-shadow: none;
-  /* Seamless edge feathering: eliminates rectangular boundary onto #f3f5f0 */
-  -webkit-mask-image: radial-gradient(ellipse 98% 96% at 50% 50%, #000 88%, transparent 100%);
-  mask-image: radial-gradient(ellipse 98% 96% at 50% 50%, #000 88%, transparent 100%);
+}
+
+/* Feathered inset overlay: flawlessly covers perimeter with identical #e4eadd */
+.city-diorama-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 28px 12px #e4eadd;
 }
 
 @media (prefers-reduced-motion: reduce) {

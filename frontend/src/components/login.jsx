@@ -22,6 +22,15 @@ export default function Login({ onAuthenticated }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Set page and body background to match exact video backdrop color (#e4eadd)
+  useEffect(() => {
+    const originalBg = document.body.style.backgroundColor
+    document.body.style.backgroundColor = '#e4eadd'
+    return () => {
+      document.body.style.backgroundColor = originalBg
+    }
+  }, [])
+
   // Keep-alive: immediately warm up backend on page view and heartbeat every 5 mins
   useEffect(() => {
     pingHealth()
