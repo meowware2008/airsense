@@ -57,25 +57,22 @@ body {
   background-color: #f2f5ed;
 }
 
-/* Layered Environmental Background from original landscape artwork */
-.atmospheric-bg-layer {
+/* Atmospheric rolling hill curves and soft cloud across top-center */
+.atmospheric-bg-hills {
   position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 0;
+  left: 212px;
+  right: 0;
+  height: 200px;
   pointer-events: none;
   z-index: 0;
-  background-size: cover;
-  background-position: center bottom;
-  opacity: 0.38;
+  overflow: hidden;
 }
 
-.atmospheric-bg-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(242, 245, 237, 0.45) 0%, rgba(242, 245, 237, 0.15) 100%);
+.bg-hills-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* -----------------------------------------------------------------
