@@ -174,6 +174,7 @@ export async function markNotificationRead(notificationId) {
 
   return response.json()
 }
+
 export async function getBestTime(locationId) {
   const response = await fetch(
     `${API_BASE_URL}/best-time?location_id=${locationId}`
@@ -184,4 +185,16 @@ export async function getBestTime(locationId) {
   }
 
   return response.json();
+}
+
+export async function pingHealth() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/health/live`, {
+      method: 'GET',
+      headers: { 'Cache-Control': 'no-cache' },
+    })
+    return response.ok
+  } catch {
+    return false
+  }
 }

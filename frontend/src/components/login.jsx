@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AnimatedCityDiorama from './AnimatedCityDiorama'
-import { loginUser, registerUser } from '../api'
+import { loginUser, registerUser, pingHealth } from '../api'
 import {
   IconLeafOutline,
   IconMail,
@@ -21,6 +21,15 @@ export default function Login({ onAuthenticated }) {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Keep-alive: immediately warm up backend on page view and heartbeat every 5 mins
+  useEffect(() => {
+    pingHealth()
+    const interval = setInterval(() => {
+      pingHealth()
+    }, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   function handleDemoFill() {
     setEmail('demo@airsense.org')

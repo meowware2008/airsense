@@ -19,6 +19,12 @@ services:
         value: .
       - key: AQI_PROVIDER
         value: open_meteo
+      - key: SELF_PING_ENABLED
+        value: "true"
+      - key: SELF_PING_INTERVAL_MINUTES
+        value: "10"
+      - key: PING_URLS
+        value: "https://airsense-backend.onrender.com/api/v1/health/live,https://airsense-frontend.onrender.com"
       - key: DATABASE_URL
         fromDatabase:
           name: airsense-db

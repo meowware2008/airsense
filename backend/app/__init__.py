@@ -56,4 +56,9 @@ def create_app(config_class=Config):
     def shutdown_session(exception=None):
         db_session.remove()
 
+    # Start Keep-Alive Self-Ping daemon if enabled
+    if app.config.get("SELF_PING_ENABLED", True) and not app.config.get("TESTING", False):
+        from backend.app.services.pinger_service import start_pinger
+        start_pinger(app.config.get("SELF_PING_INTERVAL_MINUTES", 10))
+
     return app

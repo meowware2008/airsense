@@ -55,6 +55,12 @@ class Config:
     # Monitoring
     PROMETHEUS_ENABLED = os.getenv("PROMETHEUS_ENABLED", "true").lower() in ("true", "1", "yes")
 
+    # Self-Ping / Keep-Alive (Prevents inactivity sleep on Render, Koyeb, Glitch, etc.)
+    SELF_PING_ENABLED = os.getenv("SELF_PING_ENABLED", "true").lower() in ("true", "1", "yes")
+    SELF_PING_INTERVAL_MINUTES = int(os.getenv("SELF_PING_INTERVAL_MINUTES", "10"))
+    # Comma-separated list of target websites to keep alive
+    PING_URLS = os.getenv("PING_URLS", "")
+
 
 class TestingConfig(Config):
     """Configuration for automated test execution."""
@@ -64,3 +70,4 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     AQI_PROVIDER = "mock"
     PROMETHEUS_ENABLED = False
+    SELF_PING_ENABLED = False

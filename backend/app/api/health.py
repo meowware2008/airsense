@@ -30,6 +30,7 @@ def api_index():
             "alerts": "/api/v1/alerts",
             "notifications": "/api/v1/notifications",
             "metrics": "/metrics",
+            "health_ping": "/api/v1/health/ping",
         },
         "docs": {
             "openapi": "/docs/api/openapi.yaml",
@@ -69,6 +70,24 @@ def readiness():
             "database": "disconnected",
             "error": str(e),
         }), 503
+
+
+@health_bp.route("/api/v1/health/ping", methods=["GET", "POST"])
+def health_ping():
+    """
+    Keep-alive self-ping endpoint.
+    GET: Returns current self-pinger status, target URLs, and last ping report.
+    POST: Triggers an immediate ping cycle to all configured target websites.
+    """
+    from backend.app.services.pinger_service import get_pinger_status, ping_all_targets
+    from flask import request
+
+    if request.method == "POST":
+        summary = ping_all_targets()
+        status_code = 200 if summary["failed"] == 0 else 207  # 207 Multi-Status
+        return jsonify(summary), status_code
+
+    return jsonify(get_pinger_status()), 200
 
 
 @health_bp.route("/metrics", methods=["GET"])

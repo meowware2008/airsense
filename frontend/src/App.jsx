@@ -9,6 +9,7 @@ import {
   getAirQualityHistory,
   getForecasts,
   getBestTime,
+  pingHealth,
 } from './api'
 import {
   IconWind,
@@ -196,6 +197,14 @@ function App() {
       { timeout: 8000 }
     )
   }
+
+  // Keep-alive heartbeat: ping backend every 5 minutes while webpage is open
+  useEffect(() => {
+    const interval = setInterval(() => {
+      pingHealth()
+    }, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Fetch available cities
   useEffect(() => {

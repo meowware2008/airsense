@@ -32,6 +32,15 @@ def run_single_cycle(provider_name: str = None):
     )
     if run.error_summary:
         logger.warning(f"Ingestion run warnings: {run.error_summary}")
+
+    # Keep-Alive Self-Ping across configured websites
+    if getattr(Config, "SELF_PING_ENABLED", True):
+        try:
+            from backend.app.services.pinger_service import ping_all_targets
+            ping_all_targets()
+        except Exception as exc:
+            logger.warning(f"Keep-alive ping from worker failed: {exc}")
+
     return run
 
 

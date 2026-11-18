@@ -1,0 +1,45 @@
+name: AirSense Keep-Alive Ping
+
+on:
+  schedule:
+    # Trigger every 10 minutes to prevent Render free-tier (15 min inactivity) spin-down
+    - cron: "*/10 * * * *"
+  workflow_dispatch: # Allows manual on-demand execution from GitHub Actions UI
+
+jobs:
+  keepalive-ping:
+    name: Ping All Configured Websites
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping Web Services
+        env:
+          PING_URLS: ${{ secrets.PING_URLS || 'https://airsense-backend.onrender.com/api/v1/health/live,https://airsense-frontend.onrender.com' }}
+        run: |
+          echo "=========================================================="
+          echo "Starting AirSense Keep-Alive External Self-Ping"
+          echo "UTC Time: $(date -u)"
+          echo "=========================================================="
+          
+          IFS=',' read -ra ADDR <<< "$PING_URLS"
+          FAIL_COUNT=0
+          SUCCESS_COUNT=0
+          
+          for url in "${ADDR[@]}"; do
+            trimmed_url=$(echo "$url" | xargs)
+            if [ -n "$trimmed_url" ]; then
+              echo "Pinging: $trimmed_url"
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 30 -L "$trimmed_url" || echo "FAILED")
+              echo "  -> Response: HTTP $STATUS"
+              if [[ "$STATUS" =~ ^[23] ]]; then
+                SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              else
+                FAIL_COUNT=$((FAIL_COUNT + 1))
+              fi
+            fi
+          done
+          
+          echo "=========================================================="
+          echo "Ping summary: $SUCCESS_COUNT succeeded, $FAIL_COUNT failed"
+          echo "=========================================================="
