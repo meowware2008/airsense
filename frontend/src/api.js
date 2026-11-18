@@ -115,7 +115,7 @@ export async function getAlerts() {
   return response.json()
 }
 
-export async function createAlert(locationId, thresholdValue) {
+export async function createAlert(locationId, thresholdValue, whatsappEnabled = false) {
   const response = await fetch(`${API_BASE_URL}/alerts`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -123,6 +123,7 @@ export async function createAlert(locationId, thresholdValue) {
       location_id: Number(locationId),
       threshold_value: Number(thresholdValue),
       enabled: true,
+      whatsapp_enabled: whatsappEnabled,
     }),
   })
 
@@ -130,6 +131,34 @@ export async function createAlert(locationId, thresholdValue) {
 
   if (!response.ok) {
     throw new Error(data.message || data.error || 'Unable to create alert')
+  }
+
+  return data
+}
+
+export async function getMe() {
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    headers: getAuthHeaders(),
+  })
+
+  if (!response.ok) {
+    throw new Error('Unable to fetch profile')
+  }
+
+  return response.json()
+}
+
+export async function saveWhatsappNumber(whatsappNumber) {
+  const response = await fetch(`${API_BASE_URL}/auth/me/whatsapp`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ whatsapp_number: whatsappNumber }),
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.error || data.message || 'Unable to save WhatsApp number')
   }
 
   return data

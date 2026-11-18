@@ -6,6 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from backend.app.database import db_session
 from backend.app.models import AlertPreference, Notification, AirQualityReading, Location, User
 from backend.app.config import Config
+from backend.app.services.whatsapp_service import send_whatsapp, whatsapp_configured
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +96,35 @@ class AlertService:
                         sent_at=now if email_sent else None,
                     )
                     db_session.add(email_notif)
+
+                # WhatsApp alert: only if the user opted in for this location, has a number,
+                # and the air quality is serious enough to justify an instant message
+                if (
+                    user
+                    and pref.whatsapp_enabled
+                    and user.whatsapp_number
+                    and whatsapp_configured()
+                    and reading.aqi_value >= Config.WHATSAPP_MIN_AQI
+                ):
+                    wa_body = (
+                        f"\u26a0\ufe0f AirSense Alert\n"
+                        f"{loc_name}: AQI is {int(reading.aqi_value)} "
+                        f"({reading.aqi_standard or 'Unknown'}), above your threshold of "
+                        f"{int(pref.threshold_value)}.\n"
+                        f"Limit time outdoors, wear an N95 mask and keep windows closed."
+                    )
+                    wa_sent = send_whatsapp(user.whatsapp_number, wa_body)
+                    db_session.add(Notification(
+                        user_id=pref.user_id,
+                        alert_preference_id=pref.id,
+                        location_id=reading.location_id,
+                        message=wa_body,
+                        channel="whatsapp",
+                        status="sent" if wa_sent else "failed",
+                        triggering_reading_id=reading.id,
+                        created_at=now,
+                        sent_at=now if wa_sent else None,
+                    ))
 
         if triggered_notifications:
             try:
