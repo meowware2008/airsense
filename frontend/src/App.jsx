@@ -184,7 +184,11 @@ function App() {
     setBestTimeSendingWhatsapp(true)
     try {
       const res = await sendBestTimeToWhatsapp(selectedLocationId, bestTimeCustomPhone || null)
-      setBestTimeWhatsappStatus(`✓ ${res.message || 'Sent to WhatsApp!'}`)
+      if (res.dispatched) {
+        setBestTimeWhatsappStatus(`✓ ${res.message || 'Sent to WhatsApp!'}`)
+      } else {
+        setBestTimeWhatsappStatus(`⚠️ ${res.message || 'Twilio credentials not configured on server.'}`)
+      }
       setShowPhonePrompt(false)
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes('whatsapp number')) {

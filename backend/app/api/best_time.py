@@ -6,7 +6,7 @@ from backend.app.database import db_session
 from backend.app.models import Location, AirQualityReading
 from backend.app.services.ingestion_service import IngestionService
 from backend.app.services.best_time_service import find_best_time_window
-from backend.app.services.whatsapp_service import send_whatsapp, is_valid_whatsapp_number
+from backend.app.services.whatsapp_service import send_whatsapp, is_valid_whatsapp_number, whatsapp_configured
 from backend.app.api.auth import token_required
 from ml.src.predict import predict_next_24h
 
@@ -207,11 +207,21 @@ def send_best_time_whatsapp():
     )
 
     sent = send_whatsapp(target_number, message_body)
+    configured = whatsapp_configured()
+
+    if sent:
+        status_msg = f"Best outdoor window successfully sent to {target_number} via WhatsApp!"
+    elif not configured:
+        status_msg = f"Recommendation ready for {target_number}, but Twilio credentials (TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN) are not configured on the server."
+    else:
+        status_msg = f"Twilio dispatch to {target_number} failed. Ensure recipient is joined to Twilio WhatsApp sandbox."
+
     return jsonify({
         "success": True,
         "dispatched": sent,
+        "whatsapp_configured": configured,
         "recipient": target_number,
-        "message": f"Best outdoor window successfully sent to {target_number} via WhatsApp!",
+        "message": status_msg,
         "best_window": best_window,
         "formatted_text": message_body,
     }), 200
