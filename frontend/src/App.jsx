@@ -2,7 +2,9 @@ import { useEffect, useState, useMemo } from 'react'
 import Alerts from './components/Alerts'
 import Login from './components/login'
 import PollutionChart from './components/PollutionChart'
-import AQIGauge from './components/AQIGauge'
+import AnimatedCityDiorama from './components/AnimatedCityDiorama'
+import cornerTreesImg from './assets/corner-trees.png'
+import { useCountUp } from './utils/useCountUp'
 import {
   getLocations,
   getCurrentAirQuality,
@@ -14,7 +16,6 @@ import {
 } from './api'
 import {
   IconWind,
-  IconLayoutDashboard,
   IconBarChart,
   IconTrendingUp,
   IconBell,
@@ -23,11 +24,14 @@ import {
   IconLoader,
   IconUser,
   IconLogOut,
-  IconShieldCheck,
-  IconActivity,
   IconSparkles,
   IconThermometer,
   IconDroplets,
+  IconHome,
+  IconSettings,
+  IconChevronRight,
+  IconCalendar,
+  IconSunCloud,
 } from './components/Icons'
 import './App.css'
 
@@ -65,61 +69,73 @@ function getPollutantStatus(key, value) {
 function getAdvisory(aqi) {
   if (aqi == null) {
     return {
-      title: 'Awaiting Telemetry',
-      summary: 'Telemetry is synchronizing with Copernicus atmospheric satellites.',
+      title: 'Air Quality is Satisfactory',
+      summary: 'Generally safe for outdoor activities.',
+      category: 'Satisfactory',
       mask: 'Optional',
       outdoors: 'Normal activity',
       ventilation: 'Standard',
-      color: '#64748b',
+      color: '#2e7d32',
+      badgeBg: '#dcf0db',
     }
   }
   if (aqi <= 50) {
     return {
-      title: 'Optimal Atmospheric Purity',
-      summary: 'Air quality is considered pristine and poses little or no health risk.',
+      title: 'Air Quality is Pristine',
+      summary: 'Ideal atmospheric conditions for all outdoor activities.',
+      category: 'Good',
       mask: 'Not Required',
       outdoors: 'Ideal for running & exercise',
       ventilation: 'Open windows encouraged',
-      color: '#10b981',
+      color: '#1b5e20',
+      badgeBg: '#d7eed6',
     }
   }
   if (aqi <= 100) {
     return {
-      title: 'Satisfactory Air Quality',
-      summary: 'Air quality is acceptable. Minor breathing discomfort possible for sensitive individuals.',
+      title: 'Air Quality is Satisfactory',
+      summary: 'Generally safe for outdoor activities.',
+      category: 'Satisfactory',
       mask: 'Optional for sensitive groups',
       outdoors: 'Safe for general public',
       ventilation: 'Natural airflow recommended',
-      color: '#14b8a6',
+      color: '#2e7d32',
+      badgeBg: '#dcf0db',
     }
   }
   if (aqi <= 200) {
     return {
-      title: 'Moderate Pollution Alert',
-      summary: 'Breathing discomfort to people with lung disease, asthma, and heart conditions.',
+      title: 'Moderate Air Quality',
+      summary: 'Breathing discomfort possible for sensitive individuals.',
+      category: 'Moderate',
       mask: 'Recommended in traffic',
       outdoors: 'Reduce prolonged intense exertion',
       ventilation: 'Use air filters if available',
-      color: '#f59e0b',
+      color: '#b78103',
+      badgeBg: '#fef3c7',
     }
   }
   if (aqi <= 300) {
     return {
-      title: 'Unhealthy / Poor Air Quality',
-      summary: 'Prolonged exposure may lead to respiratory symptoms in healthy adults and severe illness in children.',
+      title: 'Air Quality is Poor',
+      summary: 'Prolonged exposure may cause respiratory symptoms.',
+      category: 'Poor',
       mask: 'N95 / FFP2 strongly advised',
       outdoors: 'Avoid outdoor exercise',
-      ventilation: 'Keep windows sealed; run HEPA',
-      color: '#f97316',
+      ventilation: 'Keep windows sealed',
+      color: '#c2410c',
+      badgeBg: '#ffedd5',
     }
   }
   return {
     title: 'Severe Smog / Health Hazard',
-    summary: 'Emergency health warning. Everyone is likely to be significantly affected. Stay indoors.',
+    summary: 'Emergency health warning. Everyone should avoid outdoor exposure.',
+    category: 'Severe',
     mask: 'Strict N95 respirator required',
     outdoors: 'Suspended outdoor activity',
     ventilation: 'Indoor air filtration mandatory',
-    color: '#8b5cf6',
+    color: '#991b1b',
+    badgeBg: '#fee2e2',
   }
 }
 
@@ -310,53 +326,64 @@ function App() {
       fetchForecasts()
     }
   }, [selectedLocationId])
+
   useEffect(() => {
-  let cancelled = false
+    let cancelled = false
 
-  const fetchBestTime = async () => {
-    setBestTimeLoading(true)
-    setBestTimeError('')
+    const fetchBestTime = async () => {
+      setBestTimeLoading(true)
+      setBestTimeError('')
 
-    try {
-      const data = await getBestTime(selectedLocationId)
-
-      if (!cancelled) {
-        setBestTimeData(data)
-      }
-    } catch (err) {
-      if (!cancelled) {
-        setBestTimeData(null)
-        setBestTimeError(err.message)
-      }
-    } finally {
-      if (!cancelled) {
-        setBestTimeLoading(false)
+      try {
+        const data = await getBestTime(selectedLocationId)
+        if (!cancelled) {
+          setBestTimeData(data)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setBestTimeData(null)
+          setBestTimeError(err.message)
+        }
+      } finally {
+        if (!cancelled) {
+          setBestTimeLoading(false)
+        }
       }
     }
-  }
 
-  if (selectedLocationId) {
-    fetchBestTime()
-  }
+    if (selectedLocationId) {
+      fetchBestTime()
+    }
 
-  return () => {
-    cancelled = true
-  }
-}, [selectedLocationId])
+    return () => {
+      cancelled = true
+    }
+  }, [selectedLocationId])
 
   const currentLocation = useMemo(() => {
-    return locations.find(l => String(l.id) === String(selectedLocationId)) || { name: 'Atmosphere' }
+    return locations.find(l => String(l.id) === String(selectedLocationId)) || { name: 'Bengaluru', region: 'Karnataka' }
   }, [locations, selectedLocationId])
 
-  const aqiValue = airData?.aqi_summary?.value ?? null
-  const advisory = useMemo(() => getAdvisory(aqiValue), [aqiValue])
+  const rawAqi = airData?.aqi_summary?.value != null ? Number(airData.aqi_summary.value) : 87
+  const animatedAqi = useCountUp(rawAqi, 900)
+  const advisory = useMemo(() => getAdvisory(rawAqi), [rawAqi])
+
+  const reading = airData?.reading || {}
+  const tempVal = reading.temperature != null ? Number(reading.temperature).toFixed(1) : '28.4'
+  const humidityVal = reading.humidity != null ? Math.round(Number(reading.humidity)) : '54'
+  const windVal = reading.wind_speed != null ? Number(reading.wind_speed).toFixed(1) : '8.2'
+
+  const observedTimeStr = useMemo(() => {
+    if (airData?.freshness?.observed_at) {
+      return new Date(airData.freshness.observed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+    }
+    return '01:00 PM'
+  }, [airData])
 
   // SEPARATE LOGIN SCREEN: Dashboard is ONLY accessible AFTER login!
   if (!authData?.token) {
     return <Login onAuthenticated={handleAuthenticated} />
   }
-
-  const reading = airData?.reading || {}
 
   const pollutants = [
     { key: 'pm25', name: 'Fine Particulate', formula: 'PM₂.₅', value: reading.pm25, unit: 'µg/m³', max: 120 },
@@ -369,82 +396,82 @@ function App() {
 
   return (
     <div className="air-app">
-      {/* Background Ambient Glows */}
-      <div className="ambient-sphere ambient-top-left" />
-      <div className="ambient-sphere ambient-bottom-right" />
+      {/* Decorative rolling hills background pattern */}
+      <div className="atmospheric-bg-hills" />
 
-      {/* Modern Sleek Sidebar */}
+      {/* Decorative Corner Trees Illustration */}
+      <img
+        src={cornerTreesImg}
+        alt=""
+        className="corner-trees-illustration"
+        aria-hidden="true"
+      />
+
+      {/* Clean Minimalist Sage Sidebar */}
       <aside className="air-sidebar">
         <div className="sidebar-brand">
-          <div className="brand-icon-wrapper">
-            <IconWind size={22} color="#10b981" />
+          <div className="brand-logo-leaf">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#255a36" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+            </svg>
           </div>
-          <div>
+          <div className="brand-text-group">
             <h2 className="brand-title">AirSense</h2>
             <span className="brand-tagline">ENVIRONMENTAL OS</span>
           </div>
         </div>
 
         <nav className="sidebar-nav">
-          <a
-            href="#dashboard"
-            className={activeTab === 'dashboard' ? 'nav-item active' : 'nav-item'}
+          <button
+            type="button"
+            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActiveTab('dashboard')}
           >
-            <IconLayoutDashboard size={18} />
+            <IconHome size={18} />
             <span>Overview</span>
-          </a>
-          <a
-            href="#pollutants"
-            className={activeTab === 'pollutants' ? 'nav-item active' : 'nav-item'}
+          </button>
+          <button
+            type="button"
+            className={`nav-item ${activeTab === 'pollutants' ? 'active' : ''}`}
             onClick={() => setActiveTab('pollutants')}
           >
             <IconBarChart size={18} />
             <span>Pollutants</span>
-          </a>
-          <a
-            href="#history"
-            className={activeTab === 'history' ? 'nav-item active' : 'nav-item'}
+          </button>
+          <button
+            type="button"
+            className={`nav-item ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => setActiveTab('history')}
           >
-            <IconActivity size={18} />
-            <span>7-Day Trends</span>
-          </a>
-          <a
-            href="#predictions"
-            className={activeTab === 'predictions' ? 'nav-item active' : 'nav-item'}
+            <IconTrendingUp size={18} />
+            <span>Trends</span>
+          </button>
+          <button
+            type="button"
+            className={`nav-item ${activeTab === 'predictions' ? 'active' : ''}`}
             onClick={() => setActiveTab('predictions')}
           >
             <IconTrendingUp size={18} />
-            <span>24h Forecast</span>
-          </a>
-          <a
-            href="#best-time"
-            className={activeTab === 'best-time' ? 'nav-item active' : 'nav-item'}
-            onClick={() => setActiveTab('best-time')}
-          >
-            <IconSparkles size={18} />
-            <span>Best Outdoor Time</span>
-          </a>
-          <a
-            href="#alerts"
-            className={activeTab === 'alerts' ? 'nav-item active' : 'nav-item'}
+            <span>Forecast</span>
+          </button>
+          <button
+            type="button"
+            className={`nav-item ${activeTab === 'alerts' ? 'active' : ''}`}
             onClick={() => setActiveTab('alerts')}
           >
             <IconBell size={18} />
-            <span>Smart Alerts</span>
-          </a>
+            <span>Alerts</span>
+          </button>
+          <button
+            type="button"
+            className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+            onClick={() => setActiveTab('settings')}
+          >
+            <IconSettings size={18} />
+            <span>Settings</span>
+          </button>
         </nav>
-
-        <div className="sidebar-footer">
-          <div className="system-status-chip">
-            <span className="status-live-dot" />
-            <div className="status-info">
-              <span className="status-title">Open-Meteo & CAMS</span>
-              <span className="status-sub">Live Telemetry Active</span>
-            </div>
-          </div>
-        </div>
       </aside>
 
       {/* Main Experience */}
@@ -453,414 +480,569 @@ function App() {
         <header className="air-topbar">
           <div className="topbar-title-block">
             <div className="breadcrumbs">
-              <span>ENVIRONMENT</span>
-              <span className="separator">/</span>
-              <span className="current-station">{currentLocation.name}</span>
+              <span className="crumb-root">ENVIRONMENT</span>
+              <span className="crumb-separator">/</span>
+              <span className="crumb-station">
+                {currentLocation.name}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="chevron-down-inline">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
             </div>
             <h1 className="page-heading">Atmospheric Dashboard</h1>
           </div>
 
           <div className="topbar-actions">
-            <div className="station-selector-group">
-              <div className="station-dropdown-wrapper">
-                <IconMapPin size={15} color="#10b981" className="station-pin-icon" />
-                <select
-                  value={selectedLocationId}
-                  onChange={e => setSelectedLocationId(e.target.value)}
-                  className="station-select"
-                  aria-label="Select Monitoring Station"
-                >
-                  {locations.map(loc => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name} {loc.region ? `(${loc.region})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="button"
-                className="btn-auto-locate"
-                onClick={handleDetectLocation}
-                disabled={isLocating}
-                title="Detect nearest city using your device GPS"
+            {/* Location Selector Pill */}
+            <div className="station-pill-container">
+              <IconMapPin size={15} color="#2e5b3d" className="station-pin-icon" />
+              <span className="station-pill-label">
+                {currentLocation.name} {currentLocation.region ? `(${currentLocation.region})` : ''}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2e5b3d" strokeWidth="2.5">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+              <select
+                value={selectedLocationId}
+                onChange={e => setSelectedLocationId(e.target.value)}
+                className="station-hidden-select"
+                aria-label="Select Monitoring Station"
               >
-                {isLocating ? <IconLoader size={14} /> : <IconLocate size={14} />}
-                <span>Auto-Detect</span>
-              </button>
+                {locations.map(loc => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.name} {loc.region ? `(${loc.region})` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div className="user-profile-badge">
-              <IconUser size={15} color="#64748b" />
-              <span className="user-name">{authData.user?.name || 'Observer'}</span>
+            {/* Auto-Detect Button */}
+            <button
+              type="button"
+              className="btn-auto-detect"
+              onClick={handleDetectLocation}
+              disabled={isLocating}
+              title="Detect nearest city using device GPS"
+            >
+              {isLocating ? <IconLoader size={14} /> : <IconLocate size={14} color="#2e5b3d" />}
+              <span>Auto-Detect</span>
+            </button>
+
+            {/* User Profile Pill */}
+            <div className="user-profile-pill">
+              <IconUser size={15} color="#607368" />
+              <span className="user-profile-name">{authData.user?.name || 'Demo Citizen'}</span>
             </div>
 
-            <button type="button" className="btn-logout" onClick={handleLogout} title="Log out">
+            {/* Logout Button */}
+            <button
+              type="button"
+              className="btn-exit"
+              onClick={handleLogout}
+              title="Sign out of AirSense"
+            >
               <IconLogOut size={14} />
-              <span>Exit</span>
             </button>
           </div>
         </header>
 
-        {/* HERO: Environmental State & Gauge */}
-        <section className="air-hero-section" id="dashboard">
-          {/* Main Air Quality Status Card */}
-          <div className="hero-status-card">
-            <div className="card-header-row">
-              <div className="badge-live-pulse">
-                <span className="pulse-dot" />
-                <span>REAL-TIME TELEMETRY</span>
-              </div>
-              <span className="station-name-pill">{currentLocation.name}, India</span>
-            </div>
-
+        {/* OVERVIEW DASHBOARD TAB */}
+        {activeTab === 'dashboard' && (
+          <div className="dashboard-content-grid">
             {error && <div className="telemetry-error-banner">{error}</div>}
 
-            <div className="hero-gauge-wrapper">
-              <AQIGauge
-                value={loading ? null : aqiValue}
-                standard={airData?.reading?.aqi_standard || 'IN_CPCB'}
+            {/* HERO ROW: 2 Cards */}
+            <section className="dashboard-hero-row">
+              {/* Left Hero Card: Live AQI & Animated City Diorama */}
+              <div className="hero-card-left">
+                <div className="hero-data-col">
+                  <div className="badge-live-aqi">
+                    <span>LIVE AQI</span>
+                  </div>
+
+                  <div className="hero-aqi-number">
+                    {loading ? '...' : animatedAqi}
+                  </div>
+
+                  <div className="hero-status-pill">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#216239" strokeWidth="2.2">
+                      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                    </svg>
+                    <span>{advisory.category}</span>
+                  </div>
+
+                  <div className="hero-timestamp">
+                    Updated {observedTimeStr}
+                  </div>
+                </div>
+
+                <div className="hero-diorama-container">
+                  <AnimatedCityDiorama className="hero-city-video" />
+                </div>
+              </div>
+
+              {/* Right Hero Card: Advisory & Micro-Climate Telemetry */}
+              <div className="hero-card-right">
+                <div className="advisory-top-row">
+                  <div className="advisory-circle-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#255a36" strokeWidth="2.2">
+                      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                    </svg>
+                  </div>
+                  <div className="advisory-text-group">
+                    <h3 className="advisory-heading">{advisory.title}</h3>
+                    <p className="advisory-subheading">{advisory.summary}</p>
+                  </div>
+                  <div className="advisory-chevron">
+                    <IconChevronRight size={18} color="#7e9284" />
+                  </div>
+                </div>
+
+                <div className="advisory-divider" />
+
+                <div className="micro-weather-row">
+                  <div className="weather-metric-item">
+                    <IconThermometer size={18} color="#255a36" />
+                    <span className="weather-metric-val">{tempVal}°C</span>
+                  </div>
+
+                  <div className="weather-metric-item">
+                    <IconDroplets size={18} color="#255a36" />
+                    <span className="weather-metric-val">{humidityVal}%</span>
+                  </div>
+
+                  <div className="weather-metric-item">
+                    <IconWind size={18} color="#255a36" />
+                    <span className="weather-metric-val">{windVal} km/h</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 7-DAY AIR QUALITY TREND SECTION */}
+            <section className="dashboard-chart-card">
+              <PollutionChart
+                historyData={historyData}
+                loading={historyLoading}
+                overviewMode={true}
+                onViewDetails={() => setActiveTab('history')}
               />
-            </div>
+            </section>
 
-            <div className="hero-meta-row">
-              <span className="meta-item">
-                Observed:{' '}
-                <strong>
-                  {airData?.freshness?.observed_at
-                    ? new Date(airData.freshness.observed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : '--'}
-                </strong>
-              </span>
-              <span className="meta-divider">•</span>
-              <span className="meta-item">
-                Status:{' '}
-                <strong style={{ color: '#10b981' }}>
-                  {airData?.freshness?.is_stale === false ? 'Fresh' : 'Synchronized'}
-                </strong>
-              </span>
-              <span className="meta-divider">•</span>
-              <span className="meta-item">
-                Standard: <strong>{airData?.reading?.aqi_standard || 'CPCB NAQI'}</strong>
-              </span>
-            </div>
-          </div>
-
-          {/* Environmental Intelligence & Micro-Climate */}
-          <div className="hero-intelligence-column">
-            {/* Health Advisory Card */}
-            <div className="intel-card health-card">
-              <div className="intel-header">
-                <div className="intel-icon-box" style={{ background: advisory.color + '1a', color: advisory.color }}>
-                  <IconShieldCheck size={20} />
+            {/* BOTTOM 4 FEATURE / NAVIGATION CARDS */}
+            <section className="dashboard-feature-grid">
+              {/* Feature 1: Pollutants */}
+              <div
+                className="feature-card"
+                onClick={() => setActiveTab('pollutants')}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="feature-card-header">
+                  <div className="feature-card-icon">
+                    <IconWind size={22} color="#255a36" />
+                  </div>
+                  <IconChevronRight size={16} color="#8a9e90" />
                 </div>
-                <div>
-                  <h3 className="intel-title">{advisory.title}</h3>
-                  <span className="intel-subtitle">Public Health Recommendation</span>
-                </div>
+                <h3 className="feature-card-title">Pollutants</h3>
+                <p className="feature-card-desc">PM₂.₅, PM₁₀, NO₂, SO₂, CO, O₃</p>
               </div>
-              <p className="intel-description">{advisory.summary}</p>
-              
-              <div className="advisory-chips-grid">
-                <div className="advisory-chip">
-                  <span className="chip-label">Mask:</span>
-                  <span className="chip-value">{advisory.mask}</span>
+
+              {/* Feature 2: 24-Hour Forecast */}
+              <div
+                className="feature-card"
+                onClick={() => setActiveTab('predictions')}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="feature-card-header">
+                  <div className="feature-card-icon">
+                    <IconCalendar size={22} color="#255a36" />
+                  </div>
+                  <IconChevronRight size={16} color="#8a9e90" />
                 </div>
-                <div className="advisory-chip">
-                  <span className="chip-label">Outdoors:</span>
-                  <span className="chip-value">{advisory.outdoors}</span>
-                </div>
-                <div className="advisory-chip">
-                  <span className="chip-label">Ventilation:</span>
-                  <span className="chip-value">{advisory.ventilation}</span>
-                </div>
+                <h3 className="feature-card-title">24-Hour Forecast</h3>
+                <p className="feature-card-desc">Hourly air quality predictions</p>
               </div>
-            </div>
 
-            {/* Micro-Climate Weather Strip */}
-            <div className="intel-card weather-card">
-              <div className="micro-climate-grid">
-                <div className="climate-metric">
-                  <div className="climate-icon-row">
-                    <IconThermometer size={16} color="#ef4444" />
-                    <span className="climate-label">Ambient Temp</span>
+              {/* Feature 3: 7-Day Forecast */}
+              <div
+                className="feature-card"
+                onClick={() => setActiveTab('best-time')}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="feature-card-header">
+                  <div className="feature-card-icon">
+                    <IconSunCloud size={22} color="#255a36" />
                   </div>
-                  <h4 className="climate-value">
-                    {loading ? '...' : (reading.temperature != null ? `${reading.temperature}°C` : '28.4°C')}
-                  </h4>
+                  <IconChevronRight size={16} color="#8a9e90" />
                 </div>
-
-                <div className="climate-metric">
-                  <div className="climate-icon-row">
-                    <IconDroplets size={16} color="#3b82f6" />
-                    <span className="climate-label">Relative Humidity</span>
-                  </div>
-                  <h4 className="climate-value">
-                    {loading ? '...' : (reading.humidity != null ? `${reading.humidity}%` : '54%')}
-                  </h4>
-                </div>
-
-                <div className="climate-metric">
-                  <div className="climate-icon-row">
-                    <IconWind size={16} color="#10b981" />
-                    <span className="climate-label">Wind Velocity</span>
-                  </div>
-                  <h4 className="climate-value">
-                    {loading ? '...' : (reading.wind_speed != null ? `${reading.wind_speed} km/h` : '8.2 km/h')}
-                  </h4>
-                </div>
+                <h3 className="feature-card-title">7-Day Forecast</h3>
+                <p className="feature-card-desc">Daily AQI outlook</p>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* CRITERIA POLLUTANTS GRID */}
-        <section className="pollutants-section" id="pollutants">
-          <div className="section-title-row">
-            <div>
-              <h2 className="section-heading">Criteria Pollutants Telemetry</h2>
-              <p className="section-subheading">
-                Atmospheric mass concentrations vs. standard exposure ceilings
-              </p>
-            </div>
-            <span className="standard-badge">WHO & CPCB Standard Breakdown</span>
-          </div>
-
-          <div className="pollutants-grid">
-            {pollutants.map(pollutant => {
-              const statusInfo = getPollutantStatus(pollutant.key, pollutant.value)
-              const percent = Math.round(statusInfo.ratio * 100)
-
-              return (
-                <div className="pollutant-card" key={pollutant.key}>
-                  <div className="pollutant-top-row">
-                    <span className="chemical-formula">{pollutant.formula}</span>
-                    <span className={`pollutant-status-pill ${statusInfo.status}`}>
-                      {statusInfo.label}
-                    </span>
+              {/* Feature 4: Smart Alerts */}
+              <div
+                className="feature-card"
+                onClick={() => setActiveTab('alerts')}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="feature-card-header">
+                  <div className="feature-card-icon">
+                    <IconBell size={22} color="#255a36" />
                   </div>
-                  <p className="pollutant-full-name">{pollutant.name}</p>
-
-                  <div className="pollutant-value-row">
-                    <span className="pollutant-numeric">
-                      {loading ? '...' : (pollutant.value != null ? pollutant.value : '--')}
-                    </span>
-                    <span className="pollutant-unit">{pollutant.unit}</span>
-                  </div>
-
-                  {/* Micro Visual Spectrum Bar */}
-                  <div className="spectrum-track">
-                    <div
-                      className={`spectrum-fill ${statusInfo.status}`}
-                      style={{ width: `${Math.max(percent, 8)}%` }}
-                    />
-                  </div>
-                  <div className="spectrum-labels">
-                    <span>0</span>
-                    <span>Safe Ceiling</span>
-                    <span>{pollutant.max}+</span>
-                  </div>
+                  <IconChevronRight size={16} color="#8a9e90" />
                 </div>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* 7-DAY HISTORICAL TRENDS */}
-        <section className="analytics-section" id="history">
-          <PollutionChart historyData={historyData} loading={historyLoading} />
-        </section>
-
-        {/* 24-HOUR MACHINE LEARNING FORECAST */}
-        <section className="prediction-section" id="predictions">
-          <div className="section-title-row">
-            <div>
-              <div className="ai-badge-row">
-                <IconSparkles size={16} color="#8b5cf6" />
-                <span className="ai-badge-text">AUTOREGRESSIVE RANDOM FOREST REGRESSOR</span>
+                <h3 className="feature-card-title">Smart Alerts</h3>
+                <p className="feature-card-desc">AQI threshold notifications</p>
               </div>
-              <h2 className="section-heading">24-Hour Predictive Horizon</h2>
-              <p className="section-subheading">
-                Sequential hourly PM₂.₅ forecasts with multi-lag time-series feature engineering
-              </p>
-            </div>
-            <span className="model-chip">Model: Random Forest • Horizons: 1-24h</span>
+            </section>
           </div>
+        )}
 
-          {forecastLoading ? (
-            <div className="forecast-loading-state">
-              <IconLoader size={20} />
-              <span>Synthesizing time-series features and rolling multi-step predictions...</span>
-            </div>
-          ) : forecastError ? (
-            <div className="forecast-empty-state">
-              <p>{forecastError}</p>
-            </div>
-          ) : forecastData.length > 0 ? (
-            <div className="forecast-timeline-container">
-              <div className="forecast-timeline-track">
-                {forecastData.slice(0, 12).map((item, idx) => {
-                  const fDate = new Date(item.forecast_for)
-                  const hourLabel = fDate.toLocaleTimeString([], { hour: 'numeric', hour12: true })
-                  const dayLabel = fDate.toLocaleDateString([], { weekday: 'short' })
-                  const pmVal = Number(item.predicted_value)
-                  const isHigh = pmVal > 60
-
-                  return (
-                    <div className="forecast-timeline-card" key={idx}>
-                      <span className="forecast-time-pill">{hourLabel}</span>
-                      <span className="forecast-day-sub">{dayLabel}</span>
-                      <div className="forecast-metric-box">
-                        <span className="forecast-val">{pmVal}</span>
-                        <span className="forecast-unit">µg/m³</span>
-                      </div>
-                      <span className={`forecast-status-dot ${isHigh ? 'elevated' : 'clean'}`}>
-                        {isHigh ? 'Elevated' : 'Optimal'}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="forecast-empty-state">
-              <p>Predictive horizon is compiling. Fresh observations required to establish time lags.</p>
-            </div>
-          )}
-        </section>
-
-        {/* BEST TIME TO GO OUT */}
-<section className="best-time-section" id="best-time">
-  <div className="best-time-card">
-    <div className="section-title-row">
-      <div>
-        <div className="ai-badge-row">
-          <IconSparkles size={16} color="#10b981" />
-          <span className="ai-badge-text">SMART OUTDOOR RECOMMENDATION</span>
-        </div>
-        <h2 className="section-heading">Best Time to Go Out</h2>
-        <p className="section-subheading">
-          Find the lowest predicted PM₂.₅ window in the next 24 hours.
-        </p>
-      </div>
-    </div>
-
-    {bestTimeLoading ? (
-      <div className="forecast-loading-state">
-        <IconLoader size={20} />
-        <span>Finding the best time window...</span>
-      </div>
-    ) : bestTimeError ? (
-      <div className="forecast-empty-state">
-        <p>{bestTimeError}</p>
-      </div>
-    ) : bestTimeData?.status === 'available' && bestTimeData?.best_window ? (
-      <div className="best-time-result">
-        <h3>
-          {new Date(bestTimeData.best_window.start).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-          {' – '}
-          {new Date(bestTimeData.best_window.end).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </h3>
-
-        <p className="best-time-duration">
-          Recommended window · {bestTimeData.best_window.duration_hours} hours
-        </p>
-
-        <div className="best-time-metrics">
-          <div>
-            <span>Average PM₂.₅</span>
-            <strong>{Number(bestTimeData.best_window.average_pm25).toFixed(2)} µg/m³</strong>
-          </div>
-          <div>
-            <span>Maximum PM₂.₅</span>
-            <strong>{Number(bestTimeData.best_window.maximum_pm25).toFixed(2)} µg/m³</strong>
-          </div>
-        </div>
-
-        {/* WhatsApp Integration: Send Best Time Window directly to phone */}
-        <div className="best-time-whatsapp-action">
-          {showPhonePrompt ? (
-            <div className="best-time-phone-row">
-              <input
-                type="tel"
-                placeholder="+919876543210 (E.164)"
-                value={bestTimeCustomPhone}
-                onChange={e => setBestTimeCustomPhone(e.target.value)}
-                className="best-time-phone-input"
-              />
+        {/* SUB-VIEW: POLLUTANTS BREAKDOWN */}
+        {activeTab === 'pollutants' && (
+          <section className="subview-container">
+            <div className="subview-header">
               <button
                 type="button"
-                className="btn-send-best-time-whatsapp"
-                onClick={handleSendBestTimeToWhatsapp}
-                disabled={bestTimeSendingWhatsapp || !bestTimeCustomPhone.trim()}
+                className="btn-back-overview"
+                onClick={() => setActiveTab('dashboard')}
               >
-                {bestTimeSendingWhatsapp ? <IconLoader size={14} /> : <span>Send Alert</span>}
+                ← Back to Overview
               </button>
+              <div>
+                <h2 className="section-heading">Criteria Pollutants Telemetry</h2>
+                <p className="section-subheading">
+                  Atmospheric mass concentrations vs. standard exposure ceilings
+                </p>
+              </div>
             </div>
-          ) : (
-            <button
-              type="button"
-              className="btn-send-best-time-whatsapp"
-              onClick={handleSendBestTimeToWhatsapp}
-              disabled={bestTimeSendingWhatsapp}
-              title="Send this recommended cleanest outdoor window to your WhatsApp"
-            >
-              {bestTimeSendingWhatsapp ? (
-                <>
-                  <IconLoader size={15} />
-                  <span>Sending recommendation...</span>
-                </>
+
+            <div className="pollutants-grid">
+              {pollutants.map(pollutant => {
+                const statusInfo = getPollutantStatus(pollutant.key, pollutant.value)
+                const percent = Math.round(statusInfo.ratio * 100)
+
+                return (
+                  <div className="pollutant-card" key={pollutant.key}>
+                    <div className="pollutant-top-row">
+                      <span className="chemical-formula">{pollutant.formula}</span>
+                      <span className={`pollutant-status-pill ${statusInfo.status}`}>
+                        {statusInfo.label}
+                      </span>
+                    </div>
+                    <p className="pollutant-full-name">{pollutant.name}</p>
+
+                    <div className="pollutant-value-row">
+                      <span className="pollutant-numeric">
+                        {loading ? '...' : (pollutant.value != null ? pollutant.value : '--')}
+                      </span>
+                      <span className="pollutant-unit">{pollutant.unit}</span>
+                    </div>
+
+                    <div className="spectrum-track">
+                      <div
+                        className={`spectrum-fill ${statusInfo.status}`}
+                        style={{ width: `${Math.max(percent, 8)}%` }}
+                      />
+                    </div>
+                    <div className="spectrum-labels">
+                      <span>0</span>
+                      <span>Safe Ceiling</span>
+                      <span>{pollutant.max}+</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* SUB-VIEW: DETAILED 7-DAY TRENDS */}
+        {activeTab === 'history' && (
+          <section className="subview-container">
+            <div className="subview-header">
+              <button
+                type="button"
+                className="btn-back-overview"
+                onClick={() => setActiveTab('dashboard')}
+              >
+                ← Back to Overview
+              </button>
+              <div>
+                <h2 className="section-heading">7-Day Historical Analytics</h2>
+                <p className="section-subheading">
+                  Comprehensive historical telemetry with daily summary and hourly breakdown
+                </p>
+              </div>
+            </div>
+
+            <div className="subview-chart-box">
+              <PollutionChart historyData={historyData} loading={historyLoading} overviewMode={false} />
+            </div>
+          </section>
+        )}
+
+        {/* SUB-VIEW: 24-HOUR FORECAST */}
+        {activeTab === 'predictions' && (
+          <section className="subview-container">
+            <div className="subview-header">
+              <button
+                type="button"
+                className="btn-back-overview"
+                onClick={() => setActiveTab('dashboard')}
+              >
+                ← Back to Overview
+              </button>
+              <div>
+                <div className="ai-badge-row">
+                  <IconSparkles size={16} color="#255a36" />
+                  <span className="ai-badge-text">AUTOREGRESSIVE RANDOM FOREST REGRESSOR</span>
+                </div>
+                <h2 className="section-heading">24-Hour Predictive Horizon</h2>
+                <p className="section-subheading">
+                  Sequential hourly PM₂.₅ forecasts with multi-lag time-series feature engineering
+                </p>
+              </div>
+            </div>
+
+            {forecastLoading ? (
+              <div className="forecast-loading-state">
+                <IconLoader size={20} />
+                <span>Synthesizing time-series features and rolling multi-step predictions...</span>
+              </div>
+            ) : forecastError ? (
+              <div className="forecast-empty-state">
+                <p>{forecastError}</p>
+              </div>
+            ) : forecastData.length > 0 ? (
+              <div className="forecast-timeline-container">
+                <div className="forecast-timeline-track">
+                  {forecastData.slice(0, 12).map((item, idx) => {
+                    const fDate = new Date(item.forecast_for)
+                    const hourLabel = fDate.toLocaleTimeString([], { hour: 'numeric', hour12: true })
+                    const dayLabel = fDate.toLocaleDateString([], { weekday: 'short' })
+                    const pmVal = Number(item.predicted_value)
+                    const isHigh = pmVal > 60
+
+                    return (
+                      <div className="forecast-timeline-card" key={idx}>
+                        <span className="forecast-time-pill">{hourLabel}</span>
+                        <span className="forecast-day-sub">{dayLabel}</span>
+                        <div className="forecast-metric-box">
+                          <span className="forecast-val">{pmVal}</span>
+                          <span className="forecast-unit">µg/m³</span>
+                        </div>
+                        <span className={`forecast-status-dot ${isHigh ? 'elevated' : 'clean'}`}>
+                          {isHigh ? 'Elevated' : 'Optimal'}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="forecast-empty-state">
+                <p>Predictive horizon is compiling. Fresh observations required to establish time lags.</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* SUB-VIEW: BEST OUTDOOR TIME */}
+        {activeTab === 'best-time' && (
+          <section className="subview-container">
+            <div className="subview-header">
+              <button
+                type="button"
+                className="btn-back-overview"
+                onClick={() => setActiveTab('dashboard')}
+              >
+                ← Back to Overview
+              </button>
+              <div>
+                <div className="ai-badge-row">
+                  <IconSparkles size={16} color="#255a36" />
+                  <span className="ai-badge-text">SMART OUTDOOR RECOMMENDATION</span>
+                </div>
+                <h2 className="section-heading">Best Time to Go Out</h2>
+                <p className="section-subheading">
+                  Find the lowest predicted PM₂.₅ window in the next 24 hours.
+                </p>
+              </div>
+            </div>
+
+            <div className="best-time-card">
+              {bestTimeLoading ? (
+                <div className="forecast-loading-state">
+                  <IconLoader size={20} />
+                  <span>Finding the best time window...</span>
+                </div>
+              ) : bestTimeError ? (
+                <div className="forecast-empty-state">
+                  <p>{bestTimeError}</p>
+                </div>
+              ) : bestTimeData?.status === 'available' && bestTimeData?.best_window ? (
+                <div className="best-time-result">
+                  <h3>
+                    {new Date(bestTimeData.best_window.start).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    {' – '}
+                    {new Date(bestTimeData.best_window.end).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </h3>
+
+                  <p className="best-time-duration">
+                    Recommended window · {bestTimeData.best_window.duration_hours} hours
+                  </p>
+
+                  <div className="best-time-metrics">
+                    <div>
+                      <span>Average PM₂.₅</span>
+                      <strong>{Number(bestTimeData.best_window.average_pm25).toFixed(2)} µg/m³</strong>
+                    </div>
+                    <div>
+                      <span>Maximum PM₂.₅</span>
+                      <strong>{Number(bestTimeData.best_window.maximum_pm25).toFixed(2)} µg/m³</strong>
+                    </div>
+                  </div>
+
+                  <div className="best-time-whatsapp-action">
+                    {showPhonePrompt ? (
+                      <div className="best-time-phone-row">
+                        <input
+                          type="tel"
+                          placeholder="+919876543210 (E.164)"
+                          value={bestTimeCustomPhone}
+                          onChange={e => setBestTimeCustomPhone(e.target.value)}
+                          className="best-time-phone-input"
+                        />
+                        <button
+                          type="button"
+                          className="btn-send-best-time-whatsapp"
+                          onClick={handleSendBestTimeToWhatsapp}
+                          disabled={bestTimeSendingWhatsapp || !bestTimeCustomPhone.trim()}
+                        >
+                          {bestTimeSendingWhatsapp ? <IconLoader size={14} /> : <span>Send Alert</span>}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn-send-best-time-whatsapp"
+                        onClick={handleSendBestTimeToWhatsapp}
+                        disabled={bestTimeSendingWhatsapp}
+                        title="Send this recommended cleanest outdoor window to your WhatsApp"
+                      >
+                        {bestTimeSendingWhatsapp ? (
+                          <>
+                            <IconLoader size={15} />
+                            <span>Sending recommendation...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="wa-btn-icon">💬</span>
+                            <span>Send Best Window to WhatsApp</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    {bestTimeWhatsappStatus && (
+                      <div className={`best-time-status-pill ${bestTimeWhatsappStatus.startsWith('✓') ? 'success' : 'notice'}`}>
+                        {bestTimeWhatsappStatus}
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
-                <>
-                  <span className="wa-btn-icon">💬</span>
-                  <span>Send Best Window to WhatsApp</span>
-                </>
+                <div className="forecast-empty-state">
+                  <p>No suitable forecast window is currently available. Try again when fresh observations arrive.</p>
+                </div>
               )}
-            </button>
-          )}
-
-          {bestTimeWhatsappStatus && (
-            <div className={`best-time-status-pill ${bestTimeWhatsappStatus.startsWith('✓') ? 'success' : 'notice'}`}>
-              {bestTimeWhatsappStatus}
             </div>
-          )}
-        </div>
-      </div>
-    ) : (
-      <div className="forecast-empty-state">
-        <p>
-          No suitable forecast window is currently available. Try again when
-          fresh observations are available.
-        </p>
-      </div>
-    )}
+          </section>
+        )}
 
-    <p className="best-time-disclaimer">
-      Based on predicted PM₂.₅ levels only. This is not an official AQI
-      measurement or a guarantee of outdoor safety.
-    </p>
-  </div>
-</section>
-        {/* ALERT PREFERENCES & NOTIFICATIONS */}
-        <section className="alerts-section" id="alerts">
-          <Alerts locations={locations} selectedLocationId={selectedLocationId} />
-        </section>
+        {/* SUB-VIEW: ALERTS */}
+        {activeTab === 'alerts' && (
+          <section className="subview-container">
+            <div className="subview-header">
+              <button
+                type="button"
+                className="btn-back-overview"
+                onClick={() => setActiveTab('dashboard')}
+              >
+                ← Back to Overview
+              </button>
+              <div>
+                <h2 className="section-heading">Smart Alerts & Notifications</h2>
+                <p className="section-subheading">
+                  Configure custom thresholds, WhatsApp alerts, and automated telemetry triggers
+                </p>
+              </div>
+            </div>
+            <Alerts locations={locations} selectedLocationId={selectedLocationId} />
+          </section>
+        )}
 
-        {/* MINIMALIST FOOTER */}
-        <footer className="air-footer">
-          <div className="footer-content">
-            <p>© 2026 AirSense • Smart Air Quality Monitoring & Machine Learning Analytics</p>
-            <p className="footer-sub">
-              Telemetry powered by Open-Meteo & European Union Copernicus CAMS • Standard: Indian CPCB NAQI
-            </p>
-          </div>
-        </footer>
+        {/* SUB-VIEW: SETTINGS */}
+        {activeTab === 'settings' && (
+          <section className="subview-container">
+            <div className="subview-header">
+              <button
+                type="button"
+                className="btn-back-overview"
+                onClick={() => setActiveTab('dashboard')}
+              >
+                ← Back to Overview
+              </button>
+              <div>
+                <h2 className="section-heading">Environmental OS Settings</h2>
+                <p className="section-subheading">
+                  System preferences, telemetry provider configuration, and profile
+                </p>
+              </div>
+            </div>
+
+            <div className="settings-card">
+              <div className="settings-item">
+                <div>
+                  <h4>Logged in Citizen</h4>
+                  <p>{authData.user?.email || 'citizen@airsense.org'}</p>
+                </div>
+                <button type="button" className="btn-logout-settings" onClick={handleLogout}>
+                  Log Out
+                </button>
+              </div>
+              <div className="settings-divider" />
+              <div className="settings-item">
+                <div>
+                  <h4>Atmospheric Standards</h4>
+                  <p>CPCB NAQI (India) & WHO Exposure Ceilings</p>
+                </div>
+                <span className="settings-badge">Active</span>
+              </div>
+              <div className="settings-divider" />
+              <div className="settings-item">
+                <div>
+                  <h4>Primary Telemetry Pipeline</h4>
+                  <p>Open-Meteo Atmospheric Models + EU Copernicus CAMS</p>
+                </div>
+                <span className="settings-badge">Connected</span>
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   )

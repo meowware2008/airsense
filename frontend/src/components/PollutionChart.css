@@ -99,6 +99,50 @@
   width: 100%;
 }
 
+.chart-container-wrapper.overview-height {
+  height: 200px;
+}
+
+.chart-title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-title-with-icon h2 {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: #1a3324 !important;
+  letter-spacing: -0.02em;
+  margin: 0 !important;
+}
+
+.btn-view-details {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f4eb;
+  border: 1px solid #d8e0d2;
+  color: #1a3324;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-view-details:hover {
+  background: #e5ebe0;
+  border-color: #2e5b3d;
+  color: #1e4a2d;
+  transform: translateX(2px);
+}
+
+.pollution-chart-card.overview-mode .chart-header {
+  margin-bottom: 10px;
+}
+
 .chart-loading,
 .chart-empty {
   padding: 40px;

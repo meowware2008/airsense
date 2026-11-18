@@ -92,6 +92,7 @@ function groupHistoryByDate(series) {
     return {
       dateKey,
       label,
+      dayLabel,
       fullDate,
       avgAqi,
       maxAqi,
@@ -103,7 +104,7 @@ function groupHistoryByDate(series) {
   })
 }
 
-function PollutionChart({ historyData = [], loading = false }) {
+function PollutionChart({ historyData = [], loading = false, overviewMode = false, onViewDetails = null }) {
   const [viewMode, setViewMode] = useState('daily') // 'daily' or 'hourly'
 
   const dailyData = useMemo(() => {
@@ -140,21 +141,40 @@ function PollutionChart({ historyData = [], loading = false }) {
     return <div className="chart-empty">No historical air quality records found for this location.</div>
   }
 
-  // Chart configuration for Daily Categorized view
-  const chartData = viewMode === 'daily'
+  // Chart configuration
+  const chartData = overviewMode
+    ? {
+        labels: dailyData.map(item => item.dayLabel),
+        datasets: [
+          {
+            label: 'Air Quality Trend',
+            data: dailyData.map(item => item.avgAqi),
+            borderColor: '#1e8555',
+            backgroundColor: 'rgba(30, 133, 85, 0.18)',
+            fill: true,
+            tension: 0.35,
+            pointRadius: 4.5,
+            pointHoverRadius: 6.5,
+            pointBackgroundColor: '#1e8555',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+          },
+        ],
+      }
+    : viewMode === 'daily'
     ? {
         labels: dailyData.map(item => item.label),
         datasets: [
           {
             label: 'Daily Average AQI',
             data: dailyData.map(item => item.avgAqi),
-            borderColor: '#258b70',
-            backgroundColor: 'rgba(37, 139, 112, 0.15)',
+            borderColor: '#1e8555',
+            backgroundColor: 'rgba(30, 133, 85, 0.16)',
             fill: true,
             tension: 0.35,
-            pointRadius: 6,
-            pointHoverRadius: 8,
-            pointBackgroundColor: '#258b70',
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#1e8555',
             pointBorderColor: '#ffffff',
             pointBorderWidth: 2,
           },
@@ -166,8 +186,8 @@ function PollutionChart({ historyData = [], loading = false }) {
             borderDash: [5, 5],
             fill: false,
             tension: 0.3,
-            pointRadius: 5,
-            pointHoverRadius: 7,
+            pointRadius: 4,
+            pointHoverRadius: 6,
             pointBackgroundColor: '#f59e0b',
             pointBorderColor: '#ffffff',
             pointBorderWidth: 2,
@@ -183,8 +203,8 @@ function PollutionChart({ historyData = [], loading = false }) {
           {
             label: 'Hourly AQI',
             data: historyData.map(item => item.aqi),
-            borderColor: '#36A2EB',
-            backgroundColor: 'rgba(54, 162, 235, 0.12)',
+            borderColor: '#1e8555',
+            backgroundColor: 'rgba(30, 133, 85, 0.12)',
             fill: true,
             tension: 0.25,
             pointRadius: 2,
@@ -202,7 +222,7 @@ function PollutionChart({ historyData = [], loading = false }) {
     },
     plugins: {
       legend: {
-        display: true,
+        display: !overviewMode,
         position: 'top',
         align: 'end',
         labels: {
@@ -210,7 +230,7 @@ function PollutionChart({ historyData = [], loading = false }) {
           boxWidth: 8,
           padding: 15,
           font: {
-            family: "'Segoe UI', sans-serif",
+            family: "'Segoe UI', -apple-system, sans-serif",
             size: 12,
             weight: 600,
           },
@@ -218,16 +238,16 @@ function PollutionChart({ historyData = [], loading = false }) {
         },
       },
       tooltip: {
-        backgroundColor: '#10283d',
+        backgroundColor: '#1b3828',
         titleColor: '#ffffff',
         titleFont: { size: 13, weight: 'bold' },
         bodyFont: { size: 12 },
-        padding: 12,
+        padding: 10,
         cornerRadius: 8,
-        displayColors: true,
+        displayColors: !overviewMode,
         callbacks: {
           title: (items) => {
-            if (viewMode === 'daily') {
+            if (overviewMode || viewMode === 'daily') {
               const idx = items[0]?.dataIndex
               return dailyData[idx]?.fullDate || items[0]?.label
             }
@@ -236,6 +256,12 @@ function PollutionChart({ historyData = [], loading = false }) {
             return raw ? new Date(raw.timestamp).toLocaleString() : (items[0]?.label || '')
           },
           afterBody: (items) => {
+            if (overviewMode) {
+              const idx = items[0]?.dataIndex
+              const item = dailyData[idx]
+              if (!item) return []
+              return [`Avg PM₂.₅: ${item.avgPm25 ?? '--'} µg/m³`]
+            }
             if (viewMode === 'daily') {
               const idx = items[0]?.dataIndex
               const item = dailyData[idx]
@@ -255,18 +281,23 @@ function PollutionChart({ historyData = [], loading = false }) {
     scales: {
       y: {
         beginAtZero: true,
+        suggestedMax: overviewMode ? 200 : undefined,
         title: {
-          display: true,
+          display: !overviewMode,
           text: 'CPCB AQI',
           color: '#718293',
           font: { size: 12, weight: 600 },
         },
         grid: {
-          color: 'rgba(23, 43, 64, 0.06)',
+          color: 'rgba(0, 0, 0, 0.04)',
         },
         ticks: {
-          font: { size: 12 },
-          color: '#64748b',
+          font: { size: 11.5 },
+          color: '#7e9284',
+          stepSize: overviewMode ? 50 : undefined,
+        },
+        border: {
+          display: false,
         },
       },
       x: {
@@ -274,51 +305,74 @@ function PollutionChart({ historyData = [], loading = false }) {
           display: false,
         },
         ticks: {
-          font: { size: 12 },
-          color: '#475569',
+          font: { size: 11.5 },
+          color: '#7e9284',
           maxRotation: 0,
-          autoSkip: viewMode === 'hourly',
-          maxTicksLimit: viewMode === 'hourly' ? 14 : undefined,
+          autoSkip: !overviewMode && viewMode === 'hourly',
+          maxTicksLimit: !overviewMode && viewMode === 'hourly' ? 14 : undefined,
+        },
+        border: {
+          display: false,
         },
       },
     },
   }
 
   return (
-    <div className="pollution-chart-card">
+    <div className={`pollution-chart-card ${overviewMode ? 'overview-mode' : ''}`}>
       <div className="chart-header">
         <div className="chart-title-area">
-          <h2>7-Day Air Quality Trend</h2>
-          <p className="chart-subtitle">
-            {viewMode === 'daily'
-              ? 'Categorised daily summary (one piece per day)'
-              : 'Detailed hourly breakdown over past 7 days'}
-          </p>
+          <div className="chart-title-with-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a3324" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
+            </svg>
+            <h2>7-Day Air Quality Trend</h2>
+          </div>
+          {!overviewMode && (
+            <p className="chart-subtitle">
+              {viewMode === 'daily'
+                ? 'Categorised daily summary (one piece per day)'
+                : 'Detailed hourly breakdown over past 7 days'}
+            </p>
+          )}
         </div>
 
-        <div className="chart-controls">
+        {overviewMode ? (
           <button
             type="button"
-            className={`view-toggle-btn ${viewMode === 'daily' ? 'active' : ''}`}
-            onClick={() => setViewMode('daily')}
-            title="Categorise history into one piece per day"
+            className="btn-view-details"
+            onClick={onViewDetails}
+            title="View detailed historical telemetry and analytics"
           >
-            <IconCalendar size={14} />
-            <span>Daily Summary</span>
+            <span>View Details</span>
+            <span>→</span>
           </button>
-          <button
-            type="button"
-            className={`view-toggle-btn ${viewMode === 'hourly' ? 'active' : ''}`}
-            onClick={() => setViewMode('hourly')}
-            title="View hourly readings"
-          >
-            <IconClock size={14} />
-            <span>Hourly</span>
-          </button>
-        </div>
+        ) : (
+          <div className="chart-controls">
+            <button
+              type="button"
+              className={`view-toggle-btn ${viewMode === 'daily' ? 'active' : ''}`}
+              onClick={() => setViewMode('daily')}
+              title="Categorise history into one piece per day"
+            >
+              <IconCalendar size={14} />
+              <span>Daily Summary</span>
+            </button>
+            <button
+              type="button"
+              className={`view-toggle-btn ${viewMode === 'hourly' ? 'active' : ''}`}
+              onClick={() => setViewMode('hourly')}
+              title="View hourly readings"
+            >
+              <IconClock size={14} />
+              <span>Hourly</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {stats && viewMode === 'daily' && (
+      {!overviewMode && stats && viewMode === 'daily' && (
         <div className="chart-stats-summary">
           <div className="chart-stat-chip">
             <span className="chip-label">
@@ -344,7 +398,7 @@ function PollutionChart({ historyData = [], loading = false }) {
         </div>
       )}
 
-      <div className="chart-container-wrapper">
+      <div className={`chart-container-wrapper ${overviewMode ? 'overview-height' : ''}`}>
         <Line data={chartData} options={chartOptions} />
       </div>
     </div>
