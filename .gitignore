@@ -60,6 +60,8 @@ dist/
 ml/data/*.csv
 ml/artifacts/*.joblib
 !ml/data/sample_delhi_pm25.csv
+!ml/artifacts/random_forest_pm25.joblib
+!ml/artifacts/model_metadata.json
 !ml/artifacts/.gitkeep
 
 # Reference design files

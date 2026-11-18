@@ -35,6 +35,6 @@
     "mae_improvement_pct": -8.99,
     "rmse_improvement_pct": -6.22
   },
-  "trained_at": "2026-11-17T18:59:21.610042",
+  "trained_at": "2026-11-18T06:50:49.746407",
   "notes": "Chronological train/val/test split without lookahead leakage. Evaluated against persistence baseline."
 }

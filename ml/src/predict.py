@@ -22,11 +22,29 @@ _cached_metadata = None
 
 def load_model_and_metadata():
     global _cached_model, _cached_metadata
-    if _cached_model is None and MODEL_PATH.exists():
-        _cached_model = joblib.load(MODEL_PATH)
+    if _cached_model is None:
+        if MODEL_PATH.exists():
+            try:
+                _cached_model = joblib.load(MODEL_PATH)
+            except Exception:
+                _cached_model = None
+
+        # Self-healing: auto-train baseline pipeline if model artifact is missing
+        if _cached_model is None:
+            try:
+                from ml.src.train import train_baseline_pipeline
+                _cached_model, _cached_metadata = train_baseline_pipeline(save_artifact=True)
+                return _cached_model, _cached_metadata
+            except Exception as exc:
+                import logging
+                logging.getLogger("airsense.ml").warning(f"Model auto-train notice: {exc}")
+
     if _cached_metadata is None and METADATA_PATH.exists():
-        with open(METADATA_PATH, "r") as f:
-            _cached_metadata = json.load(f)
+        try:
+            with open(METADATA_PATH, "r") as f:
+                _cached_metadata = json.load(f)
+        except Exception:
+            pass
     return _cached_model, _cached_metadata
 
 

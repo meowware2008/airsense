@@ -79,8 +79,24 @@ def test_send_best_time_whatsapp_success(client, auth_token, test_location):
     db_session.commit()
 
     headers = {"Authorization": f"Bearer {auth_token}"}
+    now_ref = datetime.now(timezone.utc)
+    mock_forecast_result = {
+        "status": "available",
+        "model_name": "RandomForestRegressor",
+        "model_version": "1.0.0",
+        "forecasts": [
+            {
+                "forecast_for": (now_ref + timedelta(hours=h)).isoformat(),
+                "predicted_value": 20.0 + (h % 3),
+                "target_metric": "pm25",
+                "unit": "µg/m³",
+            }
+            for h in range(1, 25)
+        ],
+    }
 
-    with patch("backend.app.api.best_time.send_whatsapp", return_value=True) as mock_send:
+    with patch("backend.app.api.best_time.predict_next_24h", return_value=mock_forecast_result), \
+         patch("backend.app.api.best_time.send_whatsapp", return_value=True) as mock_send:
         res = client.post(
             "/api/v1/best-time/send-whatsapp",
             headers=headers,
