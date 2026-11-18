@@ -22,7 +22,12 @@ def train_baseline_pipeline(data_path: Path = None, save_artifact: bool = True):
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     df = fetch_or_generate_delhi_historical(csv_path=data_path)
 
-    X, y, y_pers = prepare_training_data(df, target_col="pm25", horizon_hours=24)
+    # X, y, y_pers = prepare_training_data(df, target_col="pm25", horizon_hours=24)
+    X, y, y_pers = prepare_training_data(
+    df,
+    target_col="pm25",
+    horizon_hours=1
+)
 
     total_samples = len(X)
     if total_samples < 100:
@@ -64,7 +69,8 @@ def train_baseline_pipeline(data_path: Path = None, save_artifact: bool = True):
         "model_name": "RandomForestRegressor",
         "model_version": "1.0.0",
         "target_metric": "pm25",
-        "horizon_hours": 24,
+       #"horizon_hours": 24,
+       "horizon_hours": 1,
         "feature_columns": FEATURE_COLUMNS,
         "sample_counts": {
             "total": total_samples,

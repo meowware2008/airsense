@@ -1057,3 +1057,72 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* Best Time to Go Out */
+.best-time-section {
+  margin: 30px 0;
+}
+
+.best-time-card {
+  padding: 28px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(15, 23, 42, 0.5));
+}
+
+.best-time-result {
+  margin-top: 24px;
+}
+
+.best-time-result h3 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #10b981;
+  margin: 0;
+}
+
+.best-time-duration {
+  color: #94a3b8;
+  margin-top: 8px;
+}
+
+.best-time-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.best-time-metrics div {
+  padding: 18px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.best-time-metrics span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.best-time-metrics strong {
+  color: #f8fafc;
+  font-size: 20px;
+}
+
+.best-time-disclaimer {
+  color: #94a3b8;
+  font-size: 12px;
+  margin-top: 22px;
+}
+
+@media (max-width: 600px) {
+  .best-time-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .best-time-result h3 {
+    font-size: 25px;
+  }
+}
