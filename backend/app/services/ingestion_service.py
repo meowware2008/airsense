@@ -20,12 +20,16 @@ logger = logging.getLogger(__name__)
 
 class IngestionService:
     def __init__(self, provider: Optional[BaseAirQualityProvider] = None, provider_name: Optional[str] = None):
+        if isinstance(provider, str):
+            provider_name = provider
+            provider = None
+
         active_provider = None
         try:
             active_provider = current_app.config.get("AQI_PROVIDER")
         except Exception:
             pass
-        name = provider_name or active_provider or Config.AQI_PROVIDER or "open_meteo"
+        name = provider_name or active_provider or getattr(Config, "AQI_PROVIDER", "open_meteo") or "open_meteo"
         self.provider = provider or get_provider(name)
         self.provider_name = name
 

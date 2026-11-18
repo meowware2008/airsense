@@ -14,20 +14,22 @@ def seed_demo_user():
     from werkzeug.security import generate_password_hash
     from backend.app.database import db_session
     from backend.app.models import User
+    import logging
 
     demo_email = "demo@airsense.org"
-    user = db_session.query(User).filter(User.email == demo_email).first()
-    if not user:
-        user = User(
-            name="Demo Citizen",
-            email=demo_email,
-            password_hash=generate_password_hash("demo12345"),
-        )
-        db_session.add(user)
-        try:
+    try:
+        user = db_session.query(User).filter(User.email == demo_email).first()
+        if not user:
+            user = User(
+                name="Demo Citizen",
+                email=demo_email,
+                password_hash=generate_password_hash("demo12345"),
+            )
+            db_session.add(user)
             db_session.commit()
-        except Exception:
-            db_session.rollback()
+    except Exception as exc:
+        db_session.rollback()
+        logging.getLogger("airsense.wsgi").warning(f"Demo user seed notice: {exc}")
 
 
 app = create_app()

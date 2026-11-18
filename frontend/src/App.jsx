@@ -9,6 +9,7 @@ import {
   getAirQualityHistory,
   getForecasts,
   getBestTime,
+  sendBestTimeToWhatsapp,
   pingHealth,
 } from './api'
 import {
@@ -155,7 +156,28 @@ function App() {
   const [bestTimeData, setBestTimeData] = useState(null)
   const [bestTimeLoading, setBestTimeLoading] = useState(true)
   const [bestTimeError, setBestTimeError] = useState('')
+  const [bestTimeSendingWhatsapp, setBestTimeSendingWhatsapp] = useState(false)
+  const [bestTimeWhatsappStatus, setBestTimeWhatsappStatus] = useState('')
+  const [bestTimeCustomPhone, setBestTimeCustomPhone] = useState('')
+  const [showPhonePrompt, setShowPhonePrompt] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
+
+  async function handleSendBestTimeToWhatsapp() {
+    setBestTimeWhatsappStatus('')
+    setBestTimeSendingWhatsapp(true)
+    try {
+      const res = await sendBestTimeToWhatsapp(selectedLocationId, bestTimeCustomPhone || null)
+      setBestTimeWhatsappStatus(`✓ ${res.message || 'Sent to WhatsApp!'}`)
+      setShowPhonePrompt(false)
+    } catch (err) {
+      if (err.message && err.message.toLowerCase().includes('whatsapp number')) {
+        setShowPhonePrompt(true)
+      }
+      setBestTimeWhatsappStatus(`⚠️ ${err.message}`)
+    } finally {
+      setBestTimeSendingWhatsapp(false)
+    }
+  }
 
   function handleDetectLocation() {
     if (!navigator.geolocation) {
@@ -248,7 +270,7 @@ function App() {
       setHistoryLoading(true)
       try {
         const data = await getAirQualityHistory(selectedLocationId, 7)
-        setHistoryData(data.history || [])
+        setHistoryData(data.history || data.series || [])
       } catch (err) {
         console.warn('History fetch error:', err.message)
         setHistoryData([])
@@ -395,6 +417,14 @@ function App() {
           >
             <IconTrendingUp size={18} />
             <span>24h Forecast</span>
+          </a>
+          <a
+            href="#best-time"
+            className={activeTab === 'best-time' ? 'nav-item active' : 'nav-item'}
+            onClick={() => setActiveTab('best-time')}
+          >
+            <IconSparkles size={18} />
+            <span>Best Outdoor Time</span>
           </a>
           <a
             href="#alerts"
@@ -751,6 +781,55 @@ function App() {
             <span>Maximum PM₂.₅</span>
             <strong>{Number(bestTimeData.best_window.maximum_pm25).toFixed(2)} µg/m³</strong>
           </div>
+        </div>
+
+        {/* WhatsApp Integration: Send Best Time Window directly to phone */}
+        <div className="best-time-whatsapp-action">
+          {showPhonePrompt ? (
+            <div className="best-time-phone-row">
+              <input
+                type="tel"
+                placeholder="+919876543210 (E.164)"
+                value={bestTimeCustomPhone}
+                onChange={e => setBestTimeCustomPhone(e.target.value)}
+                className="best-time-phone-input"
+              />
+              <button
+                type="button"
+                className="btn-send-best-time-whatsapp"
+                onClick={handleSendBestTimeToWhatsapp}
+                disabled={bestTimeSendingWhatsapp || !bestTimeCustomPhone.trim()}
+              >
+                {bestTimeSendingWhatsapp ? <IconLoader size={14} /> : <span>Send Alert</span>}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn-send-best-time-whatsapp"
+              onClick={handleSendBestTimeToWhatsapp}
+              disabled={bestTimeSendingWhatsapp}
+              title="Send this recommended cleanest outdoor window to your WhatsApp"
+            >
+              {bestTimeSendingWhatsapp ? (
+                <>
+                  <IconLoader size={15} />
+                  <span>Sending recommendation...</span>
+                </>
+              ) : (
+                <>
+                  <span className="wa-btn-icon">💬</span>
+                  <span>Send Best Window to WhatsApp</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {bestTimeWhatsappStatus && (
+            <div className={`best-time-status-pill ${bestTimeWhatsappStatus.startsWith('✓') ? 'success' : 'notice'}`}>
+              {bestTimeWhatsappStatus}
+            </div>
+          )}
         </div>
       </div>
     ) : (

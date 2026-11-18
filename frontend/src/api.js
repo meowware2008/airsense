@@ -216,6 +216,26 @@ export async function getBestTime(locationId) {
   return response.json();
 }
 
+export async function sendBestTimeToWhatsapp(locationId, whatsappNumber = null) {
+  const payload = { location_id: Number(locationId) }
+  if (whatsappNumber) {
+    payload.whatsapp_number = whatsappNumber
+  }
+
+  const response = await fetch(`${API_BASE_URL}/best-time/send-whatsapp`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.error || 'Failed to dispatch WhatsApp recommendation')
+  }
+
+  return response.json()
+}
+
 export async function pingHealth() {
   try {
     const response = await fetch(`${API_BASE_URL}/health/live`, {

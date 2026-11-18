@@ -142,4 +142,5 @@ def get_historical_air_quality():
         "query_window_days": days,
         "count": len(series),
         "series": series,
+        "history": series,
     }), 200
