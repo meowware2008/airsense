@@ -5,10 +5,10 @@
 
 :root {
   --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --bg-page: #eef2e7;
-  --bg-card: #fbfcf8;
+  --bg-page: #e9eee2;
+  --bg-card: #f8f8f2;
   --bg-card-hover: #ffffff;
-  --border-card: #e1e7dc;
+  --border-card: #dfe5d8;
   --border-card-hover: #b5d5b7;
 
   --text-dark: #1a3324;
@@ -55,25 +55,24 @@ body {
   min-height: 100vh;
   position: relative;
   background-color: var(--bg-page);
-  background: 
-    radial-gradient(circle at 50% -10%, rgba(220, 235, 215, 0.7) 0%, transparent 60%),
-    radial-gradient(circle at 85% 15%, rgba(228, 238, 222, 0.6) 0%, transparent 45%),
-    var(--bg-page);
 }
 
 /* Atmospheric rolling hill curves across top-center */
 .atmospheric-bg-hills {
   position: fixed;
   top: 0;
-  left: 220px;
+  left: 210px;
   right: 0;
-  height: 240px;
+  height: 200px;
   pointer-events: none;
   z-index: 0;
-  background-image: 
-    radial-gradient(ellipse 45% 60% at 50% -15%, rgba(223, 235, 217, 0.75) 0%, transparent 85%),
-    radial-gradient(ellipse 35% 50% at 75% -10%, rgba(215, 230, 210, 0.6) 0%, transparent 80%);
-  opacity: 0.9;
+  overflow: hidden;
+}
+
+.bg-hills-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* Bottom-left corner trees illustration */
@@ -86,6 +85,7 @@ body {
   pointer-events: none;
   z-index: 1;
   user-select: none;
+  mix-blend-mode: multiply;
   opacity: 0.95;
 }
 
@@ -358,23 +358,23 @@ body {
 
 .dashboard-hero-row {
   display: grid;
-  grid-template-columns: 1.48fr 1fr;
-  gap: 20px;
+  grid-template-columns: 1.44fr 1fr;
+  gap: 18px;
 }
 
 /* Hero Card Left: Live AQI & Animated City Diorama */
 .hero-card-left {
-  background: linear-gradient(135deg, #fcfdfa 0%, #f7f9f2 40%, #e6ecde 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  padding: 24px 28px;
+  padding: 22px 28px;
   box-shadow: var(--shadow-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
   overflow: hidden;
-  min-height: 220px;
+  height: 214px;
   transition: var(--transition);
 }
 
@@ -388,28 +388,29 @@ body {
   flex-direction: column;
   align-items: flex-start;
   z-index: 2;
+  flex-shrink: 0;
 }
 
 .badge-live-aqi {
   display: inline-block;
-  background: #dde8da;
+  background: #dce8d8;
   color: var(--green-primary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   padding: 4px 12px;
   border-radius: var(--radius-pill);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .hero-aqi-number {
-  font-size: 78px;
+  font-size: 82px;
   font-weight: 800;
   color: #1b4b31;
   line-height: 1.0;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  margin: 6px 0 10px;
+  margin: 4px 0 8px;
 }
 
 .hero-status-pill {
@@ -429,19 +430,19 @@ body {
   font-size: 12px;
   color: var(--text-muted);
   font-weight: 500;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 /* Diorama in Hero Card */
 .hero-diorama-container {
-  width: 50%;
-  max-width: 360px;
-  height: 190px;
+  flex: 1;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 1;
+  margin-left: 10px;
 }
 
 .hero-city-video {
@@ -462,8 +463,7 @@ body {
 }
 
 .hero-city-video::after {
-  /* Subtle feathering to match hero card gradient */
-  box-shadow: inset 0 0 24px 10px rgba(230, 236, 222, 0.7) !important;
+  box-shadow: inset 0 0 20px 8px #f8f8f2 !important;
 }
 
 /* Hero Card Right: Advisory & Micro-Climate Weather Telemetry */
@@ -471,11 +471,12 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  padding: 26px 28px;
+  padding: 24px 28px;
   box-shadow: var(--shadow-subtle);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  height: 214px;
   transition: var(--transition);
 }
 
@@ -491,8 +492,8 @@ body {
 }
 
 .advisory-circle-icon {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--green-badge-bg);
   border: 1px solid var(--green-badge-border);
@@ -529,12 +530,6 @@ body {
   color: var(--text-muted);
 }
 
-.advisory-divider {
-  height: 1px;
-  background: #e8eee4;
-  margin: 18px 0;
-}
-
 .micro-weather-row {
   display: flex;
   justify-content: space-between;
@@ -562,7 +557,7 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-card);
-  padding: 22px 28px 20px;
+  padding: 20px 28px 18px;
   box-shadow: var(--shadow-subtle);
   transition: var(--transition);
 }
@@ -585,12 +580,14 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: 20px;
-  padding: 22px 24px;
+  padding: 18px 22px;
+  height: 126px;
   box-shadow: var(--shadow-subtle);
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .feature-card:hover {
@@ -604,7 +601,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
 }
 
 .feature-card-icon {
@@ -619,13 +615,14 @@ body {
   font-weight: 700;
   color: var(--text-dark);
   letter-spacing: -0.02em;
-  margin-bottom: 4px;
+  margin-top: auto;
+  margin-bottom: 2px;
 }
 
 .feature-card-desc {
   font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 /* -----------------------------------------------------------------

@@ -32,6 +32,7 @@ import {
   IconChevronRight,
   IconCalendar,
   IconSunCloud,
+  IconLeafOutline,
 } from './components/Icons'
 import './App.css'
 
@@ -396,8 +397,29 @@ function App() {
 
   return (
     <div className="air-app">
-      {/* Decorative rolling hills background pattern */}
-      <div className="atmospheric-bg-hills" />
+      {/* Decorative rolling hills background pattern matching screenshot */}
+      <div className="atmospheric-bg-hills" aria-hidden="true">
+        <svg viewBox="0 0 1200 200" preserveAspectRatio="none" className="bg-hills-svg">
+          {/* Soft cloud floating at top */}
+          <path
+            d="M720 45 a18 18 0 0 1 24 -6 a24 24 0 0 1 44 8 a16 16 0 0 1 18 16 a16 16 0 0 1 -16 16 h-70 a16 16 0 0 1 0 -34 z"
+            fill="#ffffff"
+            opacity="0.75"
+          />
+          {/* Far background hill */}
+          <path
+            d="M100 120 Q 300 40 550 90 T 1000 60 Q 1120 70 1200 100 L 1200 200 L 100 200 Z"
+            fill="#dfe8dc"
+            opacity="0.6"
+          />
+          {/* Midground rolling hill curve */}
+          <path
+            d="M200 140 Q 420 70 700 115 T 1200 85 L 1200 200 L 200 200 Z"
+            fill="#e5ede1"
+            opacity="0.8"
+          />
+        </svg>
+      </div>
 
       {/* Decorative Corner Trees Illustration */}
       <img
@@ -411,10 +433,7 @@ function App() {
       <aside className="air-sidebar">
         <div className="sidebar-brand">
           <div className="brand-logo-leaf">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#255a36" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-            </svg>
+            <IconLeafOutline size={22} color="#255a36" />
           </div>
           <div className="brand-text-group">
             <h2 className="brand-title">AirSense</h2>
@@ -586,10 +605,7 @@ function App() {
               <div className="hero-card-right">
                 <div className="advisory-top-row">
                   <div className="advisory-circle-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#255a36" strokeWidth="2.2">
-                      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-                      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-                    </svg>
+                    <IconLeafOutline size={22} color="#255a36" />
                   </div>
                   <div className="advisory-text-group">
                     <h3 className="advisory-heading">{advisory.title}</h3>
@@ -599,8 +615,6 @@ function App() {
                     <IconChevronRight size={18} color="#7e9284" />
                   </div>
                 </div>
-
-                <div className="advisory-divider" />
 
                 <div className="micro-weather-row">
                   <div className="weather-metric-item">
