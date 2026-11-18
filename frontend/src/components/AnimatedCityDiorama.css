@@ -1,19 +1,22 @@
 /* =====================================================================
-   AirSense — Animated City Diorama Styles
-   Original Artwork with Isolated Illustrated Canopy Sway & Wind Lines
+   AirSense — Animated City Diorama (High-Definition Video Loop)
+   Smooth looping video replacing the manual SVG layers
+   Seamless background blending with feathered edge masking
    ===================================================================== */
 
 .city-diorama-wrapper {
   position: relative;
   width: 100%;
   max-width: 100%;
-  aspect-ratio: 1735 / 906;
+  aspect-ratio: 16 / 9;
   user-select: none;
   overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Base Diorama Image — Original Artwork with Seamless #F3F5F0 Outer Edge */
-.city-diorama-base {
+.city-diorama-video {
   display: block;
   width: 100%;
   height: 100%;
@@ -23,336 +26,13 @@
   border: none;
   outline: none;
   box-shadow: none;
-  filter: none;
+  /* Seamless edge feathering: eliminates rectangular boundary onto #f3f5f0 */
+  -webkit-mask-image: radial-gradient(ellipse 98% 96% at 50% 50%, #000 88%, transparent 100%);
+  mask-image: radial-gradient(ellipse 98% 96% at 50% 50%, #000 88%, transparent 100%);
 }
-
-/* Layered SVG Overlay */
-.city-diorama-svg-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
-}
-
-/* ---------------------------------------------------------------------
-   1. Isolated Illustrated Tree Canopy Layers
-   (Preserves original leaf shapes, textures, branches & colours)
-   --------------------------------------------------------------------- */
-
-.city-tree-canopy-layer {
-  will-change: transform;
-  transform-box: fill-box;
-  -webkit-transform-box: fill-box;
-}
-
-/* Tree 1: Left foreground prominent tree — heavy lush foliage sway */
-.tree-canopy-sway-1 {
-  transform-origin: 25% 98%;
-  -webkit-transform-origin: 25% 98%;
-  animation: treeCanopyGustA 3.8s cubic-bezier(0.4, 0, 0.25, 1) infinite;
-}
-
-/* Tree 2: Tall mid-left tree — slender, highly responsive wind bend */
-.tree-canopy-sway-2 {
-  transform-origin: 50% 98%;
-  -webkit-transform-origin: 50% 98%;
-  animation: treeCanopyGustB 3.2s cubic-bezier(0.38, 0, 0.22, 1) infinite -1.2s;
-}
-
-/* Tree 3: Left cluster companion tree — lighter flutter */
-.tree-canopy-sway-3 {
-  transform-origin: 38% 98%;
-  -webkit-transform-origin: 38% 98%;
-  animation: treeCanopyGustC 2.7s cubic-bezier(0.4, 0, 0.25, 1) infinite -1.9s;
-}
-
-/* Tree 4: Right foreground tree — wide visible canopy motion */
-.tree-canopy-sway-4 {
-  transform-origin: 80% 98%;
-  -webkit-transform-origin: 80% 98%;
-  animation: treeCanopyGustA 4.1s cubic-bezier(0.4, 0, 0.25, 1) infinite -0.8s;
-}
-
-/* Tree 5: Right mid tree — fluid medium crown bend */
-.tree-canopy-sway-5 {
-  transform-origin: 40% 98%;
-  -webkit-transform-origin: 40% 98%;
-  animation: treeCanopyGustB 3.4s cubic-bezier(0.38, 0, 0.22, 1) infinite -2.3s;
-}
-
-/* Tree 6: Right backdrop glade tree — background breeze sway */
-.tree-canopy-sway-6 {
-  transform-origin: 65% 98%;
-  -webkit-transform-origin: 65% 98%;
-  animation: treeCanopyGustC 2.9s cubic-bezier(0.4, 0, 0.25, 1) infinite -1.5s;
-}
-
-/* Keyframes A: Primary heavy foliage gust & elastic rebound */
-@keyframes treeCanopyGustA {
-  0% {
-    transform: rotate(-2.0deg) skewX(0.6deg);
-  }
-  26% {
-    transform: rotate(7.5deg) skewX(-2.6deg);
-  }
-  48% {
-    transform: rotate(5.8deg) skewX(-1.8deg);
-  }
-  72% {
-    transform: rotate(-4.2deg) skewX(1.5deg);
-  }
-  86% {
-    transform: rotate(2.4deg) skewX(-0.8deg);
-  }
-  100% {
-    transform: rotate(-2.0deg) skewX(0.6deg);
-  }
-}
-
-/* Keyframes B: Slender tall tree flexible bending & spring-back */
-@keyframes treeCanopyGustB {
-  0% {
-    transform: rotate(-2.4deg) skewX(0.8deg);
-  }
-  24% {
-    transform: rotate(8.8deg) skewX(-3.2deg);
-  }
-  46% {
-    transform: rotate(7.0deg) skewX(-2.4deg);
-  }
-  70% {
-    transform: rotate(-4.8deg) skewX(1.8deg);
-  }
-  85% {
-    transform: rotate(3.0deg) skewX(-1.0deg);
-  }
-  100% {
-    transform: rotate(-2.4deg) skewX(0.8deg);
-  }
-}
-
-/* Keyframes C: Smaller companion crown flutter */
-@keyframes treeCanopyGustC {
-  0% {
-    transform: rotate(-1.5deg) skewX(0.5deg);
-  }
-  25% {
-    transform: rotate(6.4deg) skewX(-2.1deg);
-  }
-  48% {
-    transform: rotate(4.8deg) skewX(-1.5deg);
-  }
-  71% {
-    transform: rotate(-3.5deg) skewX(1.2deg);
-  }
-  87% {
-    transform: rotate(2.0deg) skewX(-0.6deg);
-  }
-  100% {
-    transform: rotate(-1.5deg) skewX(0.5deg);
-  }
-}
-
-/* ---------------------------------------------------------------------
-   2. Wind Streamlines (Flowing left to right)
-   --------------------------------------------------------------------- */
-
-.city-wind-path {
-  fill: none;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-  animation-name: cityWindFlow;
-  animation-iteration-count: infinite;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: stroke-dashoffset, opacity;
-}
-
-.city-wind-path-1 {
-  stroke-dasharray: 280 920;
-  animation-duration: 7.2s;
-  animation-delay: -1.8s;
-}
-
-.city-wind-path-2 {
-  stroke-dasharray: 320 980;
-  animation-duration: 8.4s;
-  animation-delay: -4.6s;
-}
-
-.city-wind-path-3 {
-  stroke-dasharray: 360 1020;
-  animation-duration: 7.8s;
-  animation-delay: -0.2s;
-}
-
-.city-wind-path-4 {
-  stroke-dasharray: 260 880;
-  animation-duration: 9.2s;
-  animation-delay: -3.4s;
-}
-
-.city-wind-path-5 {
-  stroke-dasharray: 240 840;
-  animation-duration: 6.6s;
-  animation-delay: -5.1s;
-}
-
-@keyframes cityWindFlow {
-  0% {
-    stroke-dashoffset: 1300;
-    opacity: 0;
-  }
-  12% {
-    opacity: 0.85;
-  }
-  80% {
-    opacity: 0.85;
-  }
-  100% {
-    stroke-dashoffset: -400;
-    opacity: 0;
-  }
-}
-
-/* ---------------------------------------------------------------------
-   3. Detached Leaves Drifting Horizontally with Gentle Tumbling
-   --------------------------------------------------------------------- */
-
-.city-detached-leaf {
-  will-change: transform, opacity;
-  animation-iteration-count: infinite;
-  animation-timing-function: cubic-bezier(0.35, 0, 0.25, 1);
-  transform-box: view-box;
-}
-
-.city-detached-leaf-1 {
-  animation-name: detachedLeafTravel1;
-  animation-duration: 9.6s;
-  animation-delay: -1.4s;
-}
-
-.city-detached-leaf-2 {
-  animation-name: detachedLeafTravel2;
-  animation-duration: 11.4s;
-  animation-delay: -5.2s;
-}
-
-.city-detached-leaf-3 {
-  animation-name: detachedLeafTravel3;
-  animation-duration: 10.2s;
-  animation-delay: -3.6s;
-}
-
-.city-detached-leaf-4 {
-  animation-name: detachedLeafTravel4;
-  animation-duration: 12.6s;
-  animation-delay: -7.4s;
-}
-
-@keyframes detachedLeafTravel1 {
-  0% {
-    transform: translate(190px, 510px) rotate(0deg);
-    opacity: 0;
-  }
-  8% {
-    opacity: 0.95;
-  }
-  35% {
-    transform: translate(580px, 475px) rotate(85deg);
-    opacity: 0.95;
-  }
-  70% {
-    transform: translate(1020px, 525px) rotate(190deg);
-    opacity: 0.85;
-  }
-  92% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translate(1440px, 555px) rotate(290deg);
-    opacity: 0;
-  }
-}
-
-@keyframes detachedLeafTravel2 {
-  0% {
-    transform: translate(380px, 420px) rotate(15deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.95;
-  }
-  45% {
-    transform: translate(820px, 390px) rotate(110deg);
-    opacity: 0.95;
-  }
-  80% {
-    transform: translate(1260px, 435px) rotate(220deg);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(1580px, 465px) rotate(315deg);
-    opacity: 0;
-  }
-}
-
-@keyframes detachedLeafTravel3 {
-  0% {
-    transform: translate(470px, 475px) rotate(-15deg);
-    opacity: 0;
-  }
-  12% {
-    opacity: 0.9;
-  }
-  50% {
-    transform: translate(890px, 445px) rotate(95deg);
-    opacity: 0.95;
-  }
-  85% {
-    transform: translate(1310px, 490px) rotate(205deg);
-    opacity: 0.75;
-  }
-  100% {
-    transform: translate(1620px, 520px) rotate(285deg);
-    opacity: 0;
-  }
-}
-
-@keyframes detachedLeafTravel4 {
-  0% {
-    transform: translate(250px, 560px) rotate(10deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.9;
-  }
-  45% {
-    transform: translate(690px, 535px) rotate(80deg);
-    opacity: 0.9;
-  }
-  80% {
-    transform: translate(1140px, 580px) rotate(185deg);
-    opacity: 0.75;
-  }
-  100% {
-    transform: translate(1460px, 610px) rotate(260deg);
-    opacity: 0;
-  }
-}
-
-/* ---------------------------------------------------------------------
-   4. Reduced Motion Preferences
-   --------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .city-tree-canopy-layer,
-  .city-wind-path,
-  .city-detached-leaf {
-    animation: none !important;
-    transform: none !important;
-    opacity: 0.7;
+  .city-diorama-video {
+    animation: none;
   }
 }
