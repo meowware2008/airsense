@@ -9,6 +9,7 @@ from backend.app.api.locations import locations_bp
 from backend.app.api.air_quality import air_quality_bp
 from backend.app.api.alerts import alerts_bp
 from backend.app.api.forecasts import forecasts_bp
+from backend.app.api.best_time import best_time_bp
 from backend.app.monitoring.metrics import HTTP_REQUESTS_TOTAL, HTTP_REQUEST_DURATION_SECONDS
 
 
@@ -30,6 +31,7 @@ def create_app(config_class=Config):
     app.register_blueprint(air_quality_bp)
     app.register_blueprint(alerts_bp)
     app.register_blueprint(forecasts_bp)
+    app.register_blueprint(best_time_bp)
 
     # Prometheus Metric Request Hooks
     @app.before_request

@@ -8,6 +8,7 @@ import {
   getCurrentAirQuality,
   getAirQualityHistory,
   getForecasts,
+  getBestTime,
 } from './api'
 import {
   IconWind,
@@ -150,6 +151,9 @@ function App() {
   const [forecastData, setForecastData] = useState([])
   const [forecastLoading, setForecastLoading] = useState(true)
   const [forecastError, setForecastError] = useState('')
+  const [bestTimeData, setBestTimeData] = useState(null)
+  const [bestTimeLoading, setBestTimeLoading] = useState(true)
+  const [bestTimeError, setBestTimeError] = useState('')
   const [activeTab, setActiveTab] = useState('dashboard')
 
   function handleDetectLocation() {
@@ -275,6 +279,39 @@ function App() {
       fetchForecasts()
     }
   }, [selectedLocationId])
+  useEffect(() => {
+  let cancelled = false
+
+  const fetchBestTime = async () => {
+    setBestTimeLoading(true)
+    setBestTimeError('')
+
+    try {
+      const data = await getBestTime(selectedLocationId)
+
+      if (!cancelled) {
+        setBestTimeData(data)
+      }
+    } catch (err) {
+      if (!cancelled) {
+        setBestTimeData(null)
+        setBestTimeError(err.message)
+      }
+    } finally {
+      if (!cancelled) {
+        setBestTimeLoading(false)
+      }
+    }
+  }
+
+  if (selectedLocationId) {
+    fetchBestTime()
+  }
+
+  return () => {
+    cancelled = true
+  }
+}, [selectedLocationId])
 
   const currentLocation = useMemo(() => {
     return locations.find(l => String(l.id) === String(selectedLocationId)) || { name: 'Atmosphere' }
@@ -652,6 +689,75 @@ function App() {
           )}
         </section>
 
+        {/* BEST TIME TO GO OUT */}
+<section className="best-time-section" id="best-time">
+  <div className="best-time-card">
+    <div className="section-title-row">
+      <div>
+        <div className="ai-badge-row">
+          <IconSparkles size={16} color="#10b981" />
+          <span className="ai-badge-text">SMART OUTDOOR RECOMMENDATION</span>
+        </div>
+        <h2 className="section-heading">Best Time to Go Out</h2>
+        <p className="section-subheading">
+          Find the lowest predicted PM₂.₅ window in the next 24 hours.
+        </p>
+      </div>
+    </div>
+
+    {bestTimeLoading ? (
+      <div className="forecast-loading-state">
+        <IconLoader size={20} />
+        <span>Finding the best time window...</span>
+      </div>
+    ) : bestTimeError ? (
+      <div className="forecast-empty-state">
+        <p>{bestTimeError}</p>
+      </div>
+    ) : bestTimeData?.status === 'available' && bestTimeData?.best_window ? (
+      <div className="best-time-result">
+        <h3>
+          {new Date(bestTimeData.best_window.start).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+          {' – '}
+          {new Date(bestTimeData.best_window.end).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </h3>
+
+        <p className="best-time-duration">
+          Recommended window · {bestTimeData.best_window.duration_hours} hours
+        </p>
+
+        <div className="best-time-metrics">
+          <div>
+            <span>Average PM₂.₅</span>
+            <strong>{Number(bestTimeData.best_window.average_pm25).toFixed(2)} µg/m³</strong>
+          </div>
+          <div>
+            <span>Maximum PM₂.₅</span>
+            <strong>{Number(bestTimeData.best_window.maximum_pm25).toFixed(2)} µg/m³</strong>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="forecast-empty-state">
+        <p>
+          No suitable forecast window is currently available. Try again when
+          fresh observations are available.
+        </p>
+      </div>
+    )}
+
+    <p className="best-time-disclaimer">
+      Based on predicted PM₂.₅ levels only. This is not an official AQI
+      measurement or a guarantee of outdoor safety.
+    </p>
+  </div>
+</section>
         {/* ALERT PREFERENCES & NOTIFICATIONS */}
         <section className="alerts-section" id="alerts">
           <Alerts locations={locations} selectedLocationId={selectedLocationId} />
