@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import requests
@@ -32,8 +33,10 @@ def format_whatsapp_address(raw_number: str) -> str:
     return f"whatsapp:{cleaned}" if cleaned else ""
 
 
-def send_whatsapp_with_details(to_number: str, body: str) -> dict:
+def send_whatsapp_with_details(to_number: str, body: str, content_variables: dict = None) -> dict:
     """Send a WhatsApp message through the Twilio REST API with full diagnostic response.
+
+    Supports both free-form message body and approved Twilio Content Templates (ContentSid).
 
     Returns a dict with:
         - success: bool
@@ -69,14 +72,22 @@ def send_whatsapp_with_details(to_number: str, body: str) -> dict:
     to_addr = format_whatsapp_address(raw_to)
 
     url = f"https://api.twilio.com/2010-04-01/Accounts/{Config.TWILIO_ACCOUNT_SID}/Messages.json"
+    post_data = {
+        "From": from_addr,
+        "To": to_addr,
+    }
+
+    if Config.TWILIO_CONTENT_SID:
+        post_data["ContentSid"] = Config.TWILIO_CONTENT_SID
+        if content_variables:
+            post_data["ContentVariables"] = json.dumps(content_variables)
+    else:
+        post_data["Body"] = body
+
     try:
         resp = requests.post(
             url,
-            data={
-                "From": from_addr,
-                "To": to_addr,
-                "Body": body,
-            },
+            data=post_data,
             auth=(Config.TWILIO_ACCOUNT_SID, Config.TWILIO_AUTH_TOKEN),
             timeout=Config.REQUEST_TIMEOUT_SECONDS,
         )

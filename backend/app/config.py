@@ -50,6 +50,7 @@ class Config:
     TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
     TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+17372508034")
+    TWILIO_CONTENT_SID = os.getenv("TWILIO_CONTENT_SID", "")
     # WhatsApp is only used for serious air quality (CPCB "Poor" starts at 301 on the 0-500 scale)
     WHATSAPP_MIN_AQI = int(os.getenv("WHATSAPP_MIN_AQI", "200"))
 

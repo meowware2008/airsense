@@ -226,7 +226,12 @@ def send_best_time_whatsapp():
         err_msg = dispatch_res.get("error_message") or "Unknown error"
         clean_from = Config.TWILIO_WHATSAPP_FROM.replace("whatsapp:", "").strip()
 
-        if err_code == 63016:
+        if err_code == 21654:
+            status_msg = (
+                f"Twilio Trial Restriction (Error 21654): Twilio requires an active WhatsApp session or a Content Template. "
+                f"Please reply 'Hi' on WhatsApp from {target_number} to {clean_from} to activate your 24-hr session, or configure TWILIO_CONTENT_SID."
+            )
+        elif err_code == 63016:
             status_msg = (
                 f"Twilio WhatsApp session inactive (Error 63016): WhatsApp requires an active 24-hr session. "
                 f"Please send 'Hi' or any message on WhatsApp from your phone ({target_number}) to {clean_from}, then click send again."
