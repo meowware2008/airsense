@@ -96,7 +96,7 @@ def test_send_best_time_whatsapp_success(client, auth_token, test_location):
     }
 
     with patch("backend.app.api.best_time.predict_next_24h", return_value=mock_forecast_result), \
-         patch("backend.app.api.best_time.send_whatsapp", return_value=True) as mock_send:
+         patch("backend.app.api.best_time.send_whatsapp_with_details", return_value={"success": True, "message_sid": "SMmock", "error_code": None, "error_message": None, "status_code": 200}) as mock_send:
         res = client.post(
             "/api/v1/best-time/send-whatsapp",
             headers=headers,

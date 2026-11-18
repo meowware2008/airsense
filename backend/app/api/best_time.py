@@ -2,11 +2,17 @@ from datetime import datetime, timedelta
 
 from flask import Blueprint, request, jsonify, g
 
+from backend.app.config import Config
 from backend.app.database import db_session
 from backend.app.models import Location, AirQualityReading
 from backend.app.services.ingestion_service import IngestionService
 from backend.app.services.best_time_service import find_best_time_window
-from backend.app.services.whatsapp_service import send_whatsapp, is_valid_whatsapp_number, whatsapp_configured
+from backend.app.services.whatsapp_service import (
+    send_whatsapp,
+    send_whatsapp_with_details,
+    is_valid_whatsapp_number,
+    whatsapp_configured,
+)
 from backend.app.api.auth import token_required
 from ml.src.predict import predict_next_24h
 
@@ -206,15 +212,37 @@ def send_best_time_whatsapp():
         f"💡 *Tip:* Ideal time for outdoor exercise, walking, and room ventilation!"
     )
 
-    sent = send_whatsapp(target_number, message_body)
+    dispatch_res = send_whatsapp_with_details(target_number, message_body)
+    sent = dispatch_res["success"]
     configured = whatsapp_configured()
 
     if sent:
-        status_msg = f"Best outdoor window successfully sent to {target_number} via WhatsApp!"
+        sid_str = f" (SID: {dispatch_res['message_sid']})" if dispatch_res.get("message_sid") else ""
+        status_msg = f"Best outdoor window successfully sent to {target_number} via WhatsApp!{sid_str}"
     elif not configured:
         status_msg = f"Recommendation ready for {target_number}, but Twilio credentials (TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN) are not configured on the server."
     else:
-        status_msg = f"Twilio dispatch to {target_number} failed. Ensure recipient is joined to Twilio WhatsApp sandbox."
+        err_code = dispatch_res.get("error_code")
+        err_msg = dispatch_res.get("error_message") or "Unknown error"
+        clean_from = Config.TWILIO_WHATSAPP_FROM.replace("whatsapp:", "").strip()
+
+        if err_code == 63016:
+            status_msg = (
+                f"Twilio WhatsApp session inactive (Error 63016): WhatsApp requires an active 24-hr session. "
+                f"Please send 'Hi' or any message on WhatsApp from your phone ({target_number}) to {clean_from}, then click send again."
+            )
+        elif err_code == 21608:
+            status_msg = (
+                f"Twilio Trial restriction (Error 21608): Recipient {target_number} is unverified. "
+                f"Please add {target_number} to Twilio Verified Caller IDs or activate the sandbox."
+            )
+        elif err_code == 20003:
+            status_msg = "Twilio Authentication Error (20003): Invalid Account SID or Auth Token configured on server."
+        elif err_code == 21606:
+            status_msg = f"Twilio Sender Error (21606): From number {clean_from} is not recognized as a WhatsApp sender."
+        else:
+            code_str = f" (Error {err_code})" if err_code else ""
+            status_msg = f"Twilio dispatch to {target_number} failed{code_str}: {err_msg}"
 
     return jsonify({
         "success": True,
@@ -222,6 +250,9 @@ def send_best_time_whatsapp():
         "whatsapp_configured": configured,
         "recipient": target_number,
         "message": status_msg,
+        "error_code": dispatch_res.get("error_code"),
+        "error_detail": dispatch_res.get("error_message"),
+        "message_sid": dispatch_res.get("message_sid"),
         "best_window": best_window,
         "formatted_text": message_body,
     }), 200
