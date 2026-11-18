@@ -174,3 +174,14 @@ export async function markNotificationRead(notificationId) {
 
   return response.json()
 }
+export async function getBestTime(locationId) {
+  const response = await fetch(
+    `${API_BASE_URL}/best-time?location_id=${locationId}`
+  );
+
+  if (!response.ok) {
+    throw new Error('Unable to fetch best time recommendation');
+  }
+
+  return response.json();
+}
