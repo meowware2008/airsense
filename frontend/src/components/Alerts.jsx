@@ -6,6 +6,8 @@ import {
   deleteAlert,
   getNotifications,
   markNotificationRead,
+  getMe,
+  saveWhatsappNumber,
 } from '../api'
 import {
   IconBell,
@@ -21,6 +23,9 @@ function Alerts({ locations = [], selectedLocationId }) {
   const [alerts, setAlerts] = useState([])
   const [notifications, setNotifications] = useState([])
   const [threshold, setThreshold] = useState('100')
+  const [whatsappNumber, setWhatsappNumber] = useState('')
+  const [savedWhatsappNumber, setSavedWhatsappNumber] = useState('')
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false)
   const [alertLocationId, setAlertLocationId] = useState(selectedLocationId || '1')
   const [deletingId, setDeletingId] = useState(null)
   const [markingId, setMarkingId] = useState(null)
@@ -65,6 +70,15 @@ function Alerts({ locations = [], selectedLocationId }) {
           setAlerts(alertData.alerts || [])
           setNotifications(notificationData.notifications || [])
         }
+        try {
+          const me = await getMe()
+          if (!ignore) {
+            setWhatsappNumber(me.user?.whatsapp_number || '')
+            setSavedWhatsappNumber(me.user?.whatsapp_number || '')
+          }
+        } catch {
+          // profile is optional for rendering the page
+        }
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -81,13 +95,28 @@ function Alerts({ locations = [], selectedLocationId }) {
     }
   }, [])
 
+  async function handleSaveWhatsapp() {
+    setError('')
+    setMessage('')
+    try {
+      const data = await saveWhatsappNumber(whatsappNumber.trim())
+      const saved = data.user?.whatsapp_number || ''
+      setSavedWhatsappNumber(saved)
+      setWhatsappNumber(saved)
+      if (!saved) setWhatsappEnabled(false)
+      setMessage(saved ? 'WhatsApp number saved!' : 'WhatsApp number removed.')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   async function handleCreateAlert(e) {
     e.preventDefault()
     setError('')
     setMessage('')
 
     try {
-      await createAlert(alertLocationId, threshold)
+      await createAlert(alertLocationId, threshold, whatsappEnabled)
       setMessage('Alert created successfully!')
       await loadAlerts()
     } catch (err) {
@@ -166,6 +195,39 @@ function Alerts({ locations = [], selectedLocationId }) {
             />
           </div>
 
+          <div className="alert-field-group">
+            <label htmlFor="alert-whatsapp">WhatsApp Number</label>
+            <input
+              id="alert-whatsapp"
+              type="tel"
+              placeholder="+919876543210"
+              value={whatsappNumber}
+              onChange={e => setWhatsappNumber(e.target.value)}
+              className="alert-input"
+            />
+            <button
+              type="button"
+              className="create-alert-btn"
+              onClick={handleSaveWhatsapp}
+              disabled={whatsappNumber.trim() === savedWhatsappNumber}
+            >
+              Save Number
+            </button>
+          </div>
+
+          <div className="alert-field-group">
+            <label htmlFor="alert-whatsapp-enabled">
+              <input
+                id="alert-whatsapp-enabled"
+                type="checkbox"
+                checked={whatsappEnabled}
+                disabled={!savedWhatsappNumber}
+                onChange={e => setWhatsappEnabled(e.target.checked)}
+              />{' '}
+              Also alert me on WhatsApp when air quality is poor
+            </label>
+          </div>
+
           <button type="submit" className="create-alert-btn">Create Alert</button>
         </form>
 
@@ -202,6 +264,7 @@ function Alerts({ locations = [], selectedLocationId }) {
                 </div>
                 <p className="alert-threshold-info">
                   AQI Threshold: <strong>{alert.threshold_value}</strong>
+                  {alert.whatsapp_enabled ? ' · WhatsApp on' : ''}
                 </p>
                 <small className="alert-meta">
                   {alert.created_at ? `Created on ${new Date(alert.created_at).toLocaleDateString()}` : ''}

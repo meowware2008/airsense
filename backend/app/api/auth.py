@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from backend.app.database import db_session
 from backend.app.models import User
 from backend.app.config import Config
+from backend.app.services.whatsapp_service import is_valid_whatsapp_number
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 
@@ -98,3 +99,18 @@ def login():
 @token_required
 def me():
     return jsonify({"user": g.current_user.to_dict()}), 200
+
+
+@auth_bp.route("/me/whatsapp", methods=["PUT"])
+@token_required
+def update_whatsapp_number():
+    """Save (or clear) the WhatsApp number used for alerts. Number must be E.164, e.g. +919876543210."""
+    data = request.get_json(silent=True) or {}
+    number = (data.get("whatsapp_number") or "").strip().replace(" ", "")
+
+    if number and not is_valid_whatsapp_number(number):
+        return jsonify({"error": "Enter the number with country code, e.g. +919876543210"}), 400
+
+    g.current_user.whatsapp_number = number or None
+    db_session.commit()
+    return jsonify({"message": "WhatsApp number updated", "user": g.current_user.to_dict()}), 200

@@ -46,6 +46,13 @@ class Config:
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
     MAIL_FROM = os.getenv("MAIL_FROM", "airsense-alerts@example.com")
 
+    # WhatsApp alerts via Twilio (optional)
+    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+    TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
+    # WhatsApp is only used for serious air quality (CPCB "Poor" starts at 301 on the 0-500 scale)
+    WHATSAPP_MIN_AQI = int(os.getenv("WHATSAPP_MIN_AQI", "200"))
+
     # ML
     MODEL_PATH = os.getenv(
         "MODEL_PATH",
