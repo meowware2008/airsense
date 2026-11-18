@@ -40,6 +40,7 @@ def create_alert():
     location_id = data.get("location_id")
     threshold_value = data.get("threshold_value")
     enabled = data.get("enabled", True)
+    whatsapp_enabled = bool(data.get("whatsapp_enabled", False))
 
     if location_id is None or threshold_value is None:
         return jsonify({"error": "location_id and threshold_value are required"}), 400
@@ -51,6 +52,9 @@ def create_alert():
 
     if threshold_value <= 0 or threshold_value > 500:
         return jsonify({"error": "threshold_value must be between 1 and 500"}), 400
+
+    if whatsapp_enabled and not g.current_user.whatsapp_number:
+        return jsonify({"error": "Add your WhatsApp number before enabling WhatsApp alerts"}), 400
 
     loc = db_session.query(Location).filter(Location.id == location_id).first()
     if not loc:
@@ -72,6 +76,7 @@ def create_alert():
         location_id=location_id,
         threshold_value=threshold_value,
         enabled=enabled,
+        whatsapp_enabled=whatsapp_enabled,
     )
     db_session.add(pref)
     db_session.commit()
@@ -106,6 +111,12 @@ def update_alert(alert_id: int):
 
     if "enabled" in data:
         pref.enabled = bool(data["enabled"])
+
+    if "whatsapp_enabled" in data:
+        wants_whatsapp = bool(data["whatsapp_enabled"])
+        if wants_whatsapp and not g.current_user.whatsapp_number:
+            return jsonify({"error": "Add your WhatsApp number before enabling WhatsApp alerts"}), 400
+        pref.whatsapp_enabled = wants_whatsapp
 
     db_session.commit()
     _update_active_alerts_metric()
