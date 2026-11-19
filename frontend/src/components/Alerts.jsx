@@ -20,7 +20,7 @@ import {
 } from './Icons'
 import './Alerts.css'
 
-function Alerts({ locations = [], selectedLocationId }) {
+function Alerts({ locations = [], selectedLocationId, showDiagnostics = false }) {
   const [alerts, setAlerts] = useState([])
   const [notifications, setNotifications] = useState([])
   const [threshold, setThreshold] = useState('100')
@@ -206,217 +206,256 @@ function Alerts({ locations = [], selectedLocationId }) {
       </h2>
       <p>Get notified when air quality crosses your chosen AQI threshold.</p>
 
-      <div className="alerts-panel">
-        <h3>Create a New Alert</h3>
+      <div className="alerts-panel create-alert-panel">
+        <div className="panel-header-simple">
+          <h3>Create a New Alert</h3>
+          <p className="panel-subtitle">
+            Configure automated notifications for when ambient air pollution crosses your safe limits.
+          </p>
+        </div>
 
         <form onSubmit={handleCreateAlert} className="create-alert-form">
-          <div className="alert-field-group">
-            <label htmlFor="alert-city">Target City</label>
-            <select
-              id="alert-city"
-              value={alertLocationId}
-              onChange={e => setAlertLocationId(e.target.value)}
-              className="alert-select"
-            >
-              {locations.map(loc => (
-                <option key={loc.id} value={loc.id}>
-                  {loc.name}{loc.region ? ` (${loc.region})` : ''}
-                </option>
-              ))}
-            </select>
+          <div className="form-grid-three">
+            <div className="form-group">
+              <label htmlFor="alert-city">Target City</label>
+              <select
+                id="alert-city"
+                value={alertLocationId}
+                onChange={e => setAlertLocationId(e.target.value)}
+                className="form-control form-select"
+              >
+                {locations.map(loc => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.name}{loc.region ? ` (${loc.region})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="alert-threshold">AQI Threshold</label>
+              <div className="input-group-unit">
+                <input
+                  id="alert-threshold"
+                  type="number"
+                  min="1"
+                  max="500"
+                  value={threshold}
+                  onChange={e => setThreshold(e.target.value)}
+                  className="form-control"
+                  placeholder="100"
+                  required
+                />
+                <span className="unit-label">AQI</span>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div className="label-with-hint">
+                <label htmlFor="alert-whatsapp">WhatsApp Number</label>
+                {savedWhatsappNumber && (
+                  <span className="saved-hint">Profile: {savedWhatsappNumber}</span>
+                )}
+              </div>
+              <div className="phone-input-wrap">
+                <span className="phone-prefix-icon">📱</span>
+                <input
+                  id="alert-whatsapp"
+                  type="tel"
+                  placeholder="+919494202261 (E.164)"
+                  value={whatsappNumber}
+                  onChange={e => {
+                    setWhatsappNumber(e.target.value)
+                    setTestRecipientPhone(e.target.value)
+                  }}
+                  className="form-control phone-input"
+                />
+                {whatsappNumber.trim() && whatsappNumber.trim() !== savedWhatsappNumber && (
+                  <button
+                    type="button"
+                    className="btn-save-inline"
+                    onClick={handleSaveWhatsapp}
+                    title="Save this number to your user profile"
+                  >
+                    Save
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="alert-field-group">
-            <label htmlFor="alert-threshold">AQI Threshold</label>
-            <input
-              id="alert-threshold"
-              type="number"
-              min="1"
-              max="500"
-              value={threshold}
-              onChange={e => setThreshold(e.target.value)}
-              className="alert-input"
-              required
-            />
-          </div>
-
-          <div className="alert-field-group">
-            <label htmlFor="alert-whatsapp">WhatsApp Number</label>
-            <input
-              id="alert-whatsapp"
-              type="tel"
-              placeholder="+919494202261"
-              value={whatsappNumber}
-              onChange={e => {
-                setWhatsappNumber(e.target.value)
-                setTestRecipientPhone(e.target.value)
-              }}
-              className="alert-input"
-            />
-            <button
-              type="button"
-              className="create-alert-btn"
-              onClick={handleSaveWhatsapp}
-              disabled={whatsappNumber.trim() === savedWhatsappNumber}
-            >
-              Save Number
-            </button>
-          </div>
-
-          <div className="alert-field-group">
-            <label htmlFor="alert-whatsapp-enabled">
+          <div className="form-action-bar">
+            <label className="checkbox-toggle-wrap">
               <input
                 id="alert-whatsapp-enabled"
                 type="checkbox"
                 checked={whatsappEnabled}
-                disabled={!savedWhatsappNumber}
                 onChange={e => setWhatsappEnabled(e.target.checked)}
-              />{' '}
-              Also alert me on WhatsApp when air quality is poor
+                className="styled-checkbox"
+              />
+              <span className="checkbox-text">
+                <strong>Also alert me on WhatsApp</strong> when air quality exceeds this threshold
+              </span>
             </label>
-          </div>
 
-          <button type="submit" className="create-alert-btn">Create Alert</button>
+            <button type="submit" className="btn-create-alert-submit">
+              <IconBell size={16} />
+              <span>Create Alert</span>
+            </button>
+          </div>
         </form>
 
-        <p className="alerts-note">
-          You'll receive an alert when the AQI reaches your configured threshold.
-        </p>
+        <div className="form-info-note">
+          <IconAlertTriangle size={15} color="#059669" />
+          <span>Alert triggers automatically during hourly telemetry ingestion when observed AQI reaches or exceeds your threshold.</span>
+        </div>
       </div>
 
-      {error && <p className="alerts-error">{error}</p>}
-      {message && <p className="alerts-success">{message}</p>}
+      {error && (
+        <div className="alert-feedback-banner error">
+          <IconAlertTriangle size={18} color="#dc2626" />
+          <span>{error}</span>
+        </div>
+      )}
+      {message && (
+        <div className="alert-feedback-banner success">
+          <IconCheck size={18} color="#16a34a" />
+          <span>{message}</span>
+        </div>
+      )}
 
-      {/* WhatsApp Diagnostic & Live Testing Panel */}
-      <div className="alerts-panel whatsapp-test-panel">
-        <div className="test-panel-header">
-          <div className="test-header-text">
-            <div className="test-badge-row">
-              <span className="test-badge">DIAGNOSTIC TEST</span>
-              <span className="test-channel-badge">Twilio WhatsApp Sandbox</span>
+      {/* WhatsApp Diagnostic & Live Testing Panel (Controlled by Settings toggle) */}
+      {showDiagnostics && (
+        <div className="alerts-panel whatsapp-test-panel">
+          <div className="test-panel-header">
+            <div className="test-header-text">
+              <div className="test-badge-row">
+                <span className="test-badge">DIAGNOSTIC TEST</span>
+                <span className="test-channel-badge">Twilio WhatsApp Sandbox</span>
+              </div>
+              <h3>🧪 Manual WhatsApp Connection Test</h3>
+              <p>
+                Send an instant diagnostic test message to verify outbound delivery, sender authorization, and 24-hr session status.
+              </p>
             </div>
-            <h3>🧪 Manual WhatsApp Connection Test</h3>
-            <p>
-              Send an instant diagnostic test message to verify outbound delivery, sender authorization, and 24-hr session status.
-            </p>
           </div>
-        </div>
 
-        <div className="test-recipient-bar">
-          <div className="test-recipient-input-group">
-            <label htmlFor="test-phone-input">📱 Send Alert To Number (E.164):</label>
-            <input
-              id="test-phone-input"
-              type="tel"
-              placeholder="+919494202261 (include country code)"
-              value={testRecipientPhone}
-              onChange={e => setTestRecipientPhone(e.target.value)}
-              className="test-phone-input"
-            />
-          </div>
-          <button
-            type="button"
-            className="btn-send-test-whatsapp"
-            onClick={handleTestWhatsapp}
-            disabled={testingWhatsapp || !testRecipientPhone.trim()}
-          >
-            {testingWhatsapp ? (
-              <>
-                <IconLoader size={16} />
-                <span>Testing Dispatch...</span>
-              </>
-            ) : (
-              <>
-                <span className="wa-btn-icon">💬</span>
-                <span>Send Test WhatsApp Message</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Advanced test options toggle */}
-        <div className="test-options-toggle">
-          <button
-            type="button"
-            className="btn-link-toggle"
-            onClick={() => setShowAdvancedTest(!showAdvancedTest)}
-          >
-            {showAdvancedTest ? 'Hide Advanced Options ▲' : 'Show Advanced / Content Template Options ▼'}
-          </button>
-        </div>
-
-        {showAdvancedTest && (
-          <div className="test-advanced-box">
-            <div className="test-input-group">
-              <label htmlFor="test-content-sid">Twilio Content Template SID (Optional)</label>
+          <div className="test-recipient-bar">
+            <div className="test-recipient-input-group">
+              <label htmlFor="test-phone-input">📱 Send Alert To Number (E.164):</label>
               <input
-                id="test-content-sid"
-                type="text"
-                placeholder="e.g. HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                value={testContentSid}
-                onChange={e => setTestContentSid(e.target.value)}
-                className="test-input"
-              />
-              <span className="test-hint">Required for Twilio Trial outbound without an active WhatsApp reply session.</span>
-            </div>
-            <div className="test-input-group">
-              <label htmlFor="test-custom-msg">Custom Message Text (Optional)</label>
-              <input
-                id="test-custom-msg"
-                type="text"
-                placeholder="Default: AirSense Test Ping: WhatsApp alert channel connection verified! 🌿"
-                value={testCustomMessage}
-                onChange={e => setTestCustomMessage(e.target.value)}
-                className="test-input"
+                id="test-phone-input"
+                type="tel"
+                placeholder="+919494202261 (include country code)"
+                value={testRecipientPhone}
+                onChange={e => setTestRecipientPhone(e.target.value)}
+                className="test-phone-input"
               />
             </div>
-          </div>
-        )}
-
-        {/* Live Diagnostics Card when test is triggered */}
-        {testResult && (
-          <div className={`diagnostic-result-card ${testResult.success ? 'success' : 'failed'}`}>
-            <div className="diag-header">
-              <span className="diag-status-pill">
-                {testResult.success ? '✓ SUCCESS: 200 OK' : `⚠️ FAILED: HTTP ${testResult.status_code || 400}`}
-              </span>
-              {testResult.message_sid && (
-                <span className="diag-sid">Twilio SID: {testResult.message_sid}</span>
+            <button
+              type="button"
+              className="btn-send-test-whatsapp"
+              onClick={handleTestWhatsapp}
+              disabled={testingWhatsapp || !testRecipientPhone.trim()}
+            >
+              {testingWhatsapp ? (
+                <>
+                  <IconLoader size={16} />
+                  <span>Testing Dispatch...</span>
+                </>
+              ) : (
+                <>
+                  <span className="wa-btn-icon">💬</span>
+                  <span>Send Test WhatsApp Message</span>
+                </>
               )}
-            </div>
+            </button>
+          </div>
 
-            <div className="diag-grid">
-              <div>
-                <span className="diag-label">Sender (From):</span>
-                <code>{testResult.from_number || 'whatsapp:+17372508034'}</code>
+          {/* Advanced test options toggle */}
+          <div className="test-options-toggle">
+            <button
+              type="button"
+              className="btn-link-toggle"
+              onClick={() => setShowAdvancedTest(!showAdvancedTest)}
+            >
+              {showAdvancedTest ? 'Hide Advanced Options ▲' : 'Show Advanced / Content Template Options ▼'}
+            </button>
+          </div>
+
+          {showAdvancedTest && (
+            <div className="test-advanced-box">
+              <div className="test-input-group">
+                <label htmlFor="test-content-sid">Twilio Content Template SID (Optional)</label>
+                <input
+                  id="test-content-sid"
+                  type="text"
+                  placeholder="e.g. HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  value={testContentSid}
+                  onChange={e => setTestContentSid(e.target.value)}
+                  className="test-input"
+                />
+                <span className="test-hint">Required for Twilio Trial outbound without an active WhatsApp reply session.</span>
               </div>
-              <div>
-                <span className="diag-label">Recipient (To):</span>
-                <code>{testResult.to_number || whatsappNumber || '+919494202261'}</code>
+              <div className="test-input-group">
+                <label htmlFor="test-custom-msg">Custom Message Text (Optional)</label>
+                <input
+                  id="test-custom-msg"
+                  type="text"
+                  placeholder="Default: AirSense Test Ping: WhatsApp alert channel connection verified! 🌿"
+                  value={testCustomMessage}
+                  onChange={e => setTestCustomMessage(e.target.value)}
+                  className="test-input"
+                />
               </div>
-              {testResult.error_code && (
+            </div>
+          )}
+
+          {/* Live Diagnostics Card when test is triggered */}
+          {testResult && (
+            <div className={`diagnostic-result-card ${testResult.success ? 'success' : 'failed'}`}>
+              <div className="diag-header">
+                <span className="diag-status-pill">
+                  {testResult.success ? '✓ SUCCESS: 200 OK' : `⚠️ FAILED: HTTP ${testResult.status_code || 400}`}
+                </span>
+                {testResult.message_sid && (
+                  <span className="diag-sid">Twilio SID: {testResult.message_sid}</span>
+                )}
+              </div>
+
+              <div className="diag-grid">
                 <div>
-                  <span className="diag-label">Twilio Error Code:</span>
-                  <code className="diag-err-code">{testResult.error_code}</code>
+                  <span className="diag-label">Sender (From):</span>
+                  <code>{testResult.from_number || 'whatsapp:+17372508034'}</code>
+                </div>
+                <div>
+                  <span className="diag-label">Recipient (To):</span>
+                  <code>{testResult.to_number || whatsappNumber || '+919494202261'}</code>
+                </div>
+                {testResult.error_code && (
+                  <div>
+                    <span className="diag-label">Twilio Error Code:</span>
+                    <code className="diag-err-code">{testResult.error_code}</code>
+                  </div>
+                )}
+                {testResult.error_message && (
+                  <div>
+                    <span className="diag-label">Twilio Response:</span>
+                    <span className="diag-err-msg">{testResult.error_message}</span>
+                  </div>
+                )}
+              </div>
+
+              {testResult.diagnostic_advice && (
+                <div className="diag-advice-box">
+                  <strong>Recommended Action:</strong>
+                  <p>{testResult.diagnostic_advice}</p>
                 </div>
               )}
-              {testResult.error_message && (
-                <div>
-                  <span className="diag-label">Twilio Response:</span>
-                  <span className="diag-err-msg">{testResult.error_message}</span>
-                </div>
-              )}
             </div>
-
-            {testResult.diagnostic_advice && (
-              <div className="diag-advice-box">
-                <strong>Recommended Action:</strong>
-                <p>{testResult.diagnostic_advice}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <div className="alerts-panel">
         <div className="panel-header-row">

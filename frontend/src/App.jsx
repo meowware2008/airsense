@@ -181,7 +181,15 @@ function App() {
   const [bestTimeCustomPhone, setBestTimeCustomPhone] = useState(
     () => authData?.user?.whatsapp_number || '+919494202261'
   )
+  const [showDiagnostics, setShowDiagnostics] = useState(() => {
+    return localStorage.getItem('airsense_show_diagnostics') === 'true'
+  })
   const [activeTab, setActiveTab] = useState('dashboard')
+
+  function handleToggleDiagnostics(enabled) {
+    setShowDiagnostics(enabled)
+    localStorage.setItem('airsense_show_diagnostics', enabled ? 'true' : 'false')
+  }
 
   async function handleSendBestTimeToWhatsapp() {
     setBestTimeWhatsappStatus('')
@@ -1004,7 +1012,11 @@ function App() {
                 </p>
               </div>
             </div>
-            <Alerts locations={locations} selectedLocationId={selectedLocationId} />
+            <Alerts
+              locations={locations}
+              selectedLocationId={selectedLocationId}
+              showDiagnostics={showDiagnostics}
+            />
           </section>
         )}
 
@@ -1059,13 +1071,41 @@ function App() {
                   <h4>WhatsApp Alert Integration</h4>
                   <p>Twilio Sandbox (+1 737 250 8034)</p>
                 </div>
-                <button
-                  type="button"
-                  className="btn-settings-action"
-                  onClick={() => setActiveTab('alerts')}
-                >
-                  Test & Debug 🧪
-                </button>
+                <span className="settings-badge">Configured</span>
+              </div>
+              <div className="settings-divider" />
+              <div className="settings-item settings-item-diagnostic-toggle">
+                <div className="settings-item-info">
+                  <div className="settings-title-badge-row">
+                    <h4>Manual WhatsApp Testing & Diagnostic Station</h4>
+                    <span className={`settings-badge ${showDiagnostics ? 'badge-active' : 'badge-inactive'}`}>
+                      {showDiagnostics ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </div>
+                  <p>
+                    Enable manual outbound test messaging, recipient verification checker, and live Twilio diagnostics in the Alerts dashboard.
+                  </p>
+                </div>
+                <div className="settings-toggle-control-group">
+                  <label className="settings-switch" title="Toggle manual testing station in Alerts">
+                    <input
+                      type="checkbox"
+                      checked={showDiagnostics}
+                      onChange={e => handleToggleDiagnostics(e.target.checked)}
+                    />
+                    <span className="settings-slider" />
+                  </label>
+                  {showDiagnostics && (
+                    <button
+                      type="button"
+                      className="btn-settings-action"
+                      onClick={() => setActiveTab('alerts')}
+                      title="Open diagnostic station in Alerts"
+                    >
+                      Open Station 🧪
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </section>
