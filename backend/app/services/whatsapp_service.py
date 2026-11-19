@@ -116,18 +116,21 @@ def send_whatsapp_with_details(
     to_addr = format_whatsapp_address(raw_to)
 
     url = f"https://api.twilio.com/2010-04-01/Accounts/{Config.TWILIO_ACCOUNT_SID}/Messages.json"
+
+    # Always send free-form Body first — ContentSid overrides the message with
+    # the template's own static text, so we only fall back to it on error 21654.
     post_data = {
         "From": from_addr,
         "To": to_addr,
+        "Body": body,
     }
 
-    effective_content_sid = content_sid or Config.TWILIO_CONTENT_SID
-    if effective_content_sid:
-        post_data["ContentSid"] = effective_content_sid
+    # Allow explicit override (e.g. from the diagnostic test panel passing content_sid directly)
+    if content_sid:
+        post_data.pop("Body", None)
+        post_data["ContentSid"] = content_sid
         if content_variables:
             post_data["ContentVariables"] = json.dumps(content_variables)
-    else:
-        post_data["Body"] = body
 
     try:
         resp = requests.post(
@@ -157,6 +160,40 @@ def send_whatsapp_with_details(
         twilio_code = resp_data.get("code")
         twilio_msg = resp_data.get("message") or resp.text[:250]
         logger.warning(f"WhatsApp send failed: HTTP {resp.status_code} (Code {twilio_code}): {twilio_msg}")
+
+        # 21654 = ContentSid Required (trial account, no active session)
+        # Automatically retry once with the configured ContentSid template as fallback
+        if twilio_code == 21654 and Config.TWILIO_CONTENT_SID and "Body" in post_data:
+            logger.info("Retrying with ContentSid fallback template due to error 21654")
+            fallback_data = {k: v for k, v in post_data.items() if k != "Body"}
+            fallback_data["ContentSid"] = Config.TWILIO_CONTENT_SID
+            fallback_data["ContentVariables"] = json.dumps({"1": body[:1500]})
+            try:
+                resp2 = requests.post(
+                    url,
+                    data=fallback_data,
+                    auth=(Config.TWILIO_ACCOUNT_SID, Config.TWILIO_AUTH_TOKEN),
+                    timeout=Config.REQUEST_TIMEOUT_SECONDS,
+                )
+                resp2_data = resp2.json() if resp2.content else {}
+                if resp2.status_code in (200, 201):
+                    logger.info("ContentSid fallback succeeded")
+                    return {
+                        "success": True,
+                        "status_code": resp2.status_code,
+                        "error_code": None,
+                        "error_message": None,
+                        "message_sid": resp2_data.get("sid"),
+                        "from_number": from_addr,
+                        "to_number": to_addr,
+                        "payload_used": fallback_data,
+                    }
+                twilio_code = resp2_data.get("code", twilio_code)
+                twilio_msg = resp2_data.get("message") or resp2.text[:250]
+                logger.warning(f"ContentSid fallback also failed: {twilio_code}: {twilio_msg}")
+                post_data = fallback_data
+            except Exception as e2:
+                logger.warning(f"ContentSid fallback request error: {e2}")
 
         return {
             "success": False,

@@ -50,7 +50,7 @@ class Config:
     TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
     TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+17372508034")
-    TWILIO_CONTENT_SID = os.getenv("TWILIO_CONTENT_SID", "HXb131895de71a093156d1062e878de57c")
+    TWILIO_CONTENT_SID = os.getenv("TWILIO_CONTENT_SID", "")
     # Floor for WhatsApp alerts (default 1 to respect the user's chosen threshold)
     WHATSAPP_MIN_AQI = int(os.getenv("WHATSAPP_MIN_AQI", "1"))
 

@@ -41,7 +41,7 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
   const [testResult, setTestResult] = useState(null)
   const [testRecipientPhone, setTestRecipientPhone] = useState('+919494202261')
   const [testCustomMessage, setTestCustomMessage] = useState('🌿 AirSense Alert: Air Quality is Satisfactory (AQI 87).')
-  const [testContentSid, setTestContentSid] = useState('HXb131895de71a093156d1062e878de57c')
+  const [testContentSid, setTestContentSid] = useState('')
   const [showAdvancedTest, setShowAdvancedTest] = useState(true)
 
   const [prevSelectedId, setPrevSelectedId] = useState(selectedLocationId)
