@@ -35,9 +35,9 @@ function Alerts({ locations = [], selectedLocationId }) {
   const [message, setMessage] = useState('')
   const [testingWhatsapp, setTestingWhatsapp] = useState(false)
   const [testResult, setTestResult] = useState(null)
-  const [testCustomMessage, setTestCustomMessage] = useState('')
-  const [testContentSid, setTestContentSid] = useState('')
-  const [showAdvancedTest, setShowAdvancedTest] = useState(false)
+  const [testCustomMessage, setTestCustomMessage] = useState('🌿 AirSense Alert: Air Quality is Satisfactory (AQI 87).')
+  const [testContentSid, setTestContentSid] = useState('HXb131895de71a093156d1062e878de57c')
+  const [showAdvancedTest, setShowAdvancedTest] = useState(true)
 
   const [prevSelectedId, setPrevSelectedId] = useState(selectedLocationId)
   if (selectedLocationId !== prevSelectedId) {

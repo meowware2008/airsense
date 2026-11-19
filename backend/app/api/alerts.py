@@ -208,8 +208,8 @@ def test_whatsapp_dispatch():
         or "🌿 AirSense Test Ping: WhatsApp alert channel connection verified! If you received this, your Twilio alert integration is fully operational."
     ).strip()
 
-    content_sid = (data.get("content_sid") or "").strip() or None
-    content_variables = data.get("content_variables") or None
+    content_sid = (data.get("content_sid") or "").strip() or Config.TWILIO_CONTENT_SID
+    content_variables = data.get("content_variables") or {"1": custom_message}
 
     dispatch_res = send_whatsapp_with_details(
         to_number=target_number,

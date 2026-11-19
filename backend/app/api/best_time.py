@@ -212,7 +212,12 @@ def send_best_time_whatsapp():
         f"💡 *Tip:* Ideal time for outdoor exercise, walking, and room ventilation!"
     )
 
-    dispatch_res = send_whatsapp_with_details(target_number, message_body)
+    dispatch_res = send_whatsapp_with_details(
+        target_number,
+        message_body,
+        content_variables={"1": message_body, "2": location.name},
+        content_sid=Config.TWILIO_CONTENT_SID,
+    )
     sent = dispatch_res["success"]
     configured = whatsapp_configured()
 
