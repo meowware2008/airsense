@@ -25,7 +25,6 @@ class User(Base):
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "whatsapp_number": self.whatsapp_number,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -176,7 +175,6 @@ class AlertPreference(Base):
             "location_id": self.location_id,
             "threshold_value": self.threshold_value,
             "enabled": self.enabled,
-            "whatsapp_enabled": self.whatsapp_enabled,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

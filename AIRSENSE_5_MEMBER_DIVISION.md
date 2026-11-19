@@ -130,8 +130,8 @@
 #### 1. Codebase Ownership
 * `Dockerfile` (Backend & Frontend) & `docker-compose.yml` — Container configurations for local multi-service orchestration.
 * `render.yaml` — Infrastructure-as-code for Render cloud platform deployments (Web Service & Static Frontend).
-* `tests/` — Automated test suite with 53 comprehensive unit and integration test cases:
-  * `test_alerts.py`, `test_auth.py`, `test_best_time.py`, `test_cpcb_aqi.py`, `test_health.py`, `test_whatsapp.py`, etc.
+* `tests/` — Automated test suite with 42 comprehensive unit and integration test cases:
+  * `test_alerts.py`, `test_auth.py`, `test_best_time.py`, `test_cpcb_aqi.py`, `test_health.py`, etc.
 * `monitoring/prometheus/` & `monitoring/grafana/` — Prometheus metrics scraping configuration and Grafana dashboards.
 * `backend/app/monitoring/metrics.py` — Prometheus metrics definitions (ingestion counters, latency histograms, active alerts gauge).
 * `backend/app/api/health.py` — Cloud liveness (`/health/live`) and readiness (`/health/ready`) probes.
@@ -146,7 +146,7 @@
 * *Q1: What is the difference between `/health/live` and `/health/ready`?*
   * **Answer:** Liveness verifies the Flask web process is responsive. Readiness verifies connectivity to downstream dependencies (database session and schema readiness) before routing traffic.
 * *Q2: How are secrets managed across the development and cloud environments?*
-  * **Answer:** Sensitive tokens (JWT secrets, Twilio credentials, database passwords) are stored strictly as environment variables, never committed to Git, and loaded via `Config` from `.env` or Render environment settings.
+  * **Answer:** Sensitive tokens (JWT secrets, API keys, database passwords) are stored strictly as environment variables, never committed to Git, and loaded via `Config` from `.env` or Render environment settings.
 
 ---
 
@@ -167,7 +167,7 @@
        v                           v                 |
  +-------------------+    +--------------------+  +----------------------+
  | Notifications     |    | Member 4: Data/DB  |  | Member 3: ML Model   |
- | (Twilio / Email)  |    | (Ingestion/Worker) |  | (24h AQI Forecasting)|
+ | (In-App / Email)  |    | (Ingestion/Worker) |  | (24h AQI Forecasting)|
  +-------------------+    +--------------------+  +----------------------+
                                    ^
                                    | Docker / Prometheus Metrics / CI/CD

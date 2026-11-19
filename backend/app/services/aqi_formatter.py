@@ -1,4 +1,4 @@
-"""AQI report formatter for WhatsApp and in-app notifications."""
+"""AQI report formatter for alerts and notifications."""
 
 from datetime import datetime
 
@@ -64,16 +64,16 @@ def _fmt(val, unit="", decimals=1) -> str:
     return f"{round(val, decimals)}{unit}"
 
 
-def format_whatsapp_alert(
+def format_alert_report(
     location_name: str,
     aqi: float,
     threshold: int,
     reading,          # AirQualityReading ORM instance (optional fields used if present)
     is_test: bool = False,
 ) -> str:
-    """Build a rich, structured WhatsApp alert message.
+    """Build a rich, structured alert notification report.
 
-    Format (WhatsApp renders *bold* and _italic_):
+    Format:
 
         🚨 AirSense Air Quality Alert
         📍 Delhi | CPCB  |  🔴 Poor
