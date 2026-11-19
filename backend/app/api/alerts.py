@@ -418,10 +418,19 @@ def twilio_whatsapp_webhook():
     else:
         report_text = f"🌿 AirSense: Connected to {loc_name}. Live telemetry is currently synchronizing."
 
-    # Return valid TwiML XML
+    # Direct REST API dispatch fallback for Twilio Trial numbers (which sometimes drop TwiML)
+    if from_sender:
+        try:
+            send_whatsapp_with_details(to_number=from_sender, body=report_text)
+        except Exception:
+            pass
+
+    # Return valid TwiML XML with explicit <Body> tag and UTF-8 charset
     twiml_resp = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Message>{xml_escape(report_text)}</Message>
+    <Message>
+        <Body>{xml_escape(report_text)}</Body>
+    </Message>
 </Response>"""
-    return Response(twiml_resp, mimetype="text/xml")
+    return Response(twiml_resp, content_type="text/xml; charset=utf-8")
 
