@@ -115,15 +115,11 @@ export async function getAlerts() {
   return response.json()
 }
 
-export async function createAlert(locationId, thresholdValue, whatsappEnabled = false, whatsappNumber = null) {
+export async function createAlert(locationId, thresholdValue) {
   const payload = {
     location_id: Number(locationId),
     threshold_value: Number(thresholdValue),
     enabled: true,
-    whatsapp_enabled: whatsappEnabled,
-  }
-  if (whatsappNumber) {
-    payload.whatsapp_number = whatsappNumber
   }
 
   const response = await fetch(`${API_BASE_URL}/alerts`, {
@@ -151,22 +147,6 @@ export async function getMe() {
   }
 
   return response.json()
-}
-
-export async function saveWhatsappNumber(whatsappNumber) {
-  const response = await fetch(`${API_BASE_URL}/auth/me/whatsapp`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ whatsapp_number: whatsappNumber }),
-  })
-
-  const data = await response.json()
-
-  if (!response.ok) {
-    throw new Error(data.error || data.message || 'Unable to save WhatsApp number')
-  }
-
-  return data
 }
 
 export async function deleteAlert(alertId) {
@@ -248,46 +228,6 @@ export async function getBestTime(locationId) {
   }
 
   return response.json();
-}
-
-export async function sendBestTimeToWhatsapp(locationId, whatsappNumber = null) {
-  const payload = { location_id: Number(locationId) }
-  if (whatsappNumber) {
-    payload.whatsapp_number = whatsappNumber
-  }
-
-  const response = await fetch(`${API_BASE_URL}/best-time/send-whatsapp`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.error || 'Failed to dispatch WhatsApp recommendation')
-  }
-
-  return response.json()
-}
-
-export async function testWhatsappDispatch(whatsappNumber = null, customMessage = null, contentSid = null) {
-  const payload = {}
-  if (whatsappNumber) payload.whatsapp_number = whatsappNumber
-  if (customMessage) payload.message = customMessage
-  if (contentSid) payload.content_sid = contentSid
-
-  const response = await fetch(`${API_BASE_URL}/alerts/test-whatsapp`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.error || 'Failed to trigger test WhatsApp dispatch')
-  }
-
-  return response.json()
 }
 
 export async function pingHealth() {

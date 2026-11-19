@@ -11,7 +11,6 @@ import {
   getAirQualityHistory,
   getForecasts,
   getBestTime,
-  sendBestTimeToWhatsapp,
   pingHealth,
 } from './api'
 import {
@@ -151,9 +150,6 @@ function App() {
     localStorage.setItem('airsense_token', data.token)
     localStorage.setItem('airsense_user', JSON.stringify(data.user))
     setAuthData(data)
-    if (data?.user?.whatsapp_number) {
-      setBestTimeCustomPhone(data.user.whatsapp_number)
-    }
   }
 
   function handleLogout() {
@@ -176,38 +172,7 @@ function App() {
   const [bestTimeData, setBestTimeData] = useState(null)
   const [bestTimeLoading, setBestTimeLoading] = useState(true)
   const [bestTimeError, setBestTimeError] = useState('')
-  const [bestTimeSendingWhatsapp, setBestTimeSendingWhatsapp] = useState(false)
-  const [bestTimeWhatsappStatus, setBestTimeWhatsappStatus] = useState('')
-  const [bestTimeCustomPhone, setBestTimeCustomPhone] = useState(
-    () => authData?.user?.whatsapp_number || '+919494202261'
-  )
-  const [showDiagnostics, setShowDiagnostics] = useState(() => {
-    return localStorage.getItem('airsense_show_diagnostics') === 'true'
-  })
   const [activeTab, setActiveTab] = useState('dashboard')
-
-  function handleToggleDiagnostics(enabled) {
-    setShowDiagnostics(enabled)
-    localStorage.setItem('airsense_show_diagnostics', enabled ? 'true' : 'false')
-  }
-
-  async function handleSendBestTimeToWhatsapp() {
-    setBestTimeWhatsappStatus('')
-    setBestTimeSendingWhatsapp(true)
-    const target = (bestTimeCustomPhone || '').trim() || authData?.user?.whatsapp_number || '+919494202261'
-    try {
-      const res = await sendBestTimeToWhatsapp(selectedLocationId, target)
-      if (res.dispatched) {
-        setBestTimeWhatsappStatus(`✓ ${res.message || 'Sent to WhatsApp!'}`)
-      } else {
-        setBestTimeWhatsappStatus(`⚠️ ${res.message || 'Twilio credentials not configured on server.'}`)
-      }
-    } catch (err) {
-      setBestTimeWhatsappStatus(`⚠️ ${err.message}`)
-    } finally {
-      setBestTimeSendingWhatsapp(false)
-    }
-  }
 
   function handleDetectLocation() {
     if (!navigator.geolocation) {
@@ -943,47 +908,6 @@ function App() {
                       <strong>{Number(bestTimeData.best_window.maximum_pm25).toFixed(2)} µg/m³</strong>
                     </div>
                   </div>
-
-                  <div className="best-time-whatsapp-action">
-                    <div className="best-time-phone-row">
-                      <div className="best-time-input-wrap">
-                        <span className="best-time-phone-icon">📱</span>
-                        <input
-                          type="tel"
-                          placeholder="+919494202261 (E.164)"
-                          value={bestTimeCustomPhone}
-                          onChange={e => setBestTimeCustomPhone(e.target.value)}
-                          className="best-time-phone-input"
-                          title="Enter the WhatsApp recipient phone number with country code"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        className="btn-send-best-time-whatsapp"
-                        onClick={handleSendBestTimeToWhatsapp}
-                        disabled={bestTimeSendingWhatsapp || !bestTimeCustomPhone.trim()}
-                        title="Send this recommended cleanest outdoor window to entered WhatsApp number"
-                      >
-                        {bestTimeSendingWhatsapp ? (
-                          <>
-                            <IconLoader size={15} />
-                            <span>Sending...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="wa-btn-icon">💬</span>
-                            <span>Send to WhatsApp</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {bestTimeWhatsappStatus && (
-                      <div className={`best-time-status-pill ${bestTimeWhatsappStatus.startsWith('✓') ? 'success' : 'notice'}`}>
-                        {bestTimeWhatsappStatus}
-                      </div>
-                    )}
-                  </div>
                 </div>
               ) : (
                 <div className="forecast-empty-state">
@@ -1008,14 +932,13 @@ function App() {
               <div>
                 <h2 className="section-heading">Smart Alerts & Notifications</h2>
                 <p className="section-subheading">
-                  Configure custom thresholds, WhatsApp alerts, and automated telemetry triggers
+                  Configure custom thresholds and automated telemetry triggers
                 </p>
               </div>
             </div>
             <Alerts
               locations={locations}
               selectedLocationId={selectedLocationId}
-              showDiagnostics={showDiagnostics}
             />
           </section>
         )}
@@ -1064,48 +987,6 @@ function App() {
                   <p>Open-Meteo Atmospheric Models + EU Copernicus CAMS</p>
                 </div>
                 <span className="settings-badge">Connected</span>
-              </div>
-              <div className="settings-divider" />
-              <div className="settings-item">
-                <div>
-                  <h4>WhatsApp Alert Integration</h4>
-                  <p>Twilio Sandbox (+1 737 250 8034)</p>
-                </div>
-                <span className="settings-badge">Configured</span>
-              </div>
-              <div className="settings-divider" />
-              <div className="settings-item settings-item-diagnostic-toggle">
-                <div className="settings-item-info">
-                  <div className="settings-title-badge-row">
-                    <h4>Manual WhatsApp Testing & Diagnostic Station</h4>
-                    <span className={`settings-badge ${showDiagnostics ? 'badge-active' : 'badge-inactive'}`}>
-                      {showDiagnostics ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                  <p>
-                    Enable manual outbound test messaging, recipient verification checker, and live Twilio diagnostics in the Alerts dashboard.
-                  </p>
-                </div>
-                <div className="settings-toggle-control-group">
-                  <label className="settings-switch" title="Toggle manual testing station in Alerts">
-                    <input
-                      type="checkbox"
-                      checked={showDiagnostics}
-                      onChange={e => handleToggleDiagnostics(e.target.checked)}
-                    />
-                    <span className="settings-slider" />
-                  </label>
-                  {showDiagnostics && (
-                    <button
-                      type="button"
-                      className="btn-settings-action"
-                      onClick={() => setActiveTab('alerts')}
-                      title="Open diagnostic station in Alerts"
-                    >
-                      Open Station 🧪
-                    </button>
-                  )}
-                </div>
               </div>
             </div>
           </section>

@@ -6,8 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from backend.app.database import db_session
 from backend.app.models import AlertPreference, Notification, AirQualityReading, Location, User
 from backend.app.config import Config
-from backend.app.services.whatsapp_service import send_whatsapp, whatsapp_configured
-from backend.app.services.aqi_formatter import format_whatsapp_alert
+from backend.app.services.aqi_formatter import aqi_category
 
 logger = logging.getLogger(__name__)
 
@@ -103,39 +102,6 @@ class AlertService:
                         sent_at=now if email_sent else None,
                     )
                     db_session.add(email_notif)
-
-                # WhatsApp alert: only if the user opted in for this location, has a number,
-                # and the air quality is at or above the user's configured threshold
-                if (
-                    user
-                    and pref.whatsapp_enabled
-                    and user.whatsapp_number
-                    and whatsapp_configured()
-                    and reading.aqi_value >= max(pref.threshold_value, Config.WHATSAPP_MIN_AQI)
-                ):
-                    wa_body = format_whatsapp_alert(
-                        location_name=loc_name,
-                        aqi=reading.aqi_value,
-                        threshold=int(pref.threshold_value),
-                        reading=reading,
-                        is_test=False,
-                    )
-                    wa_sent = send_whatsapp(
-                        user.whatsapp_number,
-                        wa_body,
-                        content_variables={"1": wa_body},
-                    )
-                    db_session.add(Notification(
-                        user_id=pref.user_id,
-                        alert_preference_id=pref.id,
-                        location_id=reading.location_id,
-                        message=wa_body,
-                        channel="whatsapp",
-                        status="sent" if wa_sent else "failed",
-                        triggering_reading_id=reading.id,
-                        created_at=now,
-                        sent_at=now if wa_sent else None,
-                    ))
 
         if triggered_notifications:
             try:

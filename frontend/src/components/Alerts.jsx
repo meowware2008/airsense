@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react'
 import {
   getAlerts,
@@ -8,9 +7,6 @@ import {
   testTriggerAlert,
   getNotifications,
   markNotificationRead,
-  getMe,
-  saveWhatsappNumber,
-  testWhatsappDispatch,
 } from '../api'
 import {
   IconBell,
@@ -22,13 +18,10 @@ import {
 } from './Icons'
 import './Alerts.css'
 
-function Alerts({ locations = [], selectedLocationId, showDiagnostics = false }) {
+function Alerts({ locations = [], selectedLocationId }) {
   const [alerts, setAlerts] = useState([])
   const [notifications, setNotifications] = useState([])
   const [threshold, setThreshold] = useState('100')
-  const [whatsappNumber, setWhatsappNumber] = useState('')
-  const [savedWhatsappNumber, setSavedWhatsappNumber] = useState('')
-  const [whatsappEnabled, setWhatsappEnabled] = useState(true)
   const [alertLocationId, setAlertLocationId] = useState(selectedLocationId || '1')
   const [deletingId, setDeletingId] = useState(null)
   const [markingId, setMarkingId] = useState(null)
@@ -37,12 +30,6 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-  const [testingWhatsapp, setTestingWhatsapp] = useState(false)
-  const [testResult, setTestResult] = useState(null)
-  const [testRecipientPhone, setTestRecipientPhone] = useState('+919494202261')
-  const [testCustomMessage, setTestCustomMessage] = useState('🌿 AirSense Alert: Air Quality is Satisfactory (AQI 87).')
-  const [testContentSid, setTestContentSid] = useState('')
-  const [showAdvancedTest, setShowAdvancedTest] = useState(true)
 
   const [prevSelectedId, setPrevSelectedId] = useState(selectedLocationId)
   if (selectedLocationId !== prevSelectedId) {
@@ -81,18 +68,6 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
           setAlerts(alertData.alerts || [])
           setNotifications(notificationData.notifications || [])
         }
-        try {
-          const me = await getMe()
-          if (!ignore) {
-            const num = me.user?.whatsapp_number || '+919494202261'
-            setWhatsappNumber(num)
-            setSavedWhatsappNumber(num)
-            setTestRecipientPhone(num)
-            if (num) setWhatsappEnabled(true)
-          }
-        } catch {
-          // profile is optional for rendering the page
-        }
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -109,65 +84,14 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
     }
   }, [])
 
-  async function handleSaveWhatsapp() {
-    setError('')
-    setMessage('')
-    try {
-      const data = await saveWhatsappNumber(whatsappNumber.trim())
-      const saved = data.user?.whatsapp_number || ''
-      setSavedWhatsappNumber(saved)
-      setWhatsappNumber(saved)
-      if (!saved) setWhatsappEnabled(false)
-      setMessage(saved ? 'WhatsApp number saved!' : 'WhatsApp number removed.')
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  async function handleTestWhatsapp() {
-    setError('')
-    setMessage('')
-    setTestingWhatsapp(true)
-    setTestResult(null)
-    try {
-      const target = (testRecipientPhone || whatsappNumber || savedWhatsappNumber || '+919494202261').trim()
-      const res = await testWhatsappDispatch(
-        target,
-        testCustomMessage.trim() || null,
-        testContentSid.trim() || null
-      )
-      setTestResult(res)
-      if (res.success) {
-        setMessage(`✓ Test WhatsApp dispatched successfully to ${target}! (Twilio SID: ${res.message_sid})`)
-      } else {
-        setError(`⚠️ Dispatch failed (Code ${res.error_code || res.status_code || 'error'}): ${res.error_message}`)
-      }
-    } catch (err) {
-      setError(`Dispatch error: ${err.message}`)
-      setTestResult({
-        success: false,
-        status_code: 500,
-        error_message: err.message,
-        diagnostic_advice: 'Ensure backend server is running and Twilio credentials are valid in environment.',
-      })
-    } finally {
-      setTestingWhatsapp(false)
-    }
-  }
-
   async function handleCreateAlert(e) {
     e.preventDefault()
     setError('')
     setMessage('')
 
     try {
-      const wa = whatsappNumber.trim()
-      await createAlert(alertLocationId, threshold, whatsappEnabled, wa || null)
-      if (wa && wa !== savedWhatsappNumber) {
-        setSavedWhatsappNumber(wa)
-        setTestRecipientPhone(wa)
-      }
-      setMessage('Alert created successfully!')
+      await createAlert(alertLocationId, threshold)
+      setMessage('Alert rule created successfully!')
       await loadAlerts()
     } catch (err) {
       setError(err.message)
@@ -189,13 +113,13 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
     }
   }
 
-  async function handleToggleWhatsapp(alertId, currentVal) {
+  async function handleToggleAlert(alertId, currentEnabled) {
     setError('')
     setMessage('')
     setTogglingAlertId(alertId)
     try {
-      await updateAlert(alertId, { whatsapp_enabled: !currentVal })
-      setMessage(`WhatsApp alert ${!currentVal ? 'enabled' : 'disabled'} for this rule!`)
+      await updateAlert(alertId, { enabled: !currentEnabled })
+      setMessage(`Alert ${!currentEnabled ? 'enabled' : 'disabled'}!`)
       await loadAlerts()
     } catch (err) {
       setError(err.message)
@@ -210,20 +134,7 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
     setTestingAlertId(alertId)
     try {
       const res = await testTriggerAlert(alertId)
-      if (res.whatsapp_dispatched) {
-        setMessage(`✅ ${res.message}`)
-      } else if (!res.whatsapp_recipient) {
-        setError(`⚠️ No WhatsApp number on your profile. Save a number first, then test.`)
-      } else if (res.diagnostic_advice) {
-        // Twilio returned an error — show detailed advice
-        const details = res.whatsapp_details
-        const code = details?.error_code || details?.status_code || 'error'
-        setError(
-          `⚠️ Dispatch failed (Code ${code}): ${details?.error_message || 'Unknown error'}\n${res.diagnostic_advice}`
-        )
-      } else {
-        setMessage(`ℹ️ ${res.message}`)
-      }
+      setMessage(`✅ ${res.message}`)
       await loadAlerts()
     } catch (err) {
       setError(err.message)
@@ -252,18 +163,18 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
         <IconBell size={22} color="#258b70" />
         <span>Air Quality Alerts</span>
       </h2>
-      <p>Get notified when air quality crosses your chosen AQI threshold.</p>
+      <p>Configure automated in-app alerts when air quality crosses your chosen AQI threshold.</p>
 
       <div className="alerts-panel create-alert-panel">
         <div className="panel-header-simple">
           <h3>Create a New Alert</h3>
           <p className="panel-subtitle">
-            Configure automated notifications for when ambient air pollution crosses your safe limits.
+            Set an automated threshold to monitor ambient air pollution and receive in-app notifications.
           </p>
         </div>
 
         <form onSubmit={handleCreateAlert} className="create-alert-form">
-          <div className="form-grid-three">
+          <div className="form-grid-two">
             <div className="form-group">
               <label htmlFor="alert-city">Target City</label>
               <select
@@ -297,55 +208,9 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
                 <span className="unit-label">AQI</span>
               </div>
             </div>
-
-            <div className="form-group">
-              <div className="label-with-hint">
-                <label htmlFor="alert-whatsapp">WhatsApp Number</label>
-                {savedWhatsappNumber && (
-                  <span className="saved-hint">Profile: {savedWhatsappNumber}</span>
-                )}
-              </div>
-              <div className="phone-input-wrap">
-                <span className="phone-prefix-icon">📱</span>
-                <input
-                  id="alert-whatsapp"
-                  type="tel"
-                  placeholder="+919494202261 (E.164)"
-                  value={whatsappNumber}
-                  onChange={e => {
-                    setWhatsappNumber(e.target.value)
-                    setTestRecipientPhone(e.target.value)
-                  }}
-                  className="form-control phone-input"
-                />
-                {whatsappNumber.trim() && whatsappNumber.trim() !== savedWhatsappNumber && (
-                  <button
-                    type="button"
-                    className="btn-save-inline"
-                    onClick={handleSaveWhatsapp}
-                    title="Save this number to your user profile"
-                  >
-                    Save
-                  </button>
-                )}
-              </div>
-            </div>
           </div>
 
           <div className="form-action-bar">
-            <label className="checkbox-toggle-wrap">
-              <input
-                id="alert-whatsapp-enabled"
-                type="checkbox"
-                checked={whatsappEnabled}
-                onChange={e => setWhatsappEnabled(e.target.checked)}
-                className="styled-checkbox"
-              />
-              <span className="checkbox-text">
-                <strong>Also alert me on WhatsApp</strong> when air quality exceeds this threshold
-              </span>
-            </label>
-
             <button type="submit" className="btn-create-alert-submit">
               <IconBell size={16} />
               <span>Create Alert</span>
@@ -355,7 +220,7 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
 
         <div className="form-info-note">
           <IconAlertTriangle size={15} color="#059669" />
-          <span>Alert triggers automatically during hourly telemetry ingestion when observed AQI reaches or exceeds your threshold.</span>
+          <span>Alerts trigger automatically during hourly telemetry ingestion when observed AQI exceeds your threshold.</span>
         </div>
       </div>
 
@@ -369,139 +234,6 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
         <div className="alert-feedback-banner success">
           <IconCheck size={18} color="#16a34a" />
           <span>{message}</span>
-        </div>
-      )}
-
-      {/* WhatsApp Diagnostic & Live Testing Panel (Controlled by Settings toggle) */}
-      {showDiagnostics && (
-        <div className="alerts-panel whatsapp-test-panel">
-          <div className="test-panel-header">
-            <div className="test-header-text">
-              <div className="test-badge-row">
-                <span className="test-badge">DIAGNOSTIC TEST</span>
-                <span className="test-channel-badge">Twilio WhatsApp Sandbox</span>
-              </div>
-              <h3>🧪 Manual WhatsApp Connection Test</h3>
-              <p>
-                Send an instant diagnostic test message to verify outbound delivery, sender authorization, and 24-hr session status.
-              </p>
-            </div>
-          </div>
-
-          <div className="test-recipient-bar">
-            <div className="test-recipient-input-group">
-              <label htmlFor="test-phone-input">📱 Send Alert To Number (E.164):</label>
-              <input
-                id="test-phone-input"
-                type="tel"
-                placeholder="+919494202261 (include country code)"
-                value={testRecipientPhone}
-                onChange={e => setTestRecipientPhone(e.target.value)}
-                className="test-phone-input"
-              />
-            </div>
-            <button
-              type="button"
-              className="btn-send-test-whatsapp"
-              onClick={handleTestWhatsapp}
-              disabled={testingWhatsapp || !testRecipientPhone.trim()}
-            >
-              {testingWhatsapp ? (
-                <>
-                  <IconLoader size={16} />
-                  <span>Testing Dispatch...</span>
-                </>
-              ) : (
-                <>
-                  <span className="wa-btn-icon">💬</span>
-                  <span>Send Test WhatsApp Message</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Advanced test options toggle */}
-          <div className="test-options-toggle">
-            <button
-              type="button"
-              className="btn-link-toggle"
-              onClick={() => setShowAdvancedTest(!showAdvancedTest)}
-            >
-              {showAdvancedTest ? 'Hide Advanced Options ▲' : 'Show Advanced / Content Template Options ▼'}
-            </button>
-          </div>
-
-          {showAdvancedTest && (
-            <div className="test-advanced-box">
-              <div className="test-input-group">
-                <label htmlFor="test-content-sid">Twilio Content Template SID (Optional)</label>
-                <input
-                  id="test-content-sid"
-                  type="text"
-                  placeholder="e.g. HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                  value={testContentSid}
-                  onChange={e => setTestContentSid(e.target.value)}
-                  className="test-input"
-                />
-                <span className="test-hint">Required for Twilio Trial outbound without an active WhatsApp reply session.</span>
-              </div>
-              <div className="test-input-group">
-                <label htmlFor="test-custom-msg">Custom Message Text (Optional)</label>
-                <input
-                  id="test-custom-msg"
-                  type="text"
-                  placeholder="Default: AirSense Test Ping: WhatsApp alert channel connection verified! 🌿"
-                  value={testCustomMessage}
-                  onChange={e => setTestCustomMessage(e.target.value)}
-                  className="test-input"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Live Diagnostics Card when test is triggered */}
-          {testResult && (
-            <div className={`diagnostic-result-card ${testResult.success ? 'success' : 'failed'}`}>
-              <div className="diag-header">
-                <span className="diag-status-pill">
-                  {testResult.success ? '✓ SUCCESS: 200 OK' : `⚠️ FAILED: HTTP ${testResult.status_code || 400}`}
-                </span>
-                {testResult.message_sid && (
-                  <span className="diag-sid">Twilio SID: {testResult.message_sid}</span>
-                )}
-              </div>
-
-              <div className="diag-grid">
-                <div>
-                  <span className="diag-label">Sender (From):</span>
-                  <code>{testResult.from_number || 'whatsapp:+17372508034'}</code>
-                </div>
-                <div>
-                  <span className="diag-label">Recipient (To):</span>
-                  <code>{testResult.to_number || whatsappNumber || '+919494202261'}</code>
-                </div>
-                {testResult.error_code && (
-                  <div>
-                    <span className="diag-label">Twilio Error Code:</span>
-                    <code className="diag-err-code">{testResult.error_code}</code>
-                  </div>
-                )}
-                {testResult.error_message && (
-                  <div>
-                    <span className="diag-label">Twilio Response:</span>
-                    <span className="diag-err-msg">{testResult.error_message}</span>
-                  </div>
-                )}
-              </div>
-
-              {testResult.diagnostic_advice && (
-                <div className="diag-advice-box">
-                  <strong>Recommended Action:</strong>
-                  <p>{testResult.diagnostic_advice}</p>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
 
@@ -527,13 +259,9 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
                   <span className={`status-pill ${alert.enabled ? 'enabled' : 'disabled'}`}>
                     {alert.enabled ? 'Active' : 'Disabled'}
                   </span>
-                  <span className={`whatsapp-status-pill ${alert.whatsapp_enabled ? 'on' : 'off'}`}>
-                    {alert.whatsapp_enabled ? '💬 WhatsApp: ON' : '💬 WhatsApp: OFF'}
-                  </span>
                 </div>
                 <p className="alert-threshold-info">
                   AQI Threshold: <strong>{alert.threshold_value}</strong>
-                  {alert.whatsapp_enabled && savedWhatsappNumber ? ` · Delivery to ${savedWhatsappNumber}` : ''}
                 </p>
                 <small className="alert-meta">
                   {alert.created_at ? `Created on ${new Date(alert.created_at).toLocaleDateString()}` : ''}
@@ -543,12 +271,12 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
               <div className="alert-actions">
                 <button
                   type="button"
-                  className={`btn-toggle-wa ${alert.whatsapp_enabled ? 'turn-off' : 'turn-on'}`}
-                  onClick={() => handleToggleWhatsapp(alert.id, alert.whatsapp_enabled)}
+                  className={`btn-toggle-status ${alert.enabled ? 'turn-off' : 'turn-on'}`}
+                  onClick={() => handleToggleAlert(alert.id, alert.enabled)}
                   disabled={togglingAlertId === alert.id}
-                  title={alert.whatsapp_enabled ? 'Turn OFF WhatsApp delivery for this rule' : 'Turn ON WhatsApp delivery for this rule'}
+                  title={alert.enabled ? 'Disable this alert rule' : 'Enable this alert rule'}
                 >
-                  {togglingAlertId === alert.id ? 'Updating...' : (alert.whatsapp_enabled ? 'Disable WhatsApp' : 'Enable WhatsApp')}
+                  {togglingAlertId === alert.id ? 'Updating...' : (alert.enabled ? 'Disable' : 'Enable')}
                 </button>
 
                 <button
@@ -556,16 +284,16 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
                   className="btn-test-rule"
                   onClick={() => handleTestAlert(alert.id)}
                   disabled={testingAlertId === alert.id}
-                  title="Force-send a WhatsApp test message now (bypasses WhatsApp enabled/disabled setting)"
+                  title="Test-trigger this alert rule now"
                 >
                   {testingAlertId === alert.id ? (
                     <>
                       <IconLoader size={13} />
-                      <span>Sending...</span>
+                      <span>Testing...</span>
                     </>
                   ) : (
                     <>
-                      <span>⚡ Send Test</span>
+                      <span>⚡ Test Alert</span>
                     </>
                   )}
                 </button>
@@ -597,7 +325,7 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
 
       <div className="alerts-panel">
         <div className="panel-header-row">
-          <h3>Notifications</h3>
+          <h3>Notifications Inbox</h3>
           <span className="panel-count-badge">
             {notifications.filter(n => n.status === 'unread').length} Unread
           </span>
@@ -617,46 +345,39 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
                 <div className="alert-title-row">
                   <strong className="notif-title">
                     <IconAlertTriangle size={16} color="#d97706" />
-                    <span>{notification.title || 'Air Quality Notification'}</span>
+                    <span>{notification.location?.name ? `${notification.location.name} Air Quality Alert` : 'Air Quality Alert'}</span>
                   </strong>
-                  <span className={`status-pill ${notification.status === 'unread' ? 'unread' : 'read'}`}>
-                    {notification.status === 'unread' ? 'Unread' : 'Read'}
+                  <span className={`status-pill ${notification.status}`}>
+                    {notification.status}
                   </span>
                 </div>
-                <p className="notif-message">
-                  {notification.message || 'You have a new notification.'}
-                </p>
+                <p className="notif-message-text">{notification.message}</p>
                 <small className="alert-meta">
-                  {notification.sent_at ? new Date(notification.sent_at).toLocaleString() : ''}
+                  {notification.created_at ? new Date(notification.created_at).toLocaleString() : ''}
                 </small>
               </div>
 
               <div className="alert-actions">
-                {notification.status !== 'read' ? (
+                {notification.status === 'unread' && (
                   <button
                     type="button"
-                    className="mark-read-btn"
+                    className="btn-mark-read"
                     onClick={() => handleMarkRead(notification.id)}
                     disabled={markingId === notification.id}
                     title="Mark this notification as read"
                   >
                     {markingId === notification.id ? (
                       <>
-                        <IconLoader size={14} />
-                        <span>Marking...</span>
+                        <IconLoader size={13} />
+                        <span>Saving...</span>
                       </>
                     ) : (
                       <>
-                        <IconCheck size={14} />
-                        <span>Mark as Read</span>
+                        <IconCheck size={13} />
+                        <span>Mark Read</span>
                       </>
                     )}
                   </button>
-                ) : (
-                  <span className="read-indicator" title="Notification already read">
-                    <IconCheck size={13} color="#64748b" />
-                    <span>Read</span>
-                  </span>
                 )}
               </div>
             </div>

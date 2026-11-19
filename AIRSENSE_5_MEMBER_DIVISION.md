@@ -11,7 +11,7 @@
 | Member | Workstream / Role | Primary Directory | Core Technologies | Primary Deliverables |
 | :--- | :--- | :--- | :--- | :--- |
 | **Member 1** | **Frontend & UI/UX Lead** | `frontend/src/` | React 19, Vite, Chart.js, Leaflet, CSS Design Tokens | Dashboard, City Selector, Forecast Graphs, Pollutant Gauges, Alerts UI, Responsive Design |
-| **Member 2** | **Backend & Core API Lead** | `backend/app/api/`, `backend/app/services/` | Python 3, Flask, JWT, Twilio REST API, SMTP | RESTful API Endpoints, JWT Authentication, Alert Preference Engine, WhatsApp / Email Notifications |
+| **Member 2** | **Backend & Core API Lead** | `backend/app/api/`, `backend/app/services/` | Python 3, Flask, JWT, SMTP, SQLAlchemy | RESTful API Endpoints, JWT Authentication, Alert Preference Engine, In-App & Email Notifications |
 | **Member 3** | **Machine Learning & Analytics Lead** | `ml/`, `backend/app/api/forecasts.py` | Scikit-Learn, Pandas, NumPy, Joblib | Random Forest 24h Forecasting Engine, Feature Engineering, Lag Predictors, Evaluation Metrics |
 | **Member 4** | **Data Engineering & Database Lead** | `backend/app/providers/`, `backend/app/models/`, `worker/` | SQLAlchemy, PostgreSQL, Alembic, Open-Meteo, WAQI | Ingestion Worker Daemon, Provider Adapters (Open-Meteo/WAQI), Database Schema, CPCB AQI Calculation |
 | **Member 5** | **DevOps, Cloud & QA Lead** | `infrastructure/`, `monitoring/`, `tests/`, `render.yaml` | Docker, Compose, Render, Prometheus, Grafana, Pytest | Containerization, CI/CD Cloud Deployment, Prometheus/Grafana Metrics, 53-test Automated Suite |
@@ -30,7 +30,7 @@
 * `frontend/src/components/Overview.jsx` — Primary air quality dashboard, current AQI card, category pills.
 * `frontend/src/components/Pollutants.jsx` — Pollutant breakdowns (PM2.5, PM10, NO₂, SO₂, CO, O₃) with sub-index bars.
 * `frontend/src/components/Forecast.jsx` — 24-hour predictive visualization and historical trends with Chart.js.
-* `frontend/src/components/Alerts.jsx` — Alert rule configuration form, WhatsApp toggle, manual test trigger station.
+* `frontend/src/components/Alerts.jsx` — Alert rule configuration form, automated threshold triggers, notifications inbox.
 * `frontend/src/components/BestTime.jsx` — Best time for outdoor activities analysis widget.
 * `frontend/src/api.js` — Client API gateway layer, fetch interceptors, and JWT token management.
 
@@ -56,15 +56,14 @@
 * `backend/app/api/auth.py` — User signup, login, password hashing (bcrypt), and JWT token creation/verification.
 * `backend/app/api/alerts.py` — CRUD endpoints for alert preferences, instant trigger test endpoint, diagnostic endpoints.
 * `backend/app/api/air_quality.py` — Current reading and historical air telemetry REST endpoints.
-* `backend/app/services/alert_service.py` — Alert threshold evaluation logic, 6-hour anti-spam cooldown, and email dispatcher.
-* `backend/app/services/whatsapp_service.py` — Twilio WhatsApp REST client, payload formatting, error diagnostic mapper.
-* `backend/app/services/aqi_formatter.py` — Formatted message generator for WhatsApp (CPCB levels, pollutants, health advice).
+* `backend/app/services/alert_service.py` — Alert threshold evaluation logic, 6-hour anti-spam cooldown, in-app and email dispatcher.
+* `backend/app/services/aqi_formatter.py` — Formatted report generator (CPCB levels, pollutants, health advice).
 
 #### 2. Key Responsibilities
 * Implement secure JWT token authentication with bcrypt password hashing.
 * Develop the business logic for alert threshold evaluation on incoming readings.
-* Build the multi-channel notification engine (in-app notifications, SMTP email, and Twilio WhatsApp).
-* Design robust diagnostic handlers for external communication failures (e.g., Twilio codes 21654, 572002).
+* Build the notification engine (in-app notifications inbox and SMTP email dispatch).
+* Maintain clean REST API contracts and comprehensive automated testing.
 
 #### 3. Viva & Project Defense Questions
 * *Q1: How do you prevent notification spam when AQI fluctuates above a user's threshold?*

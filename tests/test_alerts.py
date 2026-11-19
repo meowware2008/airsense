@@ -39,19 +39,15 @@ def test_alert_crud(client, auth_token, test_location):
     assert len(res.get_json()["alerts"]) == 0
 
 
-def test_create_alert_with_custom_whatsapp_number(client, auth_token, test_location, test_user):
+def test_create_alert_valid(client, auth_token, test_location, test_user):
     headers = {"Authorization": f"Bearer {auth_token}"}
     res = client.post("/api/v1/alerts", headers=headers, json={
         "location_id": test_location.id,
         "threshold_value": 180.0,
-        "whatsapp_enabled": True,
-        "whatsapp_number": "+919494202261",
     })
     assert res.status_code == 201
-    assert res.get_json()["alert"]["whatsapp_enabled"] is True
-    from backend.app.models import User
-    u = db_session.get(User, test_user.id)
-    assert u.whatsapp_number == "+919494202261"
+    assert res.get_json()["alert"]["threshold_value"] == 180.0
+    assert res.get_json()["alert"]["enabled"] is True
 
 
 def test_alert_evaluation_and_cooldown(test_user, test_location, client, auth_token):
@@ -120,8 +116,6 @@ def test_trigger_alert_test_endpoint(client, auth_token, test_location, test_use
     create_res = client.post("/api/v1/alerts", headers=headers, json={
         "location_id": test_location.id,
         "threshold_value": 80.0,
-        "whatsapp_enabled": True,
-        "whatsapp_number": "+919494202261",
     })
     alert_id = create_res.get_json()["alert"]["id"]
 
@@ -137,11 +131,11 @@ def test_trigger_alert_test_endpoint(client, auth_token, test_location, test_use
     db_session.add(reading)
     db_session.commit()
 
-    with patch("backend.app.api.alerts.send_whatsapp_with_details", return_value={"success": True, "message_sid": "MMtest"}):
-        res = client.post(f"/api/v1/alerts/{alert_id}/trigger-test", headers=headers)
+    res = client.post(f"/api/v1/alerts/{alert_id}/trigger-test", headers=headers)
     assert res.status_code == 200
     data = res.get_json()
     assert data["success"] is True
     assert data["breached"] is True
     assert data["current_aqi"] == 120
-    assert data["whatsapp_dispatched"] is True
+    assert "notification" in data
+    assert data["notification"]["channel"] == "in_app"

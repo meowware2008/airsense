@@ -58,58 +58,6 @@ def test_get_best_time_api(client, test_location):
     assert "location" in data
 
 
-def test_send_best_time_whatsapp_unauthorized(client, test_location):
-    res = client.post(f"/api/v1/best-time/send-whatsapp?location_id={test_location.id}")
-    assert res.status_code == 401
-
-
-def test_send_best_time_whatsapp_success(client, auth_token, test_location):
-    # Seed readings
-    base = datetime.utcnow() - timedelta(hours=30)
-    for i in range(30):
-        r = AirQualityReading(
-            location_id=test_location.id,
-            provider="mock",
-            measurement_type="simulated",
-            observed_at=base + timedelta(hours=i),
-            pm25=25.0 + (i % 4),
-            aqi_value=50,
-        )
-        db_session.add(r)
-    db_session.commit()
-
-    headers = {"Authorization": f"Bearer {auth_token}"}
-    now_ref = datetime.now(timezone.utc)
-    mock_forecast_result = {
-        "status": "available",
-        "model_name": "RandomForestRegressor",
-        "model_version": "1.0.0",
-        "forecasts": [
-            {
-                "forecast_for": (now_ref + timedelta(hours=h)).isoformat(),
-                "predicted_value": 20.0 + (h % 3),
-                "target_metric": "pm25",
-                "unit": "µg/m³",
-            }
-            for h in range(1, 25)
-        ],
-    }
-
-    with patch("backend.app.api.best_time.predict_next_24h", return_value=mock_forecast_result), \
-         patch("backend.app.api.best_time.send_whatsapp_with_details", return_value={"success": True, "message_sid": "SMmock", "error_code": None, "error_message": None, "status_code": 200}) as mock_send:
-        res = client.post(
-            "/api/v1/best-time/send-whatsapp",
-            headers=headers,
-            json={"location_id": test_location.id, "whatsapp_number": "+919876543210"},
-        )
-        assert res.status_code == 200
-        data = res.get_json()
-        assert data["success"] is True
-        assert data["recipient"] == "+919876543210"
-        assert "AirSense Smart Outdoor Recommendation" in data["formatted_text"]
-        mock_send.assert_called_once()
-
-
 def test_schema_self_healing_idempotent():
     # Calling self-healing migration repeatedly must never crash
     _ensure_schema_columns()
