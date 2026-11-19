@@ -49,7 +49,7 @@ class Config:
     # WhatsApp alerts via Twilio (optional)
     TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-    TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+17372508034")
+    TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
     TWILIO_CONTENT_SID = os.getenv("TWILIO_CONTENT_SID", "")
     # Floor for WhatsApp alerts (default 1 to respect the user's chosen threshold)
     WHATSAPP_MIN_AQI = int(os.getenv("WHATSAPP_MIN_AQI", "1"))
