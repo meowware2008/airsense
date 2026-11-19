@@ -7,6 +7,7 @@ from backend.app.database import db_session
 from backend.app.models import AlertPreference, Notification, AirQualityReading, Location, User
 from backend.app.config import Config
 from backend.app.services.whatsapp_service import send_whatsapp, whatsapp_configured
+from backend.app.services.aqi_formatter import format_whatsapp_alert
 
 logger = logging.getLogger(__name__)
 
@@ -55,13 +56,19 @@ class AlertService:
                     # Cooldown active, skip duplicate notification
                     continue
 
+                from backend.app.services.aqi_formatter import aqi_category
+                aqi_int = int(reading.aqi_value)
+                aqi_label, aqi_emoji = aqi_category(aqi_int, reading.aqi_standard)
+                pm_summary = ""
+                if reading.pm25 is not None:
+                    pm_summary += f" PM2.5={reading.pm25:.1f}"
+                if reading.pm10 is not None:
+                    pm_summary += f" PM10={reading.pm10:.1f}"
                 message = (
-                    f"AQI Alert for {loc_name}: Current AQI of {int(reading.aqi_value)} "
-                    f"crossed your configured threshold of {int(pref.threshold_value)}. "
-                    f"Standard: {reading.aqi_standard or 'Unknown'}."
-                )
-
-                # Create in-app notification
+                    f"{aqi_emoji} AQI Alert — {loc_name}: {aqi_int} ({aqi_label}). "
+                    f"Your threshold: {int(pref.threshold_value)}.{pm_summary} "
+                    f"Standard: {reading.aqi_standard or 'CPCB'}."
+                )                # Create in-app notification
                 in_app_notif = Notification(
                     user_id=pref.user_id,
                     alert_preference_id=pref.id,
@@ -106,17 +113,17 @@ class AlertService:
                     and whatsapp_configured()
                     and reading.aqi_value >= max(pref.threshold_value, Config.WHATSAPP_MIN_AQI)
                 ):
-                    wa_body = (
-                        f"⚠️ AirSense Alert\n"
-                        f"{loc_name}: AQI is {int(reading.aqi_value)} "
-                        f"({reading.aqi_standard or 'Unknown'}), above your threshold of "
-                        f"{int(pref.threshold_value)}.\n"
-                        f"Limit time outdoors, wear an N95 mask and keep windows closed."
+                    wa_body = format_whatsapp_alert(
+                        location_name=loc_name,
+                        aqi=reading.aqi_value,
+                        threshold=int(pref.threshold_value),
+                        reading=reading,
+                        is_test=False,
                     )
                     wa_sent = send_whatsapp(
                         user.whatsapp_number,
                         wa_body,
-                        content_variables={"1": wa_body, "2": loc_name},
+                        content_variables={"1": wa_body},
                     )
                     db_session.add(Notification(
                         user_id=pref.user_id,

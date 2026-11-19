@@ -5,6 +5,7 @@ from backend.app.models import AlertPreference, Notification, Location, AirQuali
 from backend.app.api.auth import token_required
 from backend.app.monitoring.metrics import ACTIVE_ALERTS_COUNT
 from backend.app.services.alert_service import AlertService
+from backend.app.services.aqi_formatter import format_whatsapp_alert
 from backend.app.services.whatsapp_service import (
     send_whatsapp_with_details,
     whatsapp_configured,
@@ -206,16 +207,17 @@ def trigger_alert_test(alert_id: int):
     # Force-send WhatsApp for the test regardless of whatsapp_enabled flag —
     # this is a manual diagnostic, not a production trigger.
     if g.current_user.whatsapp_number:
-        wa_body = (
-            f"🧪 AirSense Test Alert\n"
-            f"{loc.name if loc else 'Location'}: current AQI is {current_aqi} "
-            f"({latest_reading.aqi_standard or 'CPCB'}). Your threshold is {threshold}.\n"
-            f"{'⚠️ Threshold breached!' if breached else 'ℹ️ Threshold not yet breached — this is a forced test.'}"
+        wa_body = format_whatsapp_alert(
+            location_name=loc.name if loc else "Location",
+            aqi=float(current_aqi),
+            threshold=threshold,
+            reading=latest_reading,
+            is_test=True,
         )
         wa_details = send_whatsapp_with_details(
             g.current_user.whatsapp_number,
             wa_body,
-            content_variables={"1": wa_body, "2": loc.name if loc else "AirSense"},
+            content_variables={"1": wa_body},
         )
         wa_dispatched = wa_details.get("success", False)
 
