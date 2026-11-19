@@ -371,6 +371,44 @@
   line-height: 1.45;
 }
 
+.test-recipient-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.test-recipient-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.test-recipient-input-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d4536;
+}
+
+.test-phone-input {
+  padding: 10px 14px;
+  border: 1px solid #d4ded7;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1c3528;
+  background: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.test-phone-input:focus {
+  border-color: #258b70;
+  box-shadow: 0 0 0 2px rgba(37, 139, 112, 0.15);
+}
+
 .btn-send-test-whatsapp {
   display: inline-flex;
   align-items: center;
@@ -386,6 +424,7 @@
   box-shadow: 0 2px 6px rgba(37, 211, 102, 0.25);
   transition: all 0.2s ease;
   white-space: nowrap;
+  height: 42px;
 }
 
 .btn-send-test-whatsapp:hover:not(:disabled) {

@@ -66,4 +66,7 @@ ml/artifacts/*.joblib
 
 # Reference design files
 Air _ Your agent for creative tasks*
+frontend/wind_animation/new_animation.mp4
+frontend/wind_animation/*.png
+
 

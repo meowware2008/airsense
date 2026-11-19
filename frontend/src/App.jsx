@@ -151,6 +151,9 @@ function App() {
     localStorage.setItem('airsense_token', data.token)
     localStorage.setItem('airsense_user', JSON.stringify(data.user))
     setAuthData(data)
+    if (data?.user?.whatsapp_number) {
+      setBestTimeCustomPhone(data.user.whatsapp_number)
+    }
   }
 
   function handleLogout() {
@@ -175,25 +178,23 @@ function App() {
   const [bestTimeError, setBestTimeError] = useState('')
   const [bestTimeSendingWhatsapp, setBestTimeSendingWhatsapp] = useState(false)
   const [bestTimeWhatsappStatus, setBestTimeWhatsappStatus] = useState('')
-  const [bestTimeCustomPhone, setBestTimeCustomPhone] = useState('')
-  const [showPhonePrompt, setShowPhonePrompt] = useState(false)
+  const [bestTimeCustomPhone, setBestTimeCustomPhone] = useState(
+    () => authData?.user?.whatsapp_number || '+919494202261'
+  )
   const [activeTab, setActiveTab] = useState('dashboard')
 
   async function handleSendBestTimeToWhatsapp() {
     setBestTimeWhatsappStatus('')
     setBestTimeSendingWhatsapp(true)
+    const target = (bestTimeCustomPhone || '').trim() || authData?.user?.whatsapp_number || '+919494202261'
     try {
-      const res = await sendBestTimeToWhatsapp(selectedLocationId, bestTimeCustomPhone || null)
+      const res = await sendBestTimeToWhatsapp(selectedLocationId, target)
       if (res.dispatched) {
         setBestTimeWhatsappStatus(`✓ ${res.message || 'Sent to WhatsApp!'}`)
       } else {
         setBestTimeWhatsappStatus(`⚠️ ${res.message || 'Twilio credentials not configured on server.'}`)
       }
-      setShowPhonePrompt(false)
     } catch (err) {
-      if (err.message && err.message.toLowerCase().includes('whatsapp number')) {
-        setShowPhonePrompt(true)
-      }
       setBestTimeWhatsappStatus(`⚠️ ${err.message}`)
     } finally {
       setBestTimeSendingWhatsapp(false)
@@ -936,45 +937,38 @@ function App() {
                   </div>
 
                   <div className="best-time-whatsapp-action">
-                    {showPhonePrompt ? (
-                      <div className="best-time-phone-row">
+                    <div className="best-time-phone-row">
+                      <div className="best-time-input-wrap">
+                        <span className="best-time-phone-icon">📱</span>
                         <input
                           type="tel"
-                          placeholder="+919876543210 (E.164)"
+                          placeholder="+919494202261 (E.164)"
                           value={bestTimeCustomPhone}
                           onChange={e => setBestTimeCustomPhone(e.target.value)}
                           className="best-time-phone-input"
+                          title="Enter the WhatsApp recipient phone number with country code"
                         />
-                        <button
-                          type="button"
-                          className="btn-send-best-time-whatsapp"
-                          onClick={handleSendBestTimeToWhatsapp}
-                          disabled={bestTimeSendingWhatsapp || !bestTimeCustomPhone.trim()}
-                        >
-                          {bestTimeSendingWhatsapp ? <IconLoader size={14} /> : <span>Send Alert</span>}
-                        </button>
                       </div>
-                    ) : (
                       <button
                         type="button"
                         className="btn-send-best-time-whatsapp"
                         onClick={handleSendBestTimeToWhatsapp}
-                        disabled={bestTimeSendingWhatsapp}
-                        title="Send this recommended cleanest outdoor window to your WhatsApp"
+                        disabled={bestTimeSendingWhatsapp || !bestTimeCustomPhone.trim()}
+                        title="Send this recommended cleanest outdoor window to entered WhatsApp number"
                       >
                         {bestTimeSendingWhatsapp ? (
                           <>
                             <IconLoader size={15} />
-                            <span>Sending recommendation...</span>
+                            <span>Sending...</span>
                           </>
                         ) : (
                           <>
                             <span className="wa-btn-icon">💬</span>
-                            <span>Send Best Window to WhatsApp</span>
+                            <span>Send to WhatsApp</span>
                           </>
                         )}
                       </button>
-                    )}
+                    </div>
 
                     {bestTimeWhatsappStatus && (
                       <div className={`best-time-status-pill ${bestTimeWhatsappStatus.startsWith('✓') ? 'success' : 'notice'}`}>

@@ -8,6 +8,7 @@ from backend.app.services.whatsapp_service import (
     send_whatsapp_with_details,
     whatsapp_configured,
     get_twilio_diagnostic_advice,
+    is_valid_whatsapp_number,
 )
 
 alerts_bp = Blueprint("alerts", __name__, url_prefix="/api/v1")
@@ -58,6 +59,16 @@ def create_alert():
 
     if threshold_value <= 0 or threshold_value > 500:
         return jsonify({"error": "threshold_value must be between 1 and 500"}), 400
+
+    wa_num = (data.get("whatsapp_number") or "").strip().replace(" ", "")
+    if wa_num:
+        if not is_valid_whatsapp_number(wa_num):
+            return jsonify({"error": f"Invalid WhatsApp number format '{wa_num}'. Must follow E.164 (e.g. +919876543210)."}), 400
+        g.current_user.whatsapp_number = wa_num
+        try:
+            db_session.commit()
+        except Exception:
+            db_session.rollback()
 
     if whatsapp_enabled and not g.current_user.whatsapp_number:
         return jsonify({"error": "Add your WhatsApp number before enabling WhatsApp alerts"}), 400

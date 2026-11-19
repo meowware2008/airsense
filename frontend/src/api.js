@@ -115,16 +115,21 @@ export async function getAlerts() {
   return response.json()
 }
 
-export async function createAlert(locationId, thresholdValue, whatsappEnabled = false) {
+export async function createAlert(locationId, thresholdValue, whatsappEnabled = false, whatsappNumber = null) {
+  const payload = {
+    location_id: Number(locationId),
+    threshold_value: Number(thresholdValue),
+    enabled: true,
+    whatsapp_enabled: whatsappEnabled,
+  }
+  if (whatsappNumber) {
+    payload.whatsapp_number = whatsappNumber
+  }
+
   const response = await fetch(`${API_BASE_URL}/alerts`, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify({
-      location_id: Number(locationId),
-      threshold_value: Number(thresholdValue),
-      enabled: true,
-      whatsapp_enabled: whatsappEnabled,
-    }),
+    body: JSON.stringify(payload),
   })
 
   const data = await response.json()

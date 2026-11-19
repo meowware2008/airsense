@@ -38,6 +38,21 @@ def test_alert_crud(client, auth_token, test_location):
     assert len(res.get_json()["alerts"]) == 0
 
 
+def test_create_alert_with_custom_whatsapp_number(client, auth_token, test_location, test_user):
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    res = client.post("/api/v1/alerts", headers=headers, json={
+        "location_id": test_location.id,
+        "threshold_value": 180.0,
+        "whatsapp_enabled": True,
+        "whatsapp_number": "+919494202261",
+    })
+    assert res.status_code == 201
+    assert res.get_json()["alert"]["whatsapp_enabled"] is True
+    from backend.app.models import User
+    u = db_session.get(User, test_user.id)
+    assert u.whatsapp_number == "+919494202261"
+
+
 def test_alert_evaluation_and_cooldown(test_user, test_location, client, auth_token):
     headers = {"Authorization": f"Bearer {auth_token}"}
 

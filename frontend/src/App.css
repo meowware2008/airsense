@@ -1039,24 +1039,42 @@ body {
 
 .best-time-phone-row {
   display: flex;
-  gap: 10px;
-  max-width: 400px;
+  gap: 12px;
+  align-items: center;
+  max-width: 520px;
+  flex-wrap: wrap;
+}
+
+.best-time-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-pill);
+  padding: 2px 14px;
+  flex: 1;
+  min-width: 220px;
+  transition: var(--transition);
+}
+
+.best-time-input-wrap:focus-within {
+  border-color: var(--green-primary);
+  box-shadow: 0 0 0 2px rgba(49, 101, 61, 0.15);
+}
+
+.best-time-phone-icon {
+  margin-right: 6px;
+  font-size: 14px;
 }
 
 .best-time-phone-input {
   flex: 1;
-  background: #ffffff;
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-pill);
+  background: transparent;
+  border: none;
   color: var(--text-dark);
-  padding: 9px 16px;
+  padding: 8px 0;
   font-size: 13.5px;
   outline: none;
-}
-
-.best-time-phone-input:focus {
-  border-color: var(--green-primary);
-  box-shadow: 0 0 0 2px rgba(49, 101, 61, 0.15);
 }
 
 .best-time-status-pill {

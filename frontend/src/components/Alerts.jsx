@@ -35,6 +35,7 @@ function Alerts({ locations = [], selectedLocationId }) {
   const [message, setMessage] = useState('')
   const [testingWhatsapp, setTestingWhatsapp] = useState(false)
   const [testResult, setTestResult] = useState(null)
+  const [testRecipientPhone, setTestRecipientPhone] = useState('+919494202261')
   const [testCustomMessage, setTestCustomMessage] = useState('🌿 AirSense Alert: Air Quality is Satisfactory (AQI 87).')
   const [testContentSid, setTestContentSid] = useState('HXb131895de71a093156d1062e878de57c')
   const [showAdvancedTest, setShowAdvancedTest] = useState(true)
@@ -79,8 +80,10 @@ function Alerts({ locations = [], selectedLocationId }) {
         try {
           const me = await getMe()
           if (!ignore) {
-            setWhatsappNumber(me.user?.whatsapp_number || '')
-            setSavedWhatsappNumber(me.user?.whatsapp_number || '')
+            const num = me.user?.whatsapp_number || '+919494202261'
+            setWhatsappNumber(num)
+            setSavedWhatsappNumber(num)
+            setTestRecipientPhone(num)
           }
         } catch {
           // profile is optional for rendering the page
@@ -122,7 +125,7 @@ function Alerts({ locations = [], selectedLocationId }) {
     setTestingWhatsapp(true)
     setTestResult(null)
     try {
-      const target = whatsappNumber.trim() || savedWhatsappNumber || '+919494202261'
+      const target = (testRecipientPhone || whatsappNumber || savedWhatsappNumber || '+919494202261').trim()
       const res = await testWhatsappDispatch(
         target,
         testCustomMessage.trim() || null,
@@ -130,7 +133,7 @@ function Alerts({ locations = [], selectedLocationId }) {
       )
       setTestResult(res)
       if (res.success) {
-        setMessage(`✓ Test WhatsApp dispatched successfully! (Twilio SID: ${res.message_sid})`)
+        setMessage(`✓ Test WhatsApp dispatched successfully to ${target}! (Twilio SID: ${res.message_sid})`)
       } else {
         setError(`⚠️ Dispatch failed (Code ${res.error_code || res.status_code || 'error'}): ${res.error_message}`)
       }
@@ -153,7 +156,12 @@ function Alerts({ locations = [], selectedLocationId }) {
     setMessage('')
 
     try {
-      await createAlert(alertLocationId, threshold, whatsappEnabled)
+      const wa = whatsappNumber.trim()
+      await createAlert(alertLocationId, threshold, whatsappEnabled, wa || null)
+      if (wa && wa !== savedWhatsappNumber) {
+        setSavedWhatsappNumber(wa)
+        setTestRecipientPhone(wa)
+      }
       setMessage('Alert created successfully!')
       await loadAlerts()
     } catch (err) {
@@ -237,9 +245,12 @@ function Alerts({ locations = [], selectedLocationId }) {
             <input
               id="alert-whatsapp"
               type="tel"
-              placeholder="+919876543210"
+              placeholder="+919494202261"
               value={whatsappNumber}
-              onChange={e => setWhatsappNumber(e.target.value)}
+              onChange={e => {
+                setWhatsappNumber(e.target.value)
+                setTestRecipientPhone(e.target.value)
+              }}
               className="alert-input"
             />
             <button
@@ -289,11 +300,25 @@ function Alerts({ locations = [], selectedLocationId }) {
               Send an instant diagnostic test message to verify outbound delivery, sender authorization, and 24-hr session status.
             </p>
           </div>
+        </div>
+
+        <div className="test-recipient-bar">
+          <div className="test-recipient-input-group">
+            <label htmlFor="test-phone-input">📱 Send Alert To Number (E.164):</label>
+            <input
+              id="test-phone-input"
+              type="tel"
+              placeholder="+919494202261 (include country code)"
+              value={testRecipientPhone}
+              onChange={e => setTestRecipientPhone(e.target.value)}
+              className="test-phone-input"
+            />
+          </div>
           <button
             type="button"
             className="btn-send-test-whatsapp"
             onClick={handleTestWhatsapp}
-            disabled={testingWhatsapp}
+            disabled={testingWhatsapp || !testRecipientPhone.trim()}
           >
             {testingWhatsapp ? (
               <>
