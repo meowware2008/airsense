@@ -41,7 +41,8 @@ def get_twilio_diagnostic_advice(error_code: int | None, from_number: str, to_nu
     if error_code == 21654:
         return (
             f"Twilio Trial Restriction (Error 21654 - ContentSid Required): Twilio trial accounts require an active session or a WhatsApp Content Template. "
-            f"Please reply 'Hi' on WhatsApp from {clean_to} to {clean_from} to activate your 24-hr session, or configure TWILIO_CONTENT_SID."
+            f"To enable free-form AQI alerts: In Twilio Console -> Try out WhatsApp -> 'Receive a message', select 'Standard' (not Custom) and click Save. "
+            f"Then send 'Hi' from your phone ({clean_to}) to {clean_from}."
         )
     elif error_code == 63016:
         return (
