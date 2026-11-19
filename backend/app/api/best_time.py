@@ -241,10 +241,10 @@ def send_best_time_whatsapp():
                 f"Twilio WhatsApp session inactive (Error 63016): WhatsApp requires an active 24-hr session. "
                 f"Please send 'Hi' or any message on WhatsApp from your phone ({target_number}) to {clean_from}, then click send again."
             )
-        elif err_code == 21608:
+        elif err_code in (21608, 572002):
             status_msg = (
-                f"Twilio Trial restriction (Error 21608): Recipient {target_number} is unverified. "
-                f"Please add {target_number} to Twilio Verified Caller IDs or activate the sandbox."
+                f"Twilio Trial restriction (Error {err_code}): Recipient {target_number} is unverified. "
+                f"Please add {target_number} to Twilio Verified Caller IDs in your Twilio Console (Phone Numbers > Manage > Verified Caller IDs)."
             )
         elif err_code == 20003:
             status_msg = "Twilio Authentication Error (20003): Invalid Account SID or Auth Token configured on server."

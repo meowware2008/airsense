@@ -48,10 +48,11 @@ def get_twilio_diagnostic_advice(error_code: int | None, from_number: str, to_nu
             f"Twilio WhatsApp session inactive (Error 63016): WhatsApp requires an active 24-hr session. "
             f"Please send 'Hi' or any message on WhatsApp from your phone ({clean_to}) to {clean_from}, then click send again."
         )
-    elif error_code == 21608:
+    elif error_code in (21608, 572002):
         return (
-            f"Twilio Trial restriction (Error 21608): Recipient {clean_to} is unverified. "
-            f"Please add {clean_to} to Twilio Verified Caller IDs or activate the sandbox."
+            f"Twilio Trial Restriction (Error {error_code}): Recipient {clean_to} is not a verified phone number on your Twilio account. "
+            f"Twilio trial accounts can only message numbers in your Verified Caller IDs. "
+            f"To fix: Go to Twilio Console -> Phone Numbers -> Manage -> Verified Caller IDs, add {clean_to}, and verify via OTP code."
         )
     elif error_code == 20003:
         return "Twilio Authentication Error (20003): Invalid Account SID or Auth Token configured on server."
