@@ -236,6 +236,26 @@ export async function sendBestTimeToWhatsapp(locationId, whatsappNumber = null) 
   return response.json()
 }
 
+export async function testWhatsappDispatch(whatsappNumber = null, customMessage = null, contentSid = null) {
+  const payload = {}
+  if (whatsappNumber) payload.whatsapp_number = whatsappNumber
+  if (customMessage) payload.message = customMessage
+  if (contentSid) payload.content_sid = contentSid
+
+  const response = await fetch(`${API_BASE_URL}/alerts/test-whatsapp`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.error || 'Failed to trigger test WhatsApp dispatch')
+  }
+
+  return response.json()
+}
+
 export async function pingHealth() {
   try {
     const response = await fetch(`${API_BASE_URL}/health/live`, {

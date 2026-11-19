@@ -33,7 +33,41 @@ def format_whatsapp_address(raw_number: str) -> str:
     return f"whatsapp:{cleaned}" if cleaned else ""
 
 
-def send_whatsapp_with_details(to_number: str, body: str, content_variables: dict = None) -> dict:
+def get_twilio_diagnostic_advice(error_code: int | None, from_number: str, to_number: str) -> str:
+    """Provide specific, human-readable troubleshooting advice based on Twilio error codes."""
+    clean_from = (from_number or "").replace("whatsapp:", "").strip()
+    clean_to = (to_number or "").replace("whatsapp:", "").strip()
+
+    if error_code == 21654:
+        return (
+            f"Twilio Trial Restriction (Error 21654 - ContentSid Required): Twilio trial accounts require an active session or a WhatsApp Content Template. "
+            f"Please reply 'Hi' on WhatsApp from {clean_to} to {clean_from} to activate your 24-hr session, or configure TWILIO_CONTENT_SID."
+        )
+    elif error_code == 63016:
+        return (
+            f"Twilio WhatsApp session inactive (Error 63016): WhatsApp requires an active 24-hr session. "
+            f"Please send 'Hi' or any message on WhatsApp from your phone ({clean_to}) to {clean_from}, then click send again."
+        )
+    elif error_code == 21608:
+        return (
+            f"Twilio Trial restriction (Error 21608): Recipient {clean_to} is unverified. "
+            f"Please add {clean_to} to Twilio Verified Caller IDs or activate the sandbox."
+        )
+    elif error_code == 20003:
+        return "Twilio Authentication Error (20003): Invalid Account SID or Auth Token configured on server."
+    elif error_code == 21606:
+        return f"Twilio Sender Error (21606): From number {clean_from} is not recognized as a WhatsApp sender."
+    elif error_code == 21211:
+        return f"Invalid Phone Number (Error 21211): {clean_to} is not formatted in valid international E.164 format (e.g. +919494202261)."
+    return "Ensure recipient is joined to Twilio WhatsApp sandbox or has an active 24-hour session."
+
+
+def send_whatsapp_with_details(
+    to_number: str,
+    body: str,
+    content_variables: dict = None,
+    content_sid: str = None,
+) -> dict:
     """Send a WhatsApp message through the Twilio REST API with full diagnostic response.
 
     Supports both free-form message body and approved Twilio Content Templates (ContentSid).
@@ -44,6 +78,9 @@ def send_whatsapp_with_details(to_number: str, body: str, content_variables: dic
         - error_code: int or None (Twilio error code if present)
         - error_message: str or None (Twilio error message or description)
         - message_sid: str or None
+        - from_number: str
+        - to_number: str
+        - payload_used: dict
     """
     if not whatsapp_configured():
         return {
@@ -52,6 +89,9 @@ def send_whatsapp_with_details(to_number: str, body: str, content_variables: dic
             "error_code": None,
             "error_message": "Twilio credentials (TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN) are not configured.",
             "message_sid": None,
+            "from_number": Config.TWILIO_WHATSAPP_FROM,
+            "to_number": to_number,
+            "payload_used": {},
         }
 
     raw_to = to_number or ""
@@ -66,6 +106,9 @@ def send_whatsapp_with_details(to_number: str, body: str, content_variables: dic
             "error_code": None,
             "error_message": f"Invalid WhatsApp number format '{to_number}'. Must follow E.164 (e.g. +919876543210).",
             "message_sid": None,
+            "from_number": Config.TWILIO_WHATSAPP_FROM,
+            "to_number": to_number,
+            "payload_used": {},
         }
 
     from_addr = format_whatsapp_address(Config.TWILIO_WHATSAPP_FROM)
@@ -77,8 +120,9 @@ def send_whatsapp_with_details(to_number: str, body: str, content_variables: dic
         "To": to_addr,
     }
 
-    if Config.TWILIO_CONTENT_SID:
-        post_data["ContentSid"] = Config.TWILIO_CONTENT_SID
+    effective_content_sid = content_sid or Config.TWILIO_CONTENT_SID
+    if effective_content_sid:
+        post_data["ContentSid"] = effective_content_sid
         if content_variables:
             post_data["ContentVariables"] = json.dumps(content_variables)
     else:
@@ -104,6 +148,9 @@ def send_whatsapp_with_details(to_number: str, body: str, content_variables: dic
                 "error_code": None,
                 "error_message": None,
                 "message_sid": resp_data.get("sid"),
+                "from_number": from_addr,
+                "to_number": to_addr,
+                "payload_used": post_data,
             }
 
         twilio_code = resp_data.get("code")
@@ -116,6 +163,9 @@ def send_whatsapp_with_details(to_number: str, body: str, content_variables: dic
             "error_code": twilio_code,
             "error_message": twilio_msg,
             "message_sid": None,
+            "from_number": from_addr,
+            "to_number": to_addr,
+            "payload_used": post_data,
         }
     except requests.RequestException as e:
         logger.warning(f"WhatsApp dispatch failed gracefully (network issue): {e}")
@@ -125,6 +175,9 @@ def send_whatsapp_with_details(to_number: str, body: str, content_variables: dic
             "error_code": None,
             "error_message": f"Network error connecting to Twilio: {str(e)}",
             "message_sid": None,
+            "from_number": from_addr,
+            "to_number": to_addr,
+            "payload_used": post_data,
         }
 
 

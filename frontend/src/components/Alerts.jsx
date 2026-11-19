@@ -8,6 +8,7 @@ import {
   markNotificationRead,
   getMe,
   saveWhatsappNumber,
+  testWhatsappDispatch,
 } from '../api'
 import {
   IconBell,
@@ -32,6 +33,11 @@ function Alerts({ locations = [], selectedLocationId }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [testingWhatsapp, setTestingWhatsapp] = useState(false)
+  const [testResult, setTestResult] = useState(null)
+  const [testCustomMessage, setTestCustomMessage] = useState('')
+  const [testContentSid, setTestContentSid] = useState('')
+  const [showAdvancedTest, setShowAdvancedTest] = useState(false)
 
   const [prevSelectedId, setPrevSelectedId] = useState(selectedLocationId)
   if (selectedLocationId !== prevSelectedId) {
@@ -107,6 +113,37 @@ function Alerts({ locations = [], selectedLocationId }) {
       setMessage(saved ? 'WhatsApp number saved!' : 'WhatsApp number removed.')
     } catch (err) {
       setError(err.message)
+    }
+  }
+
+  async function handleTestWhatsapp() {
+    setError('')
+    setMessage('')
+    setTestingWhatsapp(true)
+    setTestResult(null)
+    try {
+      const target = whatsappNumber.trim() || savedWhatsappNumber || '+919494202261'
+      const res = await testWhatsappDispatch(
+        target,
+        testCustomMessage.trim() || null,
+        testContentSid.trim() || null
+      )
+      setTestResult(res)
+      if (res.success) {
+        setMessage(`✓ Test WhatsApp dispatched successfully! (Twilio SID: ${res.message_sid})`)
+      } else {
+        setError(`⚠️ Dispatch failed (Code ${res.error_code || res.status_code || 'error'}): ${res.error_message}`)
+      }
+    } catch (err) {
+      setError(`Dispatch error: ${err.message}`)
+      setTestResult({
+        success: false,
+        status_code: 500,
+        error_message: err.message,
+        diagnostic_advice: 'Ensure backend server is running and Twilio credentials are valid in environment.',
+      })
+    } finally {
+      setTestingWhatsapp(false)
     }
   }
 
@@ -238,6 +275,123 @@ function Alerts({ locations = [], selectedLocationId }) {
 
       {error && <p className="alerts-error">{error}</p>}
       {message && <p className="alerts-success">{message}</p>}
+
+      {/* WhatsApp Diagnostic & Live Testing Panel */}
+      <div className="alerts-panel whatsapp-test-panel">
+        <div className="test-panel-header">
+          <div className="test-header-text">
+            <div className="test-badge-row">
+              <span className="test-badge">DIAGNOSTIC TEST</span>
+              <span className="test-channel-badge">Twilio WhatsApp Sandbox</span>
+            </div>
+            <h3>🧪 Manual WhatsApp Connection Test</h3>
+            <p>
+              Send an instant diagnostic test message to verify outbound delivery, sender authorization, and 24-hr session status.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn-send-test-whatsapp"
+            onClick={handleTestWhatsapp}
+            disabled={testingWhatsapp}
+          >
+            {testingWhatsapp ? (
+              <>
+                <IconLoader size={16} />
+                <span>Testing Dispatch...</span>
+              </>
+            ) : (
+              <>
+                <span className="wa-btn-icon">💬</span>
+                <span>Send Test WhatsApp Message</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Advanced test options toggle */}
+        <div className="test-options-toggle">
+          <button
+            type="button"
+            className="btn-link-toggle"
+            onClick={() => setShowAdvancedTest(!showAdvancedTest)}
+          >
+            {showAdvancedTest ? 'Hide Advanced Options ▲' : 'Show Advanced / Content Template Options ▼'}
+          </button>
+        </div>
+
+        {showAdvancedTest && (
+          <div className="test-advanced-box">
+            <div className="test-input-group">
+              <label htmlFor="test-content-sid">Twilio Content Template SID (Optional)</label>
+              <input
+                id="test-content-sid"
+                type="text"
+                placeholder="e.g. HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                value={testContentSid}
+                onChange={e => setTestContentSid(e.target.value)}
+                className="test-input"
+              />
+              <span className="test-hint">Required for Twilio Trial outbound without an active WhatsApp reply session.</span>
+            </div>
+            <div className="test-input-group">
+              <label htmlFor="test-custom-msg">Custom Message Text (Optional)</label>
+              <input
+                id="test-custom-msg"
+                type="text"
+                placeholder="Default: AirSense Test Ping: WhatsApp alert channel connection verified! 🌿"
+                value={testCustomMessage}
+                onChange={e => setTestCustomMessage(e.target.value)}
+                className="test-input"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Live Diagnostics Card when test is triggered */}
+        {testResult && (
+          <div className={`diagnostic-result-card ${testResult.success ? 'success' : 'failed'}`}>
+            <div className="diag-header">
+              <span className="diag-status-pill">
+                {testResult.success ? '✓ SUCCESS: 200 OK' : `⚠️ FAILED: HTTP ${testResult.status_code || 400}`}
+              </span>
+              {testResult.message_sid && (
+                <span className="diag-sid">Twilio SID: {testResult.message_sid}</span>
+              )}
+            </div>
+
+            <div className="diag-grid">
+              <div>
+                <span className="diag-label">Sender (From):</span>
+                <code>{testResult.from_number || 'whatsapp:+17372508034'}</code>
+              </div>
+              <div>
+                <span className="diag-label">Recipient (To):</span>
+                <code>{testResult.to_number || whatsappNumber || '+919494202261'}</code>
+              </div>
+              {testResult.error_code && (
+                <div>
+                  <span className="diag-label">Twilio Error Code:</span>
+                  <code className="diag-err-code">{testResult.error_code}</code>
+                </div>
+              )}
+              {testResult.error_message && (
+                <div>
+                  <span className="diag-label">Twilio Response:</span>
+                  <span className="diag-err-msg">{testResult.error_message}</span>
+                </div>
+              )}
+            </div>
+
+            {testResult.diagnostic_advice && (
+              <div className="diag-advice-box">
+                <strong>Recommended Action:</strong>
+                <p>{testResult.diagnostic_advice}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="alerts-panel">
         <div className="panel-header-row">

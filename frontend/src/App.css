@@ -1142,6 +1142,24 @@ body {
   color: #ffffff;
 }
 
+.btn-settings-action {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-settings-action:hover {
+  background: #258b70;
+  border-color: #258b70;
+  color: #ffffff;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }

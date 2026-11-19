@@ -1059,6 +1059,20 @@ function App() {
                 </div>
                 <span className="settings-badge">Connected</span>
               </div>
+              <div className="settings-divider" />
+              <div className="settings-item">
+                <div>
+                  <h4>WhatsApp Alert Integration</h4>
+                  <p>Twilio Sandbox (+1 737 250 8034)</p>
+                </div>
+                <button
+                  type="button"
+                  className="btn-settings-action"
+                  onClick={() => setActiveTab('alerts')}
+                >
+                  Test & Debug 🧪
+                </button>
+              </div>
             </div>
           </section>
         )}

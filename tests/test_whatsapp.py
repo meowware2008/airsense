@@ -130,3 +130,36 @@ def test_whatsapp_not_sent_below_min_aqi_or_when_opted_out(test_user, test_locat
     with patch("backend.app.services.alert_service.send_whatsapp") as mock_send:
         AlertService.evaluate_reading(_reading(test_location.id, 400.0))
     mock_send.assert_not_called()
+
+
+def test_manual_whatsapp_test_endpoint_unauthorized(client):
+    res = client.post("/api/v1/alerts/test-whatsapp")
+    assert res.status_code == 401
+
+
+def test_manual_whatsapp_test_endpoint_success(client, auth_token):
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    mock_return = {
+        "success": True,
+        "status_code": 201,
+        "error_code": None,
+        "error_message": None,
+        "message_sid": "SM_test_debug_sid",
+        "from_number": "whatsapp:+17372508034",
+        "to_number": "whatsapp:+919494202261",
+        "payload_used": {"From": "whatsapp:+17372508034", "To": "whatsapp:+919494202261", "Body": "test"},
+    }
+
+    with patch("backend.app.api.alerts.send_whatsapp_with_details", return_value=mock_return) as mock_dispatch:
+        res = client.post(
+            "/api/v1/alerts/test-whatsapp",
+            headers=headers,
+            json={"whatsapp_number": "+919494202261", "message": "Manual test ping"},
+        )
+        assert res.status_code == 200
+        data = res.get_json()
+        assert data["success"] is True
+        assert data["message_sid"] == "SM_test_debug_sid"
+        assert data["to_number"] == "whatsapp:+919494202261"
+        assert "accepted" in data["diagnostic_advice"]
+        mock_dispatch.assert_called_once()

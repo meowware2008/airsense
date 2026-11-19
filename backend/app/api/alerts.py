@@ -1,8 +1,14 @@
 from flask import Blueprint, request, jsonify, g
+from backend.app.config import Config
 from backend.app.database import db_session
 from backend.app.models import AlertPreference, Notification, Location
 from backend.app.api.auth import token_required
 from backend.app.monitoring.metrics import ACTIVE_ALERTS_COUNT
+from backend.app.services.whatsapp_service import (
+    send_whatsapp_with_details,
+    whatsapp_configured,
+    get_twilio_diagnostic_advice,
+)
 
 alerts_bp = Blueprint("alerts", __name__, url_prefix="/api/v1")
 
@@ -179,3 +185,57 @@ def mark_notification_read(notification_id: int):
     notif.status = "read"
     db_session.commit()
     return jsonify({"message": "Notification marked as read", "notification": notif.to_dict()}), 200
+
+
+@alerts_bp.route("/alerts/test-whatsapp", methods=["POST"])
+@token_required
+def test_whatsapp_dispatch():
+    """Manual debug endpoint for testing Twilio WhatsApp connectivity.
+
+    Sends a test ping and returns comprehensive real-time diagnostics.
+    """
+    data = request.get_json(silent=True) or {}
+    user = g.current_user
+
+    target_number = (
+        data.get("whatsapp_number")
+        or user.whatsapp_number
+        or "+919494202261"
+    ).strip().replace(" ", "")
+
+    custom_message = (
+        data.get("message")
+        or "🌿 AirSense Test Ping: WhatsApp alert channel connection verified! If you received this, your Twilio alert integration is fully operational."
+    ).strip()
+
+    content_sid = (data.get("content_sid") or "").strip() or None
+    content_variables = data.get("content_variables") or None
+
+    dispatch_res = send_whatsapp_with_details(
+        to_number=target_number,
+        body=custom_message,
+        content_variables=content_variables,
+        content_sid=content_sid,
+    )
+
+    err_code = dispatch_res.get("error_code")
+    from_num = dispatch_res.get("from_number") or Config.TWILIO_WHATSAPP_FROM
+    to_num = dispatch_res.get("to_number") or target_number
+    advice = (
+        "Message accepted and queued for delivery by Twilio."
+        if dispatch_res["success"]
+        else get_twilio_diagnostic_advice(err_code, from_num, to_num)
+    )
+
+    return jsonify({
+        "success": dispatch_res["success"],
+        "status_code": dispatch_res.get("status_code"),
+        "error_code": err_code,
+        "error_message": dispatch_res.get("error_message"),
+        "message_sid": dispatch_res.get("message_sid"),
+        "from_number": from_num,
+        "to_number": to_num,
+        "diagnostic_advice": advice,
+        "payload_used": dispatch_res.get("payload_used"),
+        "whatsapp_configured": whatsapp_configured(),
+    }), 200
