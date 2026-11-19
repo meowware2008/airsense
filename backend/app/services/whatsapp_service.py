@@ -69,6 +69,7 @@ def send_whatsapp_with_details(
     body: str,
     content_variables: dict = None,
     content_sid: str = None,
+    from_number: str = None,
 ) -> dict:
     """Send a WhatsApp message through the Twilio REST API with full diagnostic response.
 

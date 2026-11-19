@@ -1,7 +1,8 @@
-from flask import Blueprint, request, jsonify, g
+from xml.sax.saxutils import escape as xml_escape
+from flask import Blueprint, request, jsonify, g, Response
 from backend.app.config import Config
 from backend.app.database import db_session
-from backend.app.models import AlertPreference, Notification, Location, AirQualityReading
+from backend.app.models import AlertPreference, Notification, Location, AirQualityReading, User
 from backend.app.api.auth import token_required
 from backend.app.monitoring.metrics import ACTIVE_ALERTS_COUNT
 from backend.app.services.alert_service import AlertService
@@ -362,3 +363,65 @@ def test_whatsapp_dispatch():
         "payload_used": dispatch_res.get("payload_used"),
         "whatsapp_configured": whatsapp_configured(),
     }), 200
+
+
+@alerts_bp.route("/alerts/twilio-webhook", methods=["GET", "POST"])
+def twilio_whatsapp_webhook():
+    """Handle incoming WhatsApp messages from Twilio via TwiML.
+
+    Allows two-way conversational AQI queries on WhatsApp and enables
+    the 24-hr session without any template restrictions.
+    """
+    incoming_body = (request.values.get("Body") or "").strip().lower()
+    from_sender = (request.values.get("From") or "").replace("whatsapp:", "").strip()
+
+    # Look up location by keyword if mentioned in the message
+    target_location = None
+    all_locations = db_session.query(Location).all()
+    for loc in all_locations:
+        if loc.name.lower() in incoming_body:
+            target_location = loc
+            break
+
+    # If no city matched, check user profile or default to Delhi (Location 1) or first location
+    if not target_location and from_sender:
+        user = db_session.query(User).filter(User.whatsapp_number == from_sender).first()
+        if user:
+            pref = db_session.query(AlertPreference).filter(AlertPreference.user_id == user.id).first()
+            if pref:
+                target_location = db_session.query(Location).filter(Location.id == pref.location_id).first()
+
+    if not target_location:
+        target_location = (
+            db_session.query(Location).filter(Location.name.ilike("%delhi%")).first()
+            or db_session.query(Location).first()
+        )
+
+    loc_id = target_location.id if target_location else 1
+    loc_name = target_location.name if target_location else "Delhi"
+
+    reading = (
+        db_session.query(AirQualityReading)
+        .filter(AirQualityReading.location_id == loc_id)
+        .order_by(AirQualityReading.observed_at.desc())
+        .first()
+    )
+
+    if reading and reading.aqi_value is not None:
+        report_text = format_whatsapp_alert(
+            location_name=loc_name,
+            aqi=reading.aqi_value,
+            threshold=100,
+            reading=reading,
+            is_test=False,
+        )
+    else:
+        report_text = f"🌿 AirSense: Connected to {loc_name}. Live telemetry is currently synchronizing."
+
+    # Return valid TwiML XML
+    twiml_resp = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>{xml_escape(report_text)}</Message>
+</Response>"""
+    return Response(twiml_resp, mimetype="text/xml")
+

@@ -163,3 +163,17 @@ def test_manual_whatsapp_test_endpoint_success(client, auth_token):
         assert data["to_number"] == "whatsapp:+919494202261"
         assert "accepted" in data["diagnostic_advice"]
         mock_dispatch.assert_called_once()
+
+
+def test_twilio_webhook_endpoint(client, test_location):
+    _reading(test_location.id, 145.0)
+    res = client.post(
+        "/api/v1/alerts/twilio-webhook",
+        data={"Body": "Delhi", "From": "whatsapp:+919494202261"},
+    )
+    assert res.status_code == 200
+    assert "text/xml" in res.headers["Content-Type"]
+    assert "<Response>" in res.text
+    assert "<Message>" in res.text
+    assert "AirSense" in res.text
+
