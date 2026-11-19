@@ -182,10 +182,16 @@ def send_whatsapp_with_details(
         }
 
 
-def send_whatsapp(to_number: str, body: str) -> bool:
+def send_whatsapp(to_number: str, body: str, content_variables: dict = None) -> bool:
     """Send a WhatsApp message through the Twilio REST API.
 
     Returns True on success and False on any failure, so a WhatsApp problem
     never breaks the ingestion/alert cycle.
     """
-    return send_whatsapp_with_details(to_number, body)["success"]
+    if content_variables is None:
+        content_variables = {"1": body, "2": "AirSense"}
+    return send_whatsapp_with_details(
+        to_number,
+        body,
+        content_variables=content_variables,
+    )["success"]

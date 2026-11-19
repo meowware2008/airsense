@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify, g
 from backend.app.config import Config
 from backend.app.database import db_session
-from backend.app.models import AlertPreference, Notification, Location
+from backend.app.models import AlertPreference, Notification, Location, AirQualityReading
 from backend.app.api.auth import token_required
 from backend.app.monitoring.metrics import ACTIVE_ALERTS_COUNT
+from backend.app.services.alert_service import AlertService
 from backend.app.services.whatsapp_service import (
     send_whatsapp_with_details,
     whatsapp_configured,
@@ -99,6 +100,19 @@ def create_alert():
     db_session.commit()
     _update_active_alerts_metric()
 
+    # Immediately evaluate against the latest reading so the user doesn't have to wait an hour
+    latest_reading = (
+        db_session.query(AirQualityReading)
+        .filter(AirQualityReading.location_id == location_id)
+        .order_by(AirQualityReading.observed_at.desc())
+        .first()
+    )
+    if latest_reading and latest_reading.aqi_value is not None:
+        try:
+            AlertService.evaluate_reading(latest_reading)
+        except Exception:
+            pass
+
     return jsonify({"message": "Alert created successfully", "alert": pref.to_dict()}), 201
 
 
@@ -137,7 +151,90 @@ def update_alert(alert_id: int):
 
     db_session.commit()
     _update_active_alerts_metric()
+
+    # Re-evaluate against latest reading on update
+    latest_reading = (
+        db_session.query(AirQualityReading)
+        .filter(AirQualityReading.location_id == pref.location_id)
+        .order_by(AirQualityReading.observed_at.desc())
+        .first()
+    )
+    if latest_reading and latest_reading.aqi_value is not None:
+        try:
+            AlertService.evaluate_reading(latest_reading)
+        except Exception:
+            pass
+
     return jsonify({"message": "Alert updated successfully", "alert": pref.to_dict()}), 200
+
+
+@alerts_bp.route("/alerts/<int:alert_id>/trigger-test", methods=["POST"])
+@token_required
+def trigger_alert_test(alert_id: int):
+    """Manually test/trigger an alert rule against the latest observed AQI."""
+    pref = (
+        db_session.query(AlertPreference)
+        .filter(
+            AlertPreference.id == alert_id,
+            AlertPreference.user_id == g.current_user.id,
+        )
+        .first()
+    )
+    if not pref:
+        return jsonify({"error": "Alert preference not found"}), 404
+
+    loc = db_session.query(Location).filter(Location.id == pref.location_id).first()
+    latest_reading = (
+        db_session.query(AirQualityReading)
+        .filter(AirQualityReading.location_id == pref.location_id)
+        .order_by(AirQualityReading.observed_at.desc())
+        .first()
+    )
+
+    if not latest_reading:
+        return jsonify({
+            "success": False,
+            "message": f"No air quality readings available for {loc.name if loc else 'location'}.",
+        }), 400
+
+    current_aqi = int(latest_reading.aqi_value) if latest_reading.aqi_value is not None else 0
+    threshold = int(pref.threshold_value)
+    breached = current_aqi >= threshold
+
+    wa_dispatched = False
+    wa_details = None
+    if pref.whatsapp_enabled and g.current_user.whatsapp_number:
+        wa_body = (
+            f"⚠️ AirSense Alert\n"
+            f"{loc.name if loc else 'Location'}: AQI is {current_aqi} "
+            f"({latest_reading.aqi_standard or 'CPCB'}), crossing your threshold of {threshold}.\n"
+            f"Limit time outdoors, wear an N95 mask and keep windows closed."
+        )
+        wa_details = send_whatsapp_with_details(
+            g.current_user.whatsapp_number,
+            wa_body,
+            content_variables={"1": wa_body, "2": loc.name if loc else "AirSense"},
+        )
+        wa_dispatched = wa_details.get("success", False)
+
+    return jsonify({
+        "success": True,
+        "breached": breached,
+        "current_aqi": current_aqi,
+        "threshold": threshold,
+        "location": loc.name if loc else "Location",
+        "whatsapp_enabled": pref.whatsapp_enabled,
+        "whatsapp_dispatched": wa_dispatched,
+        "whatsapp_recipient": g.current_user.whatsapp_number,
+        "whatsapp_details": wa_details,
+        "message": (
+            f"Live {loc.name if loc else 'city'} AQI is {current_aqi}. "
+            + (f"Threshold ({threshold}) crossed! " if breached else f"Below threshold ({threshold}). ")
+            + (f"WhatsApp alert dispatched to {g.current_user.whatsapp_number}!" if wa_dispatched else (
+                "WhatsApp alert is disabled on this rule." if not pref.whatsapp_enabled else "No WhatsApp number configured."
+            ))
+        ).strip(),
+    }), 200
 
 
 @alerts_bp.route("/alerts/<int:alert_id>", methods=["DELETE"])

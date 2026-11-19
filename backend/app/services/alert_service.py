@@ -98,22 +98,26 @@ class AlertService:
                     db_session.add(email_notif)
 
                 # WhatsApp alert: only if the user opted in for this location, has a number,
-                # and the air quality is serious enough to justify an instant message
+                # and the air quality is at or above the user's configured threshold
                 if (
                     user
                     and pref.whatsapp_enabled
                     and user.whatsapp_number
                     and whatsapp_configured()
-                    and reading.aqi_value >= Config.WHATSAPP_MIN_AQI
+                    and reading.aqi_value >= max(pref.threshold_value, Config.WHATSAPP_MIN_AQI)
                 ):
                     wa_body = (
-                        f"\u26a0\ufe0f AirSense Alert\n"
+                        f"⚠️ AirSense Alert\n"
                         f"{loc_name}: AQI is {int(reading.aqi_value)} "
                         f"({reading.aqi_standard or 'Unknown'}), above your threshold of "
                         f"{int(pref.threshold_value)}.\n"
                         f"Limit time outdoors, wear an N95 mask and keep windows closed."
                     )
-                    wa_sent = send_whatsapp(user.whatsapp_number, wa_body)
+                    wa_sent = send_whatsapp(
+                        user.whatsapp_number,
+                        wa_body,
+                        content_variables={"1": wa_body, "2": loc_name},
+                    )
                     db_session.add(Notification(
                         user_id=pref.user_id,
                         alert_preference_id=pref.id,

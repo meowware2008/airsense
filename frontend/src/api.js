@@ -182,6 +182,35 @@ export async function deleteAlert(alertId) {
   return response.json()
 }
 
+export async function updateAlert(alertId, data) {
+  const response = await fetch(`${API_BASE_URL}/alerts/${alertId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  })
+
+  const res = await response.json()
+  if (!response.ok) {
+    throw new Error(res.error || res.message || 'Unable to update alert')
+  }
+
+  return res
+}
+
+export async function testTriggerAlert(alertId) {
+  const response = await fetch(`${API_BASE_URL}/alerts/${alertId}/trigger-test`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  })
+
+  const res = await response.json()
+  if (!response.ok) {
+    throw new Error(res.error || res.message || 'Unable to test alert')
+  }
+
+  return res
+}
+
 export async function getNotifications() {
   const response = await fetch(`${API_BASE_URL}/notifications`, {
     headers: getAuthHeaders(),

@@ -410,6 +410,86 @@
   border: 1px solid #e2e8f0;
 }
 
+.whatsapp-status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.whatsapp-status-pill.on {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.whatsapp-status-pill.off {
+  background: #f8fafc;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-toggle-wa {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-toggle-wa.turn-off {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-toggle-wa.turn-off:hover:not(:disabled) {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.btn-toggle-wa.turn-on {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.btn-toggle-wa.turn-on:hover:not(:disabled) {
+  background: #15803d;
+  color: #ffffff;
+  border-color: #15803d;
+}
+
+.btn-test-rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f0fdfa;
+  color: #0d9488;
+  border: 1px solid #99f6e4;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-test-rule:hover:not(:disabled) {
+  background: #0d9488;
+  color: #ffffff;
+  border-color: #0d9488;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+}
+
 /* Delete Alert Button */
 .delete-alert-btn {
   display: inline-flex;

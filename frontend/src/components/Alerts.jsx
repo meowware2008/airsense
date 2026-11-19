@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react'
 import {
   getAlerts,
   createAlert,
+  updateAlert,
   deleteAlert,
+  testTriggerAlert,
   getNotifications,
   markNotificationRead,
   getMe,
@@ -26,10 +28,12 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
   const [threshold, setThreshold] = useState('100')
   const [whatsappNumber, setWhatsappNumber] = useState('')
   const [savedWhatsappNumber, setSavedWhatsappNumber] = useState('')
-  const [whatsappEnabled, setWhatsappEnabled] = useState(false)
+  const [whatsappEnabled, setWhatsappEnabled] = useState(true)
   const [alertLocationId, setAlertLocationId] = useState(selectedLocationId || '1')
   const [deletingId, setDeletingId] = useState(null)
   const [markingId, setMarkingId] = useState(null)
+  const [togglingAlertId, setTogglingAlertId] = useState(null)
+  const [testingAlertId, setTestingAlertId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -84,6 +88,7 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
             setWhatsappNumber(num)
             setSavedWhatsappNumber(num)
             setTestRecipientPhone(num)
+            if (num) setWhatsappEnabled(true)
           }
         } catch {
           // profile is optional for rendering the page
@@ -181,6 +186,42 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
       setError(err.message)
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  async function handleToggleWhatsapp(alertId, currentVal) {
+    setError('')
+    setMessage('')
+    setTogglingAlertId(alertId)
+    try {
+      await updateAlert(alertId, { whatsapp_enabled: !currentVal })
+      setMessage(`WhatsApp alert ${!currentVal ? 'enabled' : 'disabled'} for this rule!`)
+      await loadAlerts()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setTogglingAlertId(null)
+    }
+  }
+
+  async function handleTestAlert(alertId) {
+    setError('')
+    setMessage('')
+    setTestingAlertId(alertId)
+    try {
+      const res = await testTriggerAlert(alertId)
+      if (res.whatsapp_dispatched) {
+        setMessage(`✓ ${res.message}`)
+      } else if (res.breached) {
+        setMessage(`⚠️ ${res.message}`)
+      } else {
+        setMessage(`ℹ️ ${res.message}`)
+      }
+      await loadAlerts()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setTestingAlertId(null)
     }
   }
 
@@ -479,10 +520,13 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
                   <span className={`status-pill ${alert.enabled ? 'enabled' : 'disabled'}`}>
                     {alert.enabled ? 'Active' : 'Disabled'}
                   </span>
+                  <span className={`whatsapp-status-pill ${alert.whatsapp_enabled ? 'on' : 'off'}`}>
+                    {alert.whatsapp_enabled ? '💬 WhatsApp: ON' : '💬 WhatsApp: OFF'}
+                  </span>
                 </div>
                 <p className="alert-threshold-info">
                   AQI Threshold: <strong>{alert.threshold_value}</strong>
-                  {alert.whatsapp_enabled ? ' · WhatsApp on' : ''}
+                  {alert.whatsapp_enabled && savedWhatsappNumber ? ` · Delivery to ${savedWhatsappNumber}` : ''}
                 </p>
                 <small className="alert-meta">
                   {alert.created_at ? `Created on ${new Date(alert.created_at).toLocaleDateString()}` : ''}
@@ -490,6 +534,35 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
               </div>
 
               <div className="alert-actions">
+                <button
+                  type="button"
+                  className={`btn-toggle-wa ${alert.whatsapp_enabled ? 'turn-off' : 'turn-on'}`}
+                  onClick={() => handleToggleWhatsapp(alert.id, alert.whatsapp_enabled)}
+                  disabled={togglingAlertId === alert.id}
+                  title={alert.whatsapp_enabled ? 'Turn OFF WhatsApp delivery for this rule' : 'Turn ON WhatsApp delivery for this rule'}
+                >
+                  {togglingAlertId === alert.id ? 'Updating...' : (alert.whatsapp_enabled ? 'Disable WhatsApp' : 'Enable WhatsApp')}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-test-rule"
+                  onClick={() => handleTestAlert(alert.id)}
+                  disabled={testingAlertId === alert.id}
+                  title="Check live AQI and evaluate this alert immediately"
+                >
+                  {testingAlertId === alert.id ? (
+                    <>
+                      <IconLoader size={13} />
+                      <span>Checking...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>⚡ Test Alert</span>
+                    </>
+                  )}
+                </button>
+
                 <button
                   type="button"
                   className="delete-alert-btn"

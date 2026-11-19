@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime
+from unittest.mock import patch
 from backend.app.database import db_session
 from backend.app.models import AirQualityReading, AlertPreference, Notification
 from backend.app.services.alert_service import AlertService
@@ -112,3 +113,35 @@ def test_alert_evaluation_and_cooldown(test_user, test_location, client, auth_to
     res = client.patch(f"/api/v1/notifications/{notif_id}/read", headers=headers)
     assert res.status_code == 200
     assert res.get_json()["notification"]["status"] == "read"
+
+
+def test_trigger_alert_test_endpoint(client, auth_token, test_location, test_user):
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    create_res = client.post("/api/v1/alerts", headers=headers, json={
+        "location_id": test_location.id,
+        "threshold_value": 80.0,
+        "whatsapp_enabled": True,
+        "whatsapp_number": "+919494202261",
+    })
+    alert_id = create_res.get_json()["alert"]["id"]
+
+    reading = AirQualityReading(
+        location_id=test_location.id,
+        provider="mock",
+        measurement_type="simulated",
+        aqi_value=120.0,
+        aqi_standard="IN_CPCB",
+        pm25=65.0,
+        observed_at=datetime.utcnow(),
+    )
+    db_session.add(reading)
+    db_session.commit()
+
+    with patch("backend.app.api.alerts.send_whatsapp_with_details", return_value={"success": True, "message_sid": "MMtest"}):
+        res = client.post(f"/api/v1/alerts/{alert_id}/trigger-test", headers=headers)
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["success"] is True
+    assert data["breached"] is True
+    assert data["current_aqi"] == 120
+    assert data["whatsapp_dispatched"] is True
