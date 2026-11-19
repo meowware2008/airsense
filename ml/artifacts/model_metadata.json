@@ -18,23 +18,23 @@
     "month"
   ],
   "sample_counts": {
-    "total": 2207,
-    "train": 1544,
-    "validation": 331,
-    "test": 332
+    "total": 8759,
+    "train": 6131,
+    "validation": 1314,
+    "test": 1314
   },
   "evaluation": {
     "random_forest": {
-      "test_mae": 13.42,
-      "test_rmse": 18.58
+      "test_mae": 13.29,
+      "test_rmse": 19.08
     },
     "persistence_baseline": {
-      "test_mae": 12.32,
-      "test_rmse": 17.49
+      "test_mae": 16.46,
+      "test_rmse": 23.65
     },
-    "mae_improvement_pct": -8.99,
-    "rmse_improvement_pct": -6.22
+    "mae_improvement_pct": 19.26,
+    "rmse_improvement_pct": 19.35
   },
-  "trained_at": "2026-11-18T06:50:49.746407",
+  "trained_at": "2026-11-19T18:52:45.779155",
   "notes": "Chronological train/val/test split without lookahead leakage. Evaluated against persistence baseline."
 }

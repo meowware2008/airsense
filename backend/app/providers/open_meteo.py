@@ -9,13 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 class OpenMeteoProvider(BaseAirQualityProvider):
-    """Open-Meteo Air Quality API integration.
+    """Open-Meteo Air Quality & Weather API integration.
     
-    Data Source: Copernicus Atmosphere Monitoring Service (CAMS) models.
+    Data Source: Copernicus Atmosphere Monitoring Service (CAMS) + ECMWF models.
     Measurement Type: 'modelled'.
     Free/open access without API key requirement.
     """
     BASE_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
+    WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
 
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
@@ -38,6 +39,26 @@ class OpenMeteoProvider(BaseAirQualityProvider):
         current = data.get("current")
         if not current:
             return None
+
+        # Fetch live synchronized weather telemetry (temperature, relative humidity, wind speed)
+        temperature = None
+        humidity = None
+        wind_speed = None
+        try:
+            wx_params = {
+                "latitude": location.latitude,
+                "longitude": location.longitude,
+                "current": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+                "timezone": "UTC",
+            }
+            wx_resp = requests.get(self.WEATHER_URL, params=wx_params, timeout=self.timeout)
+            if wx_resp.status_code == 200:
+                wx_curr = wx_resp.json().get("current", {})
+                temperature = wx_curr.get("temperature_2m")
+                humidity = wx_curr.get("relative_humidity_2m")
+                wind_speed = wx_curr.get("wind_speed_10m")
+        except Exception as wx_err:
+            logger.warning(f"Open-Meteo live weather fetch warning for location {location.id}: {wx_err}")
 
         time_str = current.get("time")
         observed_at = datetime.fromisoformat(time_str.replace("Z", "")) if time_str else datetime.utcnow()
@@ -74,6 +95,9 @@ class OpenMeteoProvider(BaseAirQualityProvider):
             so2=pollutants["so2"],
             co=pollutants["co"],
             o3=pollutants["o3"],
+            temperature=temperature,
+            humidity=humidity,
+            wind_speed=wind_speed,
             aqi_value=aqi_val,
             aqi_standard=aqi_std,
             units_metadata=units,
@@ -99,6 +123,33 @@ class OpenMeteoProvider(BaseAirQualityProvider):
         except Exception as e:
             logger.error(f"Open-Meteo fetch_history failed for location {location.id}: {e}")
             return []
+
+        # Fetch synchronized historical hourly weather telemetry
+        wx_map = {}
+        try:
+            wx_params = {
+                "latitude": location.latitude,
+                "longitude": location.longitude,
+                "past_days": past_days,
+                "forecast_days": 1,
+                "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+                "timezone": "UTC",
+            }
+            wx_resp = requests.get(self.WEATHER_URL, params=wx_params, timeout=self.timeout)
+            if wx_resp.status_code == 200:
+                wx_hourly = wx_resp.json().get("hourly", {})
+                wx_times = wx_hourly.get("time", [])
+                temps = wx_hourly.get("temperature_2m", [])
+                humids = wx_hourly.get("relative_humidity_2m", [])
+                winds = wx_hourly.get("wind_speed_10m", [])
+                for idx, t_str in enumerate(wx_times):
+                    wx_map[t_str] = {
+                        "temperature": temps[idx] if idx < len(temps) else None,
+                        "humidity": humids[idx] if idx < len(humids) else None,
+                        "wind_speed": winds[idx] if idx < len(winds) else None,
+                    }
+        except Exception as wx_err:
+            logger.warning(f"Open-Meteo history weather fetch warning for location {location.id}: {wx_err}")
 
         hourly = data.get("hourly")
         if not hourly or "time" not in hourly:
@@ -141,6 +192,8 @@ class OpenMeteoProvider(BaseAirQualityProvider):
                 aqi_val = float(us_aqi) if us_aqi is not None else None
                 aqi_std = "US_EPA" if aqi_val is not None else None
 
+            wx_data = wx_map.get(t_str, {})
+
             readings.append(
                 NormalizedReading(
                     provider="open_meteo",
@@ -153,6 +206,9 @@ class OpenMeteoProvider(BaseAirQualityProvider):
                     so2=pollutants["so2"],
                     co=pollutants["co"],
                     o3=pollutants["o3"],
+                    temperature=wx_data.get("temperature"),
+                    humidity=wx_data.get("humidity"),
+                    wind_speed=wx_data.get("wind_speed"),
                     aqi_value=aqi_val,
                     aqi_standard=aqi_std,
                     units_metadata=units,

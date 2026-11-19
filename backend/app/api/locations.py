@@ -13,14 +13,42 @@ DEFAULT_CITIES = [
     {"name": "Hyderabad", "region": "Telangana", "country": "India", "latitude": 17.3850, "longitude": 78.4867},
     {"name": "Ahmedabad", "region": "Gujarat", "country": "India", "latitude": 23.0225, "longitude": 72.5714},
     {"name": "Pune", "region": "Maharashtra", "country": "India", "latitude": 18.5204, "longitude": 73.8567},
+    {"name": "Jaipur", "region": "Rajasthan", "country": "India", "latitude": 26.9124, "longitude": 75.7873},
+    {"name": "Lucknow", "region": "Uttar Pradesh", "country": "India", "latitude": 26.8467, "longitude": 80.9462},
+    {"name": "Kanpur", "region": "Uttar Pradesh", "country": "India", "latitude": 26.4499, "longitude": 80.3319},
+    {"name": "Patna", "region": "Bihar", "country": "India", "latitude": 25.5941, "longitude": 85.1376},
+    {"name": "Varanasi", "region": "Uttar Pradesh", "country": "India", "latitude": 25.3176, "longitude": 82.9739},
+    {"name": "Chandigarh", "region": "Punjab & Haryana", "country": "India", "latitude": 30.7333, "longitude": 76.7794},
+    {"name": "Bhopal", "region": "Madhya Pradesh", "country": "India", "latitude": 23.2599, "longitude": 77.4126},
+    {"name": "Indore", "region": "Madhya Pradesh", "country": "India", "latitude": 22.7196, "longitude": 75.8577},
+    {"name": "Kochi", "region": "Kerala", "country": "India", "latitude": 9.9312, "longitude": 76.2673},
+    {"name": "Surat", "region": "Gujarat", "country": "India", "latitude": 21.1702, "longitude": 72.8311},
+    {"name": "Visakhapatnam", "region": "Andhra Pradesh", "country": "India", "latitude": 17.6868, "longitude": 83.2185},
+    {"name": "Agra", "region": "Uttar Pradesh", "country": "India", "latitude": 27.1767, "longitude": 78.0081},
+    {"name": "Ludhiana", "region": "Punjab", "country": "India", "latitude": 30.9010, "longitude": 75.8573},
+    {"name": "Gurugram", "region": "Haryana", "country": "India", "latitude": 28.4595, "longitude": 77.0266},
+    {"name": "Noida", "region": "Uttar Pradesh", "country": "India", "latitude": 28.5355, "longitude": 77.3910},
+    {"name": "Ghaziabad", "region": "Uttar Pradesh", "country": "India", "latitude": 28.6692, "longitude": 77.4538},
+    {"name": "Faridabad", "region": "Haryana", "country": "India", "latitude": 28.4089, "longitude": 77.3178},
+    {"name": "Coimbatore", "region": "Tamil Nadu", "country": "India", "latitude": 11.0168, "longitude": 76.9558},
+    {"name": "Nagpur", "region": "Maharashtra", "country": "India", "latitude": 21.1458, "longitude": 79.0882},
+    {"name": "Dehradun", "region": "Uttarakhand", "country": "India", "latitude": 30.3165, "longitude": 78.0322},
+    {"name": "Guwahati", "region": "Assam", "country": "India", "latitude": 26.1445, "longitude": 91.7362},
+    {"name": "Amritsar", "region": "Punjab", "country": "India", "latitude": 31.6340, "longitude": 74.8723},
+    {"name": "Srinagar", "region": "Jammu & Kashmir", "country": "India", "latitude": 34.0837, "longitude": 74.7973},
 ]
 
 
 def seed_default_locations():
-    """Ensure baseline Indian cities exist in the database."""
-    count = db_session.query(Location).count()
-    if count == 0:
-        for c in DEFAULT_CITIES:
+    """Ensure comprehensive coverage of major Indian cities exist in the database."""
+    try:
+        existing = {loc.name.lower() for loc in db_session.query(Location.name).all()}
+    except Exception:
+        existing = set()
+
+    added = False
+    for c in DEFAULT_CITIES:
+        if c["name"].lower() not in existing:
             loc = Location(
                 name=c["name"],
                 region=c["region"],
@@ -29,6 +57,10 @@ def seed_default_locations():
                 longitude=c["longitude"],
             )
             db_session.add(loc)
+            existing.add(c["name"].lower())
+            added = True
+
+    if added:
         try:
             db_session.commit()
         except Exception:
