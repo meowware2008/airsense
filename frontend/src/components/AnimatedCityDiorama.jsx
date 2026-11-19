@@ -2,12 +2,20 @@ import { useRef, useEffect } from 'react'
 import windAnimationVideo from '../assets/wind-animation.mp4'
 import './AnimatedCityDiorama.css'
 
-export default function AnimatedCityDiorama({ className = '' }) {
+export default function AnimatedCityDiorama({ className = '', startTime = 0 }) {
   const videoRef = useRef(null)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+
+    if (startTime > 0 && Number.isFinite(startTime)) {
+      try {
+        video.currentTime = startTime
+      } catch {
+        // Fallback gracefully
+      }
+    }
 
     video.defaultMuted = true
     video.muted = true

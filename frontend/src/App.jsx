@@ -1,8 +1,9 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import Alerts from './components/Alerts'
 import Login from './components/login'
 import PollutionChart from './components/PollutionChart'
 import AnimatedCityDiorama from './components/AnimatedCityDiorama'
+import SharedElementTransitionOverlay from './components/SharedElementTransitionOverlay'
 import cornerTreesImg from './assets/corner-trees.png'
 import { useCountUp } from './utils/useCountUp'
 import {
@@ -145,16 +146,28 @@ function App() {
     const user = localStorage.getItem('airsense_user')
     return token ? { token, user: user ? JSON.parse(user) : null } : null
   })
+  const [transitionPayload, setTransitionPayload] = useState(null)
 
-  function handleAuthenticated(data) {
+  const sidebarBrandRef = useRef(null)
+  const heroVideoRef = useRef(null)
+
+  function handleAuthenticated(data, morphData) {
     localStorage.setItem('airsense_token', data.token)
     localStorage.setItem('airsense_user', JSON.stringify(data.user))
+    if (morphData && morphData.brandRect && morphData.videoRect) {
+      setTransitionPayload({
+        startBrand: morphData.brandRect,
+        startVideo: morphData.videoRect,
+        videoTime: morphData.videoTime,
+      })
+    }
     setAuthData(data)
   }
 
   function handleLogout() {
     localStorage.removeItem('airsense_token')
     localStorage.removeItem('airsense_user')
+    setTransitionPayload(null)
     setAuthData(null)
   }
 
@@ -374,7 +387,7 @@ function App() {
   ]
 
   return (
-    <div className="air-app">
+    <div className={`air-app ${transitionPayload ? 'dashboard-transition-entering' : ''}`}>
       {/* Decorative subtle rolling hills and cloud background pattern matching screenshot */}
       <div className="atmospheric-bg-hills" aria-hidden="true">
         <svg viewBox="0 0 1200 200" preserveAspectRatio="none" className="bg-hills-svg">
@@ -401,7 +414,7 @@ function App() {
 
       {/* Light Sage Translucent Sidebar (~212px at 1728px viewport) */}
       <aside className="air-sidebar">
-        <div className="sidebar-brand">
+        <div className="sidebar-brand" ref={sidebarBrandRef}>
           <div className="brand-logo-leaf">
             <IconLeafOutline size={24} color="#255a36" />
           </div>
@@ -571,8 +584,8 @@ function App() {
                   </div>
                 </div>
 
-                <div className="hero-diorama-container">
-                  <AnimatedCityDiorama className="hero-city-video" />
+                <div className="hero-diorama-container" ref={heroVideoRef}>
+                  <AnimatedCityDiorama className="hero-city-video" startTime={transitionPayload?.videoTime} />
                 </div>
               </div>
 
@@ -992,6 +1005,16 @@ function App() {
           </section>
         )}
       </main>
+
+      {/* Shared-element cinematic flight from Login to Dashboard */}
+      {transitionPayload && (
+        <SharedElementTransitionOverlay
+          transitionPayload={transitionPayload}
+          targetBrandRef={sidebarBrandRef}
+          targetVideoRef={heroVideoRef}
+          onComplete={() => setTransitionPayload(null)}
+        />
+      )}
     </div>
   )
 }

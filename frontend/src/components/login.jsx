@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import AnimatedCityDiorama from './AnimatedCityDiorama'
 import { loginUser, registerUser, pingHealth } from '../api'
 import {
@@ -21,6 +21,10 @@ export default function Login({ onAuthenticated }) {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isExiting, setIsExiting] = useState(false)
+
+  const brandRef = useRef(null)
+  const illustrationRef = useRef(null)
 
   // Set page and body background to match exact video backdrop color (#e4eadd)
   useEffect(() => {
@@ -57,19 +61,34 @@ export default function Login({ onAuthenticated }) {
         ? await registerUser(name, email, password)
         : await loginUser(email, password)
 
-      onAuthenticated(data)
+      // Capture origin coordinates and playback timestamp for smooth flight
+      let morphData = null
+      if (brandRef.current && illustrationRef.current) {
+        const bRect = brandRef.current.getBoundingClientRect()
+        const vRect = illustrationRef.current.getBoundingClientRect()
+        const videoEl = illustrationRef.current.querySelector('video')
+        morphData = {
+          brandRect: { top: bRect.top, left: bRect.left, width: bRect.width, height: bRect.height },
+          videoRect: { top: vRect.top, left: vRect.left, width: vRect.width, height: vRect.height },
+          videoTime: videoEl ? videoEl.currentTime : 0,
+        }
+      }
+
+      setIsExiting(true)
+      setTimeout(() => {
+        onAuthenticated(data, morphData)
+      }, 200)
     } catch (err) {
       setError(err.message || 'Authentication failed. Please verify credentials.')
-    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="airsense-auth-page">
+    <div className={`airsense-auth-page ${isExiting ? 'auth-page-exiting' : ''}`}>
       {/* Top Header Bar */}
       <header className="auth-header-bar">
-        <div className="auth-brand-lockup">
+        <div className="auth-brand-lockup" ref={brandRef}>
           <IconLeafOutline size={26} color="#1E3A2F" />
           <span className="auth-brand-name">AirSense</span>
         </div>
@@ -96,7 +115,7 @@ export default function Login({ onAuthenticated }) {
             </p>
           </div>
 
-          <div className="auth-illustration-container">
+          <div className="auth-illustration-container" ref={illustrationRef}>
             <AnimatedCityDiorama className="auth-eco-city-art" />
           </div>
         </div>

@@ -1249,3 +1249,43 @@ body {
     margin-top: 16px;
   }
 }
+
+/* =====================================================================
+   Login -> Dashboard Shared-Element Cinematic Reveal
+   ===================================================================== */
+.air-app.dashboard-transition-entering .sidebar-brand {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.air-app.dashboard-transition-entering .hero-diorama-container {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.air-app.dashboard-transition-entering .sidebar-nav,
+.air-app.dashboard-transition-entering .sidebar-landscape-illustration,
+.air-app.dashboard-transition-entering .air-topbar,
+.air-app.dashboard-transition-entering .hero-card-left .hero-data-col,
+.air-app.dashboard-transition-entering .hero-card-right,
+.air-app.dashboard-transition-entering .pollutants-grid,
+.air-app.dashboard-transition-entering .analytics-section,
+.air-app.dashboard-transition-entering .atmospheric-bg-hills {
+  animation: dashboardElementsReveal 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dashboardElementsReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  26% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
