@@ -211,9 +211,16 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
     try {
       const res = await testTriggerAlert(alertId)
       if (res.whatsapp_dispatched) {
-        setMessage(`✓ ${res.message}`)
-      } else if (res.breached) {
-        setMessage(`⚠️ ${res.message}`)
+        setMessage(`✅ ${res.message}`)
+      } else if (!res.whatsapp_recipient) {
+        setError(`⚠️ No WhatsApp number on your profile. Save a number first, then test.`)
+      } else if (res.diagnostic_advice) {
+        // Twilio returned an error — show detailed advice
+        const details = res.whatsapp_details
+        const code = details?.error_code || details?.status_code || 'error'
+        setError(
+          `⚠️ Dispatch failed (Code ${code}): ${details?.error_message || 'Unknown error'}\n${res.diagnostic_advice}`
+        )
       } else {
         setMessage(`ℹ️ ${res.message}`)
       }
@@ -549,16 +556,16 @@ function Alerts({ locations = [], selectedLocationId, showDiagnostics = false })
                   className="btn-test-rule"
                   onClick={() => handleTestAlert(alert.id)}
                   disabled={testingAlertId === alert.id}
-                  title="Check live AQI and evaluate this alert immediately"
+                  title="Force-send a WhatsApp test message now (bypasses WhatsApp enabled/disabled setting)"
                 >
                   {testingAlertId === alert.id ? (
                     <>
                       <IconLoader size={13} />
-                      <span>Checking...</span>
+                      <span>Sending...</span>
                     </>
                   ) : (
                     <>
-                      <span>⚡ Test Alert</span>
+                      <span>⚡ Send Test</span>
                     </>
                   )}
                 </button>

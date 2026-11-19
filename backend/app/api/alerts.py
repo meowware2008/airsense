@@ -203,12 +203,14 @@ def trigger_alert_test(alert_id: int):
 
     wa_dispatched = False
     wa_details = None
-    if pref.whatsapp_enabled and g.current_user.whatsapp_number:
+    # Force-send WhatsApp for the test regardless of whatsapp_enabled flag —
+    # this is a manual diagnostic, not a production trigger.
+    if g.current_user.whatsapp_number:
         wa_body = (
-            f"⚠️ AirSense Alert\n"
-            f"{loc.name if loc else 'Location'}: AQI is {current_aqi} "
-            f"({latest_reading.aqi_standard or 'CPCB'}), crossing your threshold of {threshold}.\n"
-            f"Limit time outdoors, wear an N95 mask and keep windows closed."
+            f"🧪 AirSense Test Alert\n"
+            f"{loc.name if loc else 'Location'}: current AQI is {current_aqi} "
+            f"({latest_reading.aqi_standard or 'CPCB'}). Your threshold is {threshold}.\n"
+            f"{'⚠️ Threshold breached!' if breached else 'ℹ️ Threshold not yet breached — this is a forced test.'}"
         )
         wa_details = send_whatsapp_with_details(
             g.current_user.whatsapp_number,
@@ -216,6 +218,15 @@ def trigger_alert_test(alert_id: int):
             content_variables={"1": wa_body, "2": loc.name if loc else "AirSense"},
         )
         wa_dispatched = wa_details.get("success", False)
+
+    err_code = wa_details.get("error_code") if wa_details else None
+    from_num = wa_details.get("from_number") if wa_details else Config.TWILIO_WHATSAPP_FROM
+    to_num = wa_details.get("to_number") if wa_details else g.current_user.whatsapp_number
+
+    diagnostic_advice = None
+    if wa_details and not wa_dispatched:
+        from backend.app.services.whatsapp_service import get_twilio_diagnostic_advice
+        diagnostic_advice = get_twilio_diagnostic_advice(err_code, from_num, to_num)
 
     return jsonify({
         "success": True,
@@ -227,11 +238,13 @@ def trigger_alert_test(alert_id: int):
         "whatsapp_dispatched": wa_dispatched,
         "whatsapp_recipient": g.current_user.whatsapp_number,
         "whatsapp_details": wa_details,
+        "diagnostic_advice": diagnostic_advice,
         "message": (
             f"Live {loc.name if loc else 'city'} AQI is {current_aqi}. "
             + (f"Threshold ({threshold}) crossed! " if breached else f"Below threshold ({threshold}). ")
-            + (f"WhatsApp alert dispatched to {g.current_user.whatsapp_number}!" if wa_dispatched else (
-                "WhatsApp alert is disabled on this rule." if not pref.whatsapp_enabled else "No WhatsApp number configured."
+            + (f"WhatsApp test dispatched to {g.current_user.whatsapp_number}!" if wa_dispatched else (
+                "No WhatsApp number on your profile — save a number first." if not g.current_user.whatsapp_number
+                else f"WhatsApp dispatch failed (code {err_code}): {wa_details.get('error_message', 'Unknown error') if wa_details else 'No Twilio credentials configured.'}"
             ))
         ).strip(),
     }), 200
