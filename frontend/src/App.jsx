@@ -236,6 +236,7 @@ function App() {
   const [bestTimeData, setBestTimeData] = useState(null)
   const [bestTimeLoading, setBestTimeLoading] = useState(true)
   const [bestTimeError, setBestTimeError] = useState('')
+  const [bestTimeDurationHours, setBestTimeDurationHours] = useState(3)
   const [activeTab, setActiveTab] = useState('dashboard')
 
   function handleDetectLocation() {
@@ -378,7 +379,7 @@ function App() {
       setBestTimeError('')
 
       try {
-        const data = await getBestTime(selectedLocationId)
+        const data = await getBestTime(selectedLocationId, bestTimeDurationHours)
         if (!cancelled) {
           setBestTimeData(data)
         }
@@ -401,7 +402,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [selectedLocationId])
+  }, [selectedLocationId, bestTimeDurationHours])
 
   const currentLocation = useMemo(() => {
     return locations.find(l => String(l.id) === String(selectedLocationId)) || { name: 'Bengaluru', region: 'Karnataka' }
@@ -970,8 +971,35 @@ function App() {
                 </div>
                 <h2 className="section-heading">Best Time to Go Out in {currentLocation.name}</h2>
                 <p className="section-subheading">
-                  Machine learning model analyzes rolling 24-hour PM₂.₅ forecasts to identify the cleanest continuous 3-hour window.
+                  Machine learning model analyzes rolling 24-hour PM₂.₅ forecasts to identify the cleanest continuous {bestTimeDurationHours}-hour window.
                 </p>
+              </div>
+            </div>
+
+            {/* Custom Time Frame / Window Duration Selector */}
+            <div className="duration-selector-wrap">
+              <div className="duration-selector-label">
+                <IconClock size={16} color="#255a36" />
+                <span>Time Frame / Window Duration:</span>
+              </div>
+              <div className="duration-pill-group">
+                {[
+                  { hours: 1, label: '1 Hour' },
+                  { hours: 2, label: '2 Hours' },
+                  { hours: 3, label: '3 Hours (Default)' },
+                  { hours: 4, label: '4 Hours' },
+                  { hours: 6, label: '6 Hours' },
+                  { hours: 8, label: '8 Hours' },
+                ].map(({ hours, label }) => (
+                  <button
+                    key={hours}
+                    type="button"
+                    className={`duration-pill-btn ${bestTimeDurationHours === hours ? 'active' : ''}`}
+                    onClick={() => setBestTimeDurationHours(hours)}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1006,7 +1034,7 @@ function App() {
                         <h3 className="best-time-hero-hours">
                           {startTimeStr} – {endTimeStr}
                         </h3>
-                        <p className="best-time-hero-day">{dayStr} · 3-Hour Continuous Window</p>
+                        <p className="best-time-hero-day">{dayStr} · {bestTimeData.best_window.duration_hours || bestTimeDurationHours}-Hour Continuous Window</p>
 
                         <div className="best-time-metrics">
                           <div className="best-time-metric-box">
@@ -1085,7 +1113,7 @@ function App() {
                             <div>
                               <h4 className="best-time-section-title">24-Hour Comparative Timeline</h4>
                               <p className="best-time-timeline-hint">
-                                Hourly PM₂.₅ forecast comparison. Cleanest 3-hour continuous window is highlighted with an optimal badge.
+                                Hourly PM₂.₅ forecast comparison. Cleanest {bestTimeData.best_window.duration_hours || bestTimeDurationHours}-hour continuous window is highlighted with an optimal badge.
                               </p>
                             </div>
                             <span className="timeline-scroll-hint">Scroll horizontally to view 24h →</span>

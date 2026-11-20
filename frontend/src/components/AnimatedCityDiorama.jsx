@@ -50,7 +50,7 @@ export default function AnimatedCityDiorama({ className = '', startTime = 0 }) {
         mediaQuery.removeEventListener('change', handleMotionChange)
       }
     }
-  }, [])
+  }, [startTime])
 
   return (
     <div className={`city-diorama-wrapper ${className}`}>

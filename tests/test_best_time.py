@@ -58,6 +58,23 @@ def test_get_best_time_api(client, test_location):
     assert "location" in data
 
 
+def test_find_best_time_window_custom_six_hours():
+    base = datetime.now(timezone.utc) + timedelta(hours=1)
+    # 10 hours of forecasts: first 4 hours dirty (100), next 6 hours clean (20)
+    forecasts = [
+        {"forecast_for": (base + timedelta(hours=i)).isoformat(), "predicted_value": 100.0 if i < 4 else 20.0}
+        for i in range(10)
+    ]
+
+    res = find_best_time_window(forecasts, window_hours=6)
+    assert res["status"] == "available"
+    window = res["best_window"]
+    assert window is not None
+    assert window["duration_hours"] == 6
+    assert window["average_pm25"] == 20.0
+    assert window["maximum_pm25"] == 20.0
+
+
 def test_schema_self_healing_idempotent():
     # Calling self-healing migration repeatedly must never crash
     _ensure_schema_columns()

@@ -22,6 +22,10 @@ def get_best_time():
             "error": "location_id query parameter is required"
         }), 400
 
+    window_hours = request.args.get("window_hours", default=3, type=int)
+    if not window_hours or window_hours < 1 or window_hours > 12:
+        window_hours = 3
+
     location = (
         db_session.query(Location)
         .filter(Location.id == location_id)
@@ -80,7 +84,7 @@ def get_best_time():
 
     recommendation = find_best_time_window(
         forecast_result.get("forecasts", []),
-        window_hours=3
+        window_hours=window_hours
     )
 
     return jsonify({

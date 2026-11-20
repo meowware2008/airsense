@@ -1022,6 +1022,65 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
+/* Custom Time Frame / Duration Selector */
+.duration-selector-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: 16px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-subtle);
+  flex-wrap: wrap;
+}
+
+.duration-selector-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.duration-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.duration-pill-btn {
+  background: #f4f8f2;
+  border: 1px solid rgba(46, 91, 61, 0.16);
+  color: #3b5344;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.duration-pill-btn:hover {
+  background: #e8f3e5;
+  border-color: rgba(46, 91, 61, 0.35);
+  color: #1e5a37;
+  transform: translateY(-1px);
+}
+
+.duration-pill-btn.active {
+  background: #1e5a37;
+  color: #ffffff;
+  border-color: #1e5a37;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(30, 90, 55, 0.25);
+}
+
 /* Enhanced Best Time Sub-View */
 .best-time-enhanced-container {
   display: flex;
