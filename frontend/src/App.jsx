@@ -33,6 +33,9 @@ import {
   IconCalendar,
   IconSunCloud,
   IconLeafOutline,
+  IconActivity,
+  IconClock,
+  IconShieldCheck,
 } from './components/Icons'
 import './App.css'
 
@@ -64,6 +67,35 @@ function getPollutantStatus(key, value) {
       return { label: 'Elevated', status: 'moderate', ratio: Math.min(num / 180, 1) }
     default:
       return { label: 'Normal', status: 'normal', ratio: 0.5 }
+  }
+}
+
+function getActivityGuidance(avgPm25) {
+  const pm = Number(avgPm25) || 0
+  if (pm <= 30) {
+    return {
+      quality: 'Ideal',
+      qualityColor: '#16a34a',
+      jogging: { status: 'Optimal', text: 'Safe for high-intensity workouts and distance running.' },
+      walking: { status: 'Optimal', text: 'Crisp, clean air. Excellent for walking and outdoor commutes.' },
+      sensitive: { status: 'Safe', text: 'No precautions needed for children or elderly.' },
+    }
+  } else if (pm <= 60) {
+    return {
+      quality: 'Moderate',
+      qualityColor: '#d97706',
+      jogging: { status: 'Acceptable', text: 'Suitable for moderate cardio. Limit prolonged exhaustion.' },
+      walking: { status: 'Good', text: 'Comfortable conditions for walking and outdoor errands.' },
+      sensitive: { status: 'Caution', text: 'Sensitive individuals should reduce heavy exertion.' },
+    }
+  } else {
+    return {
+      quality: 'Elevated',
+      qualityColor: '#dc2626',
+      jogging: { status: 'Caution', text: 'Avoid strenuous outdoor cardio. Indoor training recommended.' },
+      walking: { status: 'Acceptable', text: 'Short trips acceptable. Consider wearing an N95 mask.' },
+      sensitive: { status: 'High Risk', text: 'Stay indoors with air filtration where possible.' },
+    }
   }
 }
 
@@ -459,6 +491,14 @@ function App() {
           </button>
           <button
             type="button"
+            className={`nav-item ${activeTab === 'best-time' ? 'active' : ''}`}
+            onClick={() => setActiveTab('best-time')}
+          >
+            <IconSunCloud size={18} />
+            <span>Outdoor Time</span>
+          </button>
+          <button
+            type="button"
             className={`nav-item ${activeTab === 'alerts' ? 'active' : ''}`}
             onClick={() => setActiveTab('alerts')}
           >
@@ -637,6 +677,35 @@ function App() {
               />
             </section>
 
+            {/* SMART OUTDOOR WINDOW RECOMMENDATION BANNER */}
+            {bestTimeData?.status === 'available' && bestTimeData?.best_window && (
+              <section
+                className="best-time-overview-banner"
+                onClick={() => setActiveTab('best-time')}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="banner-left">
+                  <div className="banner-badge">
+                    <IconSparkles size={14} color="#166534" />
+                    <span>SMART OUTDOOR RECOMMENDATION</span>
+                  </div>
+                  <h3 className="banner-title">
+                    Optimal outdoor window for {currentLocation.name}:{' '}
+                    <span className="banner-window-highlight">
+                      {new Date(bestTimeData.best_window.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} – {new Date(bestTimeData.best_window.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                  </h3>
+                  <p className="banner-desc">
+                    Lowest expected PM₂.₅ ({Number(bestTimeData.best_window.average_pm25).toFixed(1)} µg/m³) over the next 24 hours. Ideal for running, commuting, and outdoor recreation.
+                  </p>
+                </div>
+                <div className="banner-right">
+                  <span className="btn-banner-action">View Activity Breakdown →</span>
+                </div>
+              </section>
+            )}
+
             {/* BOTTOM 4 FEATURE / NAVIGATION CARDS */}
             <section className="dashboard-feature-grid">
               {/* Feature 1: Pollutants */}
@@ -673,7 +742,7 @@ function App() {
                 <p className="feature-card-desc">Hourly air quality predictions</p>
               </div>
 
-              {/* Feature 3: 7-Day Forecast */}
+              {/* Feature 3: Best Time to Go Out */}
               <div
                 className="feature-card"
                 onClick={() => setActiveTab('best-time')}
@@ -686,8 +755,12 @@ function App() {
                   </div>
                   <IconChevronRight size={16} color="#8a9e90" />
                 </div>
-                <h3 className="feature-card-title">7-Day Forecast</h3>
-                <p className="feature-card-desc">Daily AQI outlook</p>
+                <h3 className="feature-card-title">Best Time to Go Out</h3>
+                <p className="feature-card-desc">
+                  {bestTimeData?.best_window
+                    ? `${new Date(bestTimeData.best_window.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} – ${new Date(bestTimeData.best_window.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
+                    : 'Optimal outdoor window'}
+                </p>
               </div>
 
               {/* Feature 4: Smart Alerts */}
@@ -876,9 +949,9 @@ function App() {
                   <IconSparkles size={16} color="#255a36" />
                   <span className="ai-badge-text">SMART OUTDOOR RECOMMENDATION</span>
                 </div>
-                <h2 className="section-heading">Best Time to Go Out</h2>
+                <h2 className="section-heading">Best Time to Go Out in {currentLocation.name}</h2>
                 <p className="section-subheading">
-                  Find the lowest predicted PM₂.₅ window in the next 24 hours.
+                  Machine learning model analyzes rolling 24-hour PM₂.₅ forecasts to identify the cleanest continuous 3-hour window.
                 </p>
               </div>
             </div>
@@ -887,41 +960,137 @@ function App() {
               {bestTimeLoading ? (
                 <div className="forecast-loading-state">
                   <IconLoader size={20} />
-                  <span>Finding the best time window...</span>
+                  <span>Analyzing next 24 hours of air quality forecasts...</span>
                 </div>
               ) : bestTimeError ? (
                 <div className="forecast-empty-state">
                   <p>{bestTimeError}</p>
                 </div>
               ) : bestTimeData?.status === 'available' && bestTimeData?.best_window ? (
-                <div className="best-time-result">
-                  <h3>
-                    {new Date(bestTimeData.best_window.start).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                    {' – '}
-                    {new Date(bestTimeData.best_window.end).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </h3>
+                (() => {
+                  const guidance = getActivityGuidance(bestTimeData.best_window.average_pm25)
+                  const startD = new Date(bestTimeData.best_window.start)
+                  const endD = new Date(bestTimeData.best_window.end)
+                  const startTimeStr = startD.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                  const endTimeStr = endD.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                  const dayStr = startD.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })
+                  const winStartMs = startD.getTime()
+                  const winEndMs = endD.getTime()
 
-                  <p className="best-time-duration">
-                    Recommended window · {bestTimeData.best_window.duration_hours} hours
-                  </p>
+                  return (
+                    <div className="best-time-enhanced-container">
+                      <div className="best-time-hero">
+                        <div className="best-time-hero-badge">
+                          <IconSunCloud size={16} color="#166534" />
+                          <span>OPTIMAL OUTDOOR WINDOW</span>
+                        </div>
+                        <h3 className="best-time-hero-hours">
+                          {startTimeStr} – {endTimeStr}
+                        </h3>
+                        <p className="best-time-hero-day">{dayStr} · 3-Hour Continuous Window</p>
 
-                  <div className="best-time-metrics">
-                    <div>
-                      <span>Average PM₂.₅</span>
-                      <strong>{Number(bestTimeData.best_window.average_pm25).toFixed(2)} µg/m³</strong>
+                        <div className="best-time-metrics">
+                          <div className="best-time-metric-box">
+                            <span>Window Average PM₂.₅</span>
+                            <strong style={{ color: guidance.qualityColor }}>
+                              {Number(bestTimeData.best_window.average_pm25).toFixed(1)} µg/m³
+                            </strong>
+                            <small className="metric-tag">{guidance.quality} Quality</small>
+                          </div>
+                          <div className="best-time-metric-box">
+                            <span>Peak Window PM₂.₅</span>
+                            <strong>{Number(bestTimeData.best_window.maximum_pm25).toFixed(1)} µg/m³</strong>
+                            <small className="metric-tag">Max Ceiling</small>
+                          </div>
+                          <div className="best-time-metric-box">
+                            <span>Algorithm</span>
+                            <strong>{bestTimeData.model_name || 'Random Forest'}</strong>
+                            <small className="metric-tag">v{bestTimeData.model_version || '1.0'}</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Activity Guidance Grid */}
+                      <h4 className="best-time-section-title">Outdoor Activity Suitability</h4>
+                      <div className="activity-guidance-grid">
+                        <div className="activity-card">
+                          <div className="activity-card-header">
+                            <span className="activity-icon-wrap">🏃</span>
+                            <div>
+                              <h5>Running & Cardio</h5>
+                              <span className={`activity-status-badge ${guidance.jogging.status.toLowerCase()}`}>
+                                {guidance.jogging.status}
+                              </span>
+                            </div>
+                          </div>
+                          <p>{guidance.jogging.text}</p>
+                        </div>
+
+                        <div className="activity-card">
+                          <div className="activity-card-header">
+                            <span className="activity-icon-wrap">🚶</span>
+                            <div>
+                              <h5>Walking & Commute</h5>
+                              <span className={`activity-status-badge ${guidance.walking.status.toLowerCase()}`}>
+                                {guidance.walking.status}
+                              </span>
+                            </div>
+                          </div>
+                          <p>{guidance.walking.text}</p>
+                        </div>
+
+                        <div className="activity-card">
+                          <div className="activity-card-header">
+                            <span className="activity-icon-wrap">🛡️</span>
+                            <div>
+                              <h5>Sensitive Groups</h5>
+                              <span className={`activity-status-badge ${guidance.sensitive.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                                {guidance.sensitive.status}
+                              </span>
+                            </div>
+                          </div>
+                          <p>{guidance.sensitive.text}</p>
+                        </div>
+                      </div>
+
+                      {/* 24-Hour Forecast Timeline with Best Window Highlighted */}
+                      {forecastData.length > 0 && (
+                        <div className="best-time-timeline-wrap">
+                          <h4 className="best-time-section-title">24-Hour Comparative Timeline</h4>
+                          <p className="best-time-timeline-hint">
+                            Green highlighted slot shows the optimal 3-hour minimum pollution period.
+                          </p>
+                          <div className="forecast-timeline-track">
+                            {forecastData.slice(0, 18).map((item, idx) => {
+                              const fDate = new Date(item.forecast_for)
+                              const itemMs = fDate.getTime()
+                              const isOptimalWindow = itemMs >= winStartMs && itemMs < winEndMs
+                              const hourLabel = fDate.toLocaleTimeString([], { hour: 'numeric', hour12: true })
+                              const pmVal = Number(item.predicted_value)
+
+                              return (
+                                <div
+                                  className={`forecast-timeline-card ${isOptimalWindow ? 'is-best-window' : ''}`}
+                                  key={idx}
+                                >
+                                  {isOptimalWindow && <span className="window-pill">BEST</span>}
+                                  <span className="forecast-time-pill">{hourLabel}</span>
+                                  <div className="forecast-metric-box">
+                                    <span className="forecast-val">{pmVal}</span>
+                                    <span className="forecast-unit">µg/m³</span>
+                                  </div>
+                                  <span className={`forecast-status-dot ${isOptimalWindow ? 'best' : pmVal > 60 ? 'elevated' : 'clean'}`}>
+                                    {isOptimalWindow ? 'Best Window' : pmVal > 60 ? 'Elevated' : 'Clean'}
+                                  </span>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <span>Maximum PM₂.₅</span>
-                      <strong>{Number(bestTimeData.best_window.maximum_pm25).toFixed(2)} µg/m³</strong>
-                    </div>
-                  </div>
-                </div>
+                  )
+                })()
               ) : (
                 <div className="forecast-empty-state">
                   <p>No suitable forecast window is currently available. Try again when fresh observations arrive.</p>

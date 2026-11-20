@@ -14,7 +14,6 @@ class User(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(191), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
-    whatsapp_number = Column(String(20), nullable=True)  # E.164, e.g. +919876543210
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
 
     alert_preferences = relationship("AlertPreference", back_populates="user", cascade="all, delete-orphan")
@@ -156,7 +155,6 @@ class AlertPreference(Base):
     location_id = Column(Integer, ForeignKey("locations.id", ondelete="CASCADE"), nullable=False, index=True)
     threshold_value = Column(Float, nullable=False)
     enabled = Column(Boolean, default=True, nullable=False)
-    whatsapp_enabled = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
 
@@ -188,7 +186,7 @@ class Notification(Base):
     alert_preference_id = Column(Integer, ForeignKey("alert_preferences.id", ondelete="CASCADE"), nullable=False)
     location_id = Column(Integer, ForeignKey("locations.id", ondelete="CASCADE"), nullable=False)
     message = Column(Text, nullable=False)
-    channel = Column(String(20), nullable=False, default="in_app")  # in_app, email, whatsapp
+    channel = Column(String(20), nullable=False, default="in_app")  # in_app, email
     status = Column(String(20), nullable=False, default="unread")   # unread, read, sent, failed
     triggering_reading_id = Column(Integer, ForeignKey("air_quality_readings.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False, index=True)
