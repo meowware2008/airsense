@@ -102,8 +102,12 @@ def predict_next_24h(recent_readings: List[Dict[str, Any]]) -> Dict[str, Any]:
         pred_val = float(model.predict(row_features[FEATURE_COLUMNS])[0])
         pred_val = max(1.0, round(pred_val, 1))
 
+        forecast_iso = forecast_time.isoformat()
+        if not forecast_iso.endswith("Z") and "+" not in forecast_iso:
+            forecast_iso += "Z"
+
         predictions.append({
-            "forecast_for": forecast_time.isoformat(),
+            "forecast_for": forecast_iso,
             "target_metric": "pm25",
             "predicted_value": pred_val,
             "unit": "µg/m³",

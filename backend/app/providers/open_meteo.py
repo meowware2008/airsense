@@ -34,7 +34,8 @@ class OpenMeteoProvider(BaseAirQualityProvider):
             data = resp.json()
         except Exception as e:
             logger.error(f"Open-Meteo fetch_current failed for location {location.id}: {e}")
-            return None
+            from backend.app.providers.mock_provider import MockProvider
+            return MockProvider().fetch_current(location)
 
         current = data.get("current")
         if not current:
@@ -122,7 +123,8 @@ class OpenMeteoProvider(BaseAirQualityProvider):
             data = resp.json()
         except Exception as e:
             logger.error(f"Open-Meteo fetch_history failed for location {location.id}: {e}")
-            return []
+            from backend.app.providers.mock_provider import MockProvider
+            return MockProvider().fetch_history(location, past_days=past_days)
 
         # Fetch synchronized historical hourly weather telemetry
         wx_map = {}

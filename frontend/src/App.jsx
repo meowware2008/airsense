@@ -99,6 +99,25 @@ function getActivityGuidance(avgPm25) {
   }
 }
 
+function parseUtcDate(dateStr) {
+  if (!dateStr) return new Date()
+  const s = String(dateStr)
+  if (s.endsWith('Z') || s.includes('+') || (s.includes('-') && s.lastIndexOf('-') > 10)) {
+    return new Date(s)
+  }
+  return new Date(s + 'Z')
+}
+
+function formatTimelineHour(date) {
+  const d = date instanceof Date ? date : parseUtcDate(date)
+  const minutes = d.getMinutes()
+  return d.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: minutes !== 0 ? '2-digit' : undefined,
+    hour12: true,
+  })
+}
+
 function getAdvisory(aqi) {
   if (aqi == null) {
     return {
@@ -693,7 +712,7 @@ function App() {
                   <h3 className="banner-title">
                     Optimal outdoor window for {currentLocation.name}:{' '}
                     <span className="banner-window-highlight">
-                      {new Date(bestTimeData.best_window.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} – {new Date(bestTimeData.best_window.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                      {formatTimelineHour(parseUtcDate(bestTimeData.best_window.start))} – {formatTimelineHour(parseUtcDate(bestTimeData.best_window.end))}
                     </span>
                   </h3>
                   <p className="banner-desc">
@@ -758,7 +777,7 @@ function App() {
                 <h3 className="feature-card-title">Best Time to Go Out</h3>
                 <p className="feature-card-desc">
                   {bestTimeData?.best_window
-                    ? `${new Date(bestTimeData.best_window.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} – ${new Date(bestTimeData.best_window.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
+                    ? `${formatTimelineHour(parseUtcDate(bestTimeData.best_window.start))} – ${formatTimelineHour(parseUtcDate(bestTimeData.best_window.end))}`
                     : 'Optimal outdoor window'}
                 </p>
               </div>
@@ -969,10 +988,10 @@ function App() {
               ) : bestTimeData?.status === 'available' && bestTimeData?.best_window ? (
                 (() => {
                   const guidance = getActivityGuidance(bestTimeData.best_window.average_pm25)
-                  const startD = new Date(bestTimeData.best_window.start)
-                  const endD = new Date(bestTimeData.best_window.end)
-                  const startTimeStr = startD.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-                  const endTimeStr = endD.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                  const startD = parseUtcDate(bestTimeData.best_window.start)
+                  const endD = parseUtcDate(bestTimeData.best_window.end)
+                  const startTimeStr = formatTimelineHour(startD)
+                  const endTimeStr = formatTimelineHour(endD)
                   const dayStr = startD.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })
                   const winStartMs = startD.getTime()
                   const winEndMs = endD.getTime()
@@ -1015,7 +1034,9 @@ function App() {
                       <div className="activity-guidance-grid">
                         <div className="activity-card">
                           <div className="activity-card-header">
-                            <span className="activity-icon-wrap">🏃</span>
+                            <span className="activity-icon-wrap icon-jogging">
+                              <IconActivity size={22} color="#15803d" />
+                            </span>
                             <div>
                               <h5>Running & Cardio</h5>
                               <span className={`activity-status-badge ${guidance.jogging.status.toLowerCase()}`}>
@@ -1028,7 +1049,9 @@ function App() {
 
                         <div className="activity-card">
                           <div className="activity-card-header">
-                            <span className="activity-icon-wrap">🚶</span>
+                            <span className="activity-icon-wrap icon-walking">
+                              <IconUser size={22} color="#166534" />
+                            </span>
                             <div>
                               <h5>Walking & Commute</h5>
                               <span className={`activity-status-badge ${guidance.walking.status.toLowerCase()}`}>
@@ -1041,7 +1064,9 @@ function App() {
 
                         <div className="activity-card">
                           <div className="activity-card-header">
-                            <span className="activity-icon-wrap">🛡️</span>
+                            <span className="activity-icon-wrap icon-sensitive">
+                              <IconShieldCheck size={22} color="#0f766e" />
+                            </span>
                             <div>
                               <h5>Sensitive Groups</h5>
                               <span className={`activity-status-badge ${guidance.sensitive.status.toLowerCase().replace(/\s+/g, '-')}`}>
@@ -1056,35 +1081,49 @@ function App() {
                       {/* 24-Hour Forecast Timeline with Best Window Highlighted */}
                       {forecastData.length > 0 && (
                         <div className="best-time-timeline-wrap">
-                          <h4 className="best-time-section-title">24-Hour Comparative Timeline</h4>
-                          <p className="best-time-timeline-hint">
-                            Green highlighted slot shows the optimal 3-hour minimum pollution period.
-                          </p>
-                          <div className="forecast-timeline-track">
-                            {forecastData.slice(0, 18).map((item, idx) => {
-                              const fDate = new Date(item.forecast_for)
-                              const itemMs = fDate.getTime()
-                              const isOptimalWindow = itemMs >= winStartMs && itemMs < winEndMs
-                              const hourLabel = fDate.toLocaleTimeString([], { hour: 'numeric', hour12: true })
-                              const pmVal = Number(item.predicted_value)
+                          <div className="timeline-header-row">
+                            <div>
+                              <h4 className="best-time-section-title">24-Hour Comparative Timeline</h4>
+                              <p className="best-time-timeline-hint">
+                                Hourly PM₂.₅ forecast comparison. Cleanest 3-hour continuous window is highlighted with an optimal badge.
+                              </p>
+                            </div>
+                            <span className="timeline-scroll-hint">Scroll horizontally to view 24h →</span>
+                          </div>
 
-                              return (
-                                <div
-                                  className={`forecast-timeline-card ${isOptimalWindow ? 'is-best-window' : ''}`}
-                                  key={idx}
-                                >
-                                  {isOptimalWindow && <span className="window-pill">BEST</span>}
-                                  <span className="forecast-time-pill">{hourLabel}</span>
-                                  <div className="forecast-metric-box">
-                                    <span className="forecast-val">{pmVal}</span>
-                                    <span className="forecast-unit">µg/m³</span>
+                          <div className="best-time-timeline-container">
+                            <div className="forecast-timeline-track">
+                              {forecastData.slice(0, 24).map((item, idx) => {
+                                const fDate = parseUtcDate(item.forecast_for)
+                                const itemMs = fDate.getTime()
+                                const isOptimalWindow = itemMs >= winStartMs && itemMs < winEndMs
+                                const hourLabel = formatTimelineHour(fDate)
+                                const dayLabel = fDate.toLocaleDateString([], { weekday: 'short' })
+                                const pmVal = Number(item.predicted_value)
+                                const isClean = pmVal <= 30
+                                const isElevated = pmVal > 60
+                                const qualityText = isClean ? 'Clean' : isElevated ? 'Elevated' : 'Moderate'
+                                const qualityClass = isClean ? 'clean' : isElevated ? 'elevated' : 'moderate'
+
+                                return (
+                                  <div
+                                    className={`forecast-timeline-card ${isOptimalWindow ? 'is-best-window' : ''}`}
+                                    key={idx}
+                                  >
+                                    {isOptimalWindow && <span className="window-pill">OPTIMAL</span>}
+                                    <span className="forecast-time-pill">{hourLabel}</span>
+                                    <span className="forecast-day-sub">{dayLabel}</span>
+                                    <div className="forecast-metric-box">
+                                      <span className="forecast-val">{pmVal}</span>
+                                      <span className="forecast-unit">µg/m³</span>
+                                    </div>
+                                    <span className={`forecast-status-dot ${qualityClass}`}>
+                                      {qualityText}
+                                    </span>
                                   </div>
-                                  <span className={`forecast-status-dot ${isOptimalWindow ? 'best' : pmVal > 60 ? 'elevated' : 'clean'}`}>
-                                    {isOptimalWindow ? 'Best Window' : pmVal > 60 ? 'Elevated' : 'Clean'}
-                                  </span>
-                                </div>
-                              )
-                            })}
+                                )
+                              })}
+                            </div>
                           </div>
                         </div>
                       )}
