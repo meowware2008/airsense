@@ -8,6 +8,7 @@ from backend.app.services.pinger_service import (
 
 
 def test_resolve_ping_urls_explicit(monkeypatch):
+    monkeypatch.setattr('backend.app.services.pinger_service.Config.PING_URLS', '')
     monkeypatch.setenv("PING_URLS", "https://site-a.com, https://site-b.com/health")
     monkeypatch.delenv("RENDER_EXTERNAL_URL", raising=False)
     monkeypatch.delenv("FRONTEND_URL", raising=False)
@@ -51,6 +52,7 @@ def test_ping_target_failure():
 
 
 def test_ping_all_targets(monkeypatch):
+    monkeypatch.setattr("backend.app.services.pinger_service.Config.PING_URLS", "")
     monkeypatch.setenv("PING_URLS", "https://test1.com, https://test2.com")
 
     mock_resp = MagicMock()
